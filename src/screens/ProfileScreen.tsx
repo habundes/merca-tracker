@@ -1,0 +1,246 @@
+import { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+type Mode = 'login' | 'signup';
+
+export default function ProfileScreen() {
+  const [mode, setMode] = useState<Mode>('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+  const [name, setName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [error, setError] = useState('');
+
+  const reset = () => { setEmail(''); setPassword(''); setConfirm(''); setName(''); setError(''); };
+
+  const handleLogin = () => {
+    if (!email.trim() || !password.trim()) return setError('Completa todos los campos.');
+    setError('');
+    setLoggedIn(true);
+  };
+
+  const handleSignup = () => {
+    if (!name.trim() || !email.trim() || !password.trim()) return setError('Completa todos los campos.');
+    if (password !== confirm) return setError('Las contraseñas no coinciden.');
+    setError('');
+    setLoggedIn(true);
+  };
+
+  if (loggedIn) {
+    return (
+      <View style={styles.container}>
+        <Ionicons name="person-circle-outline" size={72} color="#2563eb" />
+        <Text style={styles.title}>{name || email}</Text>
+        <Text style={styles.sub}>Sesión iniciada</Text>
+        <TouchableOpacity style={styles.logoutBtn} onPress={() => { setLoggedIn(false); reset(); }}>
+          <Text style={styles.logoutText}>Cerrar sesión</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <Ionicons name="person-circle-outline" size={72} color="#ccc" />
+        <Text style={styles.title}>{mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}</Text>
+
+        {/* Toggle */}
+        <View style={styles.toggle}>
+          <TouchableOpacity
+            style={[styles.toggleBtn, mode === 'login' && styles.toggleActive]}
+            onPress={() => { setMode('login'); reset(); }}
+          >
+            <Text style={[styles.toggleText, mode === 'login' && styles.toggleTextActive]}>Entrar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.toggleBtn, mode === 'signup' && styles.toggleActive]}
+            onPress={() => { setMode('signup'); reset(); }}
+          >
+            <Text style={[styles.toggleText, mode === 'signup' && styles.toggleTextActive]}>Registrarse</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.form}>
+          {mode === 'signup' && (
+            <TextInput
+              style={styles.input}
+              placeholder="Nombre completo"
+              placeholderTextColor="#aaa"
+              value={name}
+              onChangeText={setName}
+            />
+          )}
+
+          <TextInput
+            style={styles.input}
+            placeholder="Correo electrónico"
+            placeholderTextColor="#aaa"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+
+          <View style={styles.passwordRow}>
+            <TextInput
+              style={[styles.input, { flex: 1 }]}
+              placeholder="Contraseña"
+              placeholderTextColor="#aaa"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPassword(v => !v)}>
+              <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#888" />
+            </TouchableOpacity>
+          </View>
+
+          {mode === 'signup' && (
+            <TextInput
+              style={styles.input}
+              placeholder="Confirmar contraseña"
+              placeholderTextColor="#aaa"
+              value={confirm}
+              onChangeText={setConfirm}
+              secureTextEntry={!showPassword}
+            />
+          )}
+
+          {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={mode === 'login' ? handleLogin : handleSignup}
+          >
+            <Text style={styles.actionText}>{mode === 'login' ? 'Entrar' : 'Crear cuenta'}</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    backgroundColor: '#f5f5f5',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 28,
+    paddingVertical: 40,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#222',
+    marginTop: 12,
+  },
+  sub: {
+    fontSize: 14,
+    color: '#777',
+    marginTop: 6,
+  },
+  toggle: {
+    flexDirection: 'row',
+    marginTop: 24,
+    backgroundColor: '#e5e7eb',
+    borderRadius: 10,
+    padding: 4,
+  },
+  toggleBtn: {
+    paddingHorizontal: 28,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  toggleActive: {
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  toggleText: {
+    fontSize: 14,
+    color: '#888',
+    fontWeight: '600',
+  },
+  toggleTextActive: {
+    color: '#2563eb',
+  },
+  form: {
+    width: '100%',
+    marginTop: 24,
+    gap: 12,
+  },
+  input: {
+    height: 48,
+    borderWidth: 1.5,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    backgroundColor: '#fff',
+    fontSize: 15,
+    color: '#222',
+  },
+  passwordRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  eyeBtn: {
+    height: 48,
+    paddingHorizontal: 12,
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    borderWidth: 1.5,
+    borderColor: '#ccc',
+    borderRadius: 10,
+  },
+  error: {
+    color: '#dc2626',
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  actionBtn: {
+    height: 48,
+    backgroundColor: '#2563eb',
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  actionText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  logoutBtn: {
+    marginTop: 24,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderWidth: 1.5,
+    borderColor: '#2563eb',
+    borderRadius: 10,
+  },
+  logoutText: {
+    color: '#2563eb',
+    fontWeight: '600',
+    fontSize: 15,
+  },
+});
