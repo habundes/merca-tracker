@@ -2,7 +2,7 @@
 
 ## Header
 
-- **Estado:** Aprobado
+- **Estado:** Implementado
 - **Dependencias:** ninguna (proyecto base ya tiene Expo SDK 57, React Navigation instalado pero fuera de scope aquí)
 - **Fecha:** 2026-07-31
 - **Objetivo (una frase):** Crear un sistema de componentes reutilizables (`GlassView`, `GlassCard`, `GlassButton`, `GlassHeader`) que apliquen el material Liquid Glass nativo de iOS 26+ vía `expo-glass-effect`, sin tocar navegación ni pantallas existentes.
