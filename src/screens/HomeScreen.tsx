@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSearch } from '../context/SearchContext';
+import { GlassCard } from '../components/glass';
 
 export default function HomeScreen() {
   const { history, clearHistory } = useSearch();
@@ -24,9 +25,12 @@ export default function HomeScreen() {
 
       {history.length === 0 ? (
         <View style={styles.empty}>
-          <Ionicons name="search-outline" size={48} color="#ccc" />
-          <Text style={styles.emptyText}>Sin búsquedas aún</Text>
-          <Text style={styles.emptySubText}>Las URLs buscadas aparecerán aquí</Text>
+          {/* Demo temporal Liquid Glass — spec 01-liquid-glass-components */}
+          <GlassCard style={styles.emptyGlass}>
+            <Ionicons name="search-outline" size={48} color="#ccc" />
+            <Text style={styles.emptyText}>Sin búsquedas aún</Text>
+            <Text style={styles.emptySubText}>Las URLs buscadas aparecerán aquí</Text>
+          </GlassCard>
         </View>
       ) : (
         <FlatList
@@ -113,6 +117,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
+  },
+  emptyGlass: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingHorizontal: 32,
+    paddingVertical: 32,
   },
   emptyText: {
     fontSize: 16,
