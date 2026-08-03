@@ -4,6 +4,7 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -16,6 +17,17 @@ type Props = NativeStackScreenProps<HomeStackParamList, 'HomeMain'>;
 export default function HomeMain({ navigation }: Props) {
   const { history, clearHistory } = useSearch();
 
+  const handleClearHistory = () => {
+    Alert.alert(
+      'Limpiar búsquedas',
+      '¿Estás seguro que deseas limpiar tu historial de búsquedas?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Limpiar', style: 'destructive', onPress: clearHistory },
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -25,7 +37,7 @@ export default function HomeMain({ navigation }: Props) {
             <Text style={styles.configText}>Configurar</Text>
           </TouchableOpacity>
           {history.length > 0 && (
-            <TouchableOpacity onPress={clearHistory}>
+            <TouchableOpacity onPress={handleClearHistory}>
               <Text style={styles.clearText}>Limpiar</Text>
             </TouchableOpacity>
           )}
