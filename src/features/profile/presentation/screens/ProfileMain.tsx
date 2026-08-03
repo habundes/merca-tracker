@@ -138,16 +138,6 @@ export default function ProfileMain({ navigation }: Props) {
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          <View style={styles.demoNav}>
-            <Text style={styles.demoNavTitle}>Demo de navegación</Text>
-            <TouchableOpacity style={styles.demoNavBtn} onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.demoNavText}>Pantalla de login</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.demoNavBtn} onPress={() => navigation.navigate('SignUp')}>
-              <Text style={styles.demoNavText}>Pantalla de registro</Text>
-            </TouchableOpacity>
-          </View>
-
           <TouchableOpacity
             style={styles.actionBtn}
             onPress={mode === 'login' ? handleLogin : handleSignup}
