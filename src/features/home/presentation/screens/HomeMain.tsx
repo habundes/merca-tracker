@@ -4,23 +4,44 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSearch } from '../context/SearchContext';
-import { GlassCard } from '../components/glass';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useSearch } from '../../../../shared/context/SearchContext';
+import { GlassCard } from '../../../../shared/components/glass';
+import type { HomeStackParamList } from '../navigation/types';
 
-export default function HomeScreen() {
+type Props = NativeStackScreenProps<HomeStackParamList, 'HomeMain'>;
+
+export default function HomeMain({ navigation }: Props) {
   const { history, clearHistory } = useSearch();
+
+  const handleClearHistory = () => {
+    Alert.alert(
+      'Limpiar búsquedas',
+      '¿Estás seguro que deseas limpiar tu historial de búsquedas?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Limpiar', style: 'destructive', onPress: clearHistory },
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Mis búsquedas</Text>
-        {history.length > 0 && (
-          <TouchableOpacity onPress={clearHistory}>
-            <Text style={styles.clearText}>Limpiar</Text>
+        <View style={styles.headerActions}>
+          <TouchableOpacity onPress={() => navigation.navigate('ListConfig')}>
+            <Text style={styles.configText}>Configurar</Text>
           </TouchableOpacity>
-        )}
+          {history.length > 0 && (
+            <TouchableOpacity onPress={handleClearHistory}>
+              <Text style={styles.clearText}>Limpiar</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {history.length === 0 ? (
@@ -38,7 +59,10 @@ export default function HomeScreen() {
           keyExtractor={(item, index) => `${item}-${index}`}
           contentContainerStyle={styles.list}
           renderItem={({ item, index }) => (
-            <View style={styles.item}>
+            <TouchableOpacity
+              style={styles.item}
+              onPress={() => navigation.navigate('ItemDetail', { itemId: item })}
+            >
               <View style={styles.indexBadge}>
                 <Text style={styles.indexText}>{index + 1}</Text>
               </View>
@@ -46,7 +70,7 @@ export default function HomeScreen() {
                 <Text style={styles.itemUrl} numberOfLines={1}>{item}</Text>
               </View>
               <Ionicons name="open-outline" size={16} color="#aaa" />
-            </View>
+            </TouchableOpacity>
           )}
         />
       )}
@@ -71,6 +95,16 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: '#222',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  configText: {
+    fontSize: 14,
+    color: '#2563eb',
+    fontWeight: '600',
   },
   clearText: {
     fontSize: 14,

@@ -1,18 +1,19 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import type { AppTabsParamList } from './types';
 
-import HomeScreen from '../screens/HomeScreen';
-import SearchScreen from '../screens/SearchScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+import HomeStack from '../features/home/presentation/navigation/HomeStack';
+import SearchScreen from '../features/search/presentation/screens/SearchScreen';
+import ProfileStack from '../features/profile/presentation/navigation/ProfileStack';
 
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<AppTabsParamList>();
 
-export default function BottomTabs() {
+export default function AppTabs() {
   return (
     <Tab.Navigator
       initialRouteName="Buscar"
       screenOptions={({ route }) => ({
-        headerShown: true,
+        headerShown: false,
         tabBarActiveTintColor: '#2563eb',
         tabBarInactiveTintColor: '#aaa',
         tabBarStyle: {
@@ -32,9 +33,9 @@ export default function BottomTabs() {
         },
       })}
     >
-      <Tab.Screen name="Historial" component={HomeScreen} />
-      <Tab.Screen name="Buscar" component={SearchScreen} />
-      <Tab.Screen name="Perfil" component={ProfileScreen} />
+      <Tab.Screen name="Historial" component={HomeStack} />
+      <Tab.Screen name="Buscar" component={SearchScreen} options={{ headerShown: true }} />
+      <Tab.Screen name="Perfil" component={ProfileStack} />
     </Tab.Navigator>
   );
 }
