@@ -6,10 +6,14 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSearch } from '../shared/context/SearchContext';
-import { GlassCard } from '../shared/components/glass';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useSearch } from '../../../../shared/context/SearchContext';
+import { GlassCard } from '../../../../shared/components/glass';
+import type { HomeStackParamList } from '../navigation/types';
 
-export default function HomeScreen() {
+type Props = NativeStackScreenProps<HomeStackParamList, 'HomeMain'>;
+
+export default function HomeMain({}: Props) {
   const { history, clearHistory } = useSearch();
 
   return (
