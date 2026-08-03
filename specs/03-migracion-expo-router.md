@@ -2,7 +2,7 @@
 
 ## Header
 
-- **Estado:** Aprobado
+- **Estado:** Implementado
 - **Dependencias:**
   - Spec `02` (navegación anidada clean-arch) — **Implementado**. Esta migración reemplaza su capa de navegación (`src/navigation/*`, `src/features/*/presentation/navigation/*`) conservando las screens y `src/shared/*`.
   - Base: Expo SDK 57, React 19.2, RN 0.86, TS 6.
@@ -74,16 +74,16 @@ Cada paso deja el proyecto compilando (`npx tsc --noEmit`) y la app arrancable. 
 
 ## Acceptance criteria
 
-- [ ] `expo-router` presente en `package.json` (versión de `npx expo install` para SDK 57); `@react-navigation/native|native-stack|bottom-tabs` **eliminados**.
-- [ ] `package.json` `"main": "expo-router/entry"`; `index.ts` y `App.tsx` borrados.
-- [ ] `app.json` tiene `scheme`, `plugins:["expo-router"]` y `experiments.typedRoutes:true`.
-- [ ] Existe `app/_layout.tsx` (SearchProvider + StatusBar + Stack `headerShown:false`) y `app/(tabs)/_layout.tsx` (Tabs, `initialRouteName:'buscar'`, iconos/estilos conservados).
-- [ ] Rutas: `(tabs)/buscar`, `(tabs)/lista/{index,config,[itemId]}`, `(tabs)/perfil/{index,account,payment}`; cada route file re-exporta la screen de `src/features/*` (imports relativos).
-- [ ] Títulos idénticos: Lista "Mis búsquedas"/"Configurar lista"/"Detalle"; Perfil "Perfil"/"Ajustes de cuenta"/"Ajustes de pago"; Buscar con header a nivel tab.
-- [ ] Screens migradas a hooks: `useRouter().push` en ListMain/ListConfig/ProfileMain; `useLocalSearchParams` en ItemDetail (`itemId:string`); AccountSettings/PaymentSettings sin props de navegación.
-- [ ] Eliminada la capa RN Navigation (`src/navigation/*`, `src/features/*/presentation/navigation/*`) y todo import de `NativeStackScreenProps`/`*ParamList`. `SearchScreen.tsx` importa `useFocusEffect` desde `expo-router`, no desde `@react-navigation/native`.
-- [ ] `npx tsc --noEmit` pasa sin errores.
-- [ ] En la app: tab inicial Buscar; navegar `lista`→config→detalle de un ítem (con `itemId` correcto) y volver; `perfil`→account/payment y volver; login/logout efímero de ProfileMain igual; glass y `useSearch()` operativos.
+- [x] `expo-router` presente en `package.json` (versión de `npx expo install` para SDK 57); `@react-navigation/native|native-stack|bottom-tabs` **eliminados**.
+- [x] `package.json` `"main": "expo-router/entry"`; `index.ts` y `App.tsx` borrados.
+- [x] `app.json` tiene `scheme`, `plugins:["expo-router"]` y `experiments.typedRoutes:true`.
+- [x] Existe `app/_layout.tsx` (SearchProvider + StatusBar + Stack `headerShown:false`) y `app/(tabs)/_layout.tsx` (Tabs, `initialRouteName:'buscar'`, iconos/estilos conservados).
+- [x] Rutas: `(tabs)/buscar`, `(tabs)/lista/{index,config,[itemId]}`, `(tabs)/perfil/{index,account,payment}`; cada route file re-exporta la screen de `src/features/*` (imports relativos).
+- [x] Títulos idénticos: Lista "Mis búsquedas"/"Configurar lista"/"Detalle"; Perfil "Perfil"/"Ajustes de cuenta"/"Ajustes de pago"; Buscar con header a nivel tab.
+- [x] Screens migradas a hooks: `useRouter().push` en ListMain/ListConfig/ProfileMain; `useLocalSearchParams` en ItemDetail (`itemId:string`); AccountSettings/PaymentSettings sin props de navegación.
+- [x] Eliminada la capa RN Navigation (`src/navigation/*`, `src/features/*/presentation/navigation/*`) y todo import de `NativeStackScreenProps`/`*ParamList`. `SearchScreen.tsx` importa `useFocusEffect` desde `expo-router`, no desde `@react-navigation/native`.
+- [x] `npx tsc --noEmit` pasa sin errores.
+- [x] En la app: tab inicial Buscar; navegar `lista`→config→detalle de un ítem (con `itemId` correcto) y volver; `perfil`→account/payment y volver; login/logout efímero de ProfileMain igual; glass y `useSearch()` operativos.
 
 ## Decisiones tomadas y descartadas
 
