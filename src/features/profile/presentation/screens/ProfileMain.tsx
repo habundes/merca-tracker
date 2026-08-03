@@ -10,10 +10,14 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { ProfileStackParamList } from '../navigation/types';
 
 type Mode = 'login' | 'signup';
 
-export default function ProfileScreen() {
+type Props = NativeStackScreenProps<ProfileStackParamList, 'ProfileMain'>;
+
+export default function ProfileMain({ navigation }: Props) {
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,6 +51,16 @@ export default function ProfileScreen() {
         <TouchableOpacity style={styles.logoutBtn} onPress={() => { setLoggedIn(false); reset(); }}>
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
+
+        <View style={styles.demoNav}>
+          <Text style={styles.demoNavTitle}>Demo de navegación</Text>
+          <TouchableOpacity style={styles.demoNavBtn} onPress={() => navigation.navigate('AccountSettings')}>
+            <Text style={styles.demoNavText}>Ajustes de cuenta</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.demoNavBtn} onPress={() => navigation.navigate('PaymentSettings')}>
+            <Text style={styles.demoNavText}>Ajustes de pago</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -123,6 +137,16 @@ export default function ProfileScreen() {
           )}
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
+
+          <View style={styles.demoNav}>
+            <Text style={styles.demoNavTitle}>Demo de navegación</Text>
+            <TouchableOpacity style={styles.demoNavBtn} onPress={() => navigation.navigate('Login')}>
+              <Text style={styles.demoNavText}>Pantalla de login</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.demoNavBtn} onPress={() => navigation.navigate('SignUp')}>
+              <Text style={styles.demoNavText}>Pantalla de registro</Text>
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
             style={styles.actionBtn}
@@ -242,5 +266,25 @@ const styles = StyleSheet.create({
     color: '#2563eb',
     fontWeight: '600',
     fontSize: 15,
+  },
+  demoNav: {
+    marginTop: 24,
+    alignItems: 'center',
+    gap: 8,
+  },
+  demoNavTitle: {
+    fontSize: 12,
+    color: '#999',
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  demoNavBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  demoNavText: {
+    color: '#2563eb',
+    fontWeight: '600',
+    fontSize: 14,
   },
 });

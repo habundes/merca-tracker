@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import HomeScreen from '../features/home/presentation/navigation/HomeStack';
 import SearchScreen from '../screens/SearchScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+import ProfileScreen from '../features/profile/presentation/navigation/ProfileStack';
 
 const Tab = createBottomTabNavigator();
 
