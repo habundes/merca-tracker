@@ -67,7 +67,7 @@ export default function SearchScreen() {
         ? <Text style={styles.duplicate}>URL ya agregada anteriormente</Text>
         : added
           ? <Text style={styles.added}>URL agregada al historial</Text>
-          : <Text style={styles.hint}>Las búsquedas se guardan en Historial</Text>
+          : <Text style={styles.hint}>Las búsquedas se guardan en Lista</Text>
       }
     </KeyboardAvoidingView>
   );

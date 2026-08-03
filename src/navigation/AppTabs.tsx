@@ -2,7 +2,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import type { AppTabsParamList } from './types';
 
-import HomeStack from '../features/home/presentation/navigation/HomeStack';
+import ListStack from '../features/list/presentation/navigation/ListStack';
 import SearchScreen from '../features/search/presentation/screens/SearchScreen';
 import ProfileStack from '../features/profile/presentation/navigation/ProfileStack';
 
@@ -25,7 +25,7 @@ export default function AppTabs() {
         },
         tabBarIcon: ({ color, size }) => {
           const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
-            Historial: 'time-outline',
+            Lista: 'list-outline',
             Buscar: 'search-outline',
             Perfil: 'person-outline',
           };
@@ -33,7 +33,7 @@ export default function AppTabs() {
         },
       })}
     >
-      <Tab.Screen name="Historial" component={HomeStack} />
+      <Tab.Screen name="Lista" component={ListStack} />
       <Tab.Screen name="Buscar" component={SearchScreen} options={{ headerShown: true }} />
       <Tab.Screen name="Perfil" component={ProfileStack} />
     </Tab.Navigator>
