@@ -10,14 +10,12 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { ProfileStackParamList } from '../navigation/types';
+import { useRouter } from 'expo-router';
 
 type Mode = 'login' | 'signup';
 
-type Props = NativeStackScreenProps<ProfileStackParamList, 'ProfileMain'>;
-
-export default function ProfileMain({ navigation }: Props) {
+export default function ProfileMain() {
+  const router = useRouter();
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -54,10 +52,10 @@ export default function ProfileMain({ navigation }: Props) {
 
         <View style={styles.demoNav}>
           <Text style={styles.demoNavTitle}>Demo de navegación</Text>
-          <TouchableOpacity style={styles.demoNavBtn} onPress={() => navigation.navigate('AccountSettings')}>
+          <TouchableOpacity style={styles.demoNavBtn} onPress={() => router.push('/perfil/account')}>
             <Text style={styles.demoNavText}>Ajustes de cuenta</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.demoNavBtn} onPress={() => navigation.navigate('PaymentSettings')}>
+          <TouchableOpacity style={styles.demoNavBtn} onPress={() => router.push('/perfil/payment')}>
             <Text style={styles.demoNavText}>Ajustes de pago</Text>
           </TouchableOpacity>
         </View>

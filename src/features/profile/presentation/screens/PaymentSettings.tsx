@@ -1,10 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { ProfileStackParamList } from '../navigation/types';
 
-type Props = NativeStackScreenProps<ProfileStackParamList, 'PaymentSettings'>;
-
-export default function PaymentSettings({}: Props) {
+export default function PaymentSettings() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Ajustes de pago</Text>
