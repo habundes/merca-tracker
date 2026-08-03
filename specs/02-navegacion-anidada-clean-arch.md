@@ -2,7 +2,7 @@
 
 ## Header
 
-- **Estado:** Aprobado
+- **Estado:** Implementado
 - **Dependencias:**
   - Spec `01` (Liquid Glass) — sus componentes se **mueven** a `src/shared/components/glass` (mismo código, nueva ruta).
   - Base: Expo SDK 57, React Navigation 7 (`@react-navigation/native`, `@react-navigation/bottom-tabs` ya instalados).
@@ -105,17 +105,17 @@ Cada paso deja el proyecto compilando (`tsc --noEmit`) y la app arrancando. Se c
 
 ## Acceptance criteria
 
-- [ ] `@react-navigation/native-stack` presente en `package.json` (`^7`, peer compatible con `@react-navigation/native ^7.3.x`).
-- [ ] Existe `src/features/{home,profile,search}/`; home y profile con `domain/` + `data/` (con `index.ts` de convención) y `presentation/`; search solo `presentation/`.
-- [ ] `SearchContext` vive en `src/shared/context/` y glass en `src/shared/components/glass/`; no quedan `src/context/` ni `src/components/` viejos.
-- [ ] `HomeStack` (native-stack) con rutas `HomeMain`, `ListConfig`, `ItemDetail`; header propio por pantalla.
-- [ ] `ProfileStack` (native-stack) con rutas `ProfileMain`, `Login`, `SignUp`, `AccountSettings`, `PaymentSettings`; header propio.
-- [ ] `AppTabs` reemplaza a `BottomTabs`: tabs `headerShown:false`, `Historial`→HomeStack, `Buscar`→SearchScreen (con header a nivel tab), `Perfil`→ProfileStack; iconos y estilos de tab conservados; `initialRouteName:'Buscar'`.
-- [ ] Param lists co-locadas por feature; `src/navigation/types.ts` compone `AppTabsParamList` y declara `RootParamList` (tipado global de `useNavigation`).
-- [ ] `ItemDetail` recibe y usa `route.params.itemId: string`.
-- [ ] `tsc --noEmit` pasa sin errores.
-- [ ] En la app: navegar `HomeMain`→`ListConfig`→`ItemDetail` y volver; entrar a las 4 sub-pantallas de Perfil y volver; Search funciona igual; glass y `useSearch()` operativos.
-- [ ] `App.tsx` importa `AppTabs` y `SearchProvider` desde las nuevas rutas; `BottomTabs.tsx` viejo eliminado.
+- [x] `@react-navigation/native-stack` presente en `package.json` (`^7`, peer compatible con `@react-navigation/native ^7.3.x`).
+- [x] Existe `src/features/{home,profile,search}/`; home y profile con `domain/` + `data/` (con `index.ts` de convención) y `presentation/`; search solo `presentation/`.
+- [x] `SearchContext` vive en `src/shared/context/` y glass en `src/shared/components/glass/`; no quedan `src/context/` ni `src/components/` viejos.
+- [x] `HomeStack` (native-stack) con rutas `HomeMain`, `ListConfig`, `ItemDetail`; header propio por pantalla.
+- [x] `ProfileStack` (native-stack) con rutas `ProfileMain`, `Login`, `SignUp`, `AccountSettings`, `PaymentSettings`; header propio.
+- [x] `AppTabs` reemplaza a `BottomTabs`: tabs `headerShown:false`, `Historial`→HomeStack, `Buscar`→SearchScreen (con header a nivel tab), `Perfil`→ProfileStack; iconos y estilos de tab conservados; `initialRouteName:'Buscar'`.
+- [x] Param lists co-locadas por feature; `src/navigation/types.ts` compone `AppTabsParamList` y declara `RootParamList` (tipado global de `useNavigation`).
+- [x] `ItemDetail` recibe y usa `route.params.itemId: string`.
+- [x] `tsc --noEmit` pasa sin errores.
+- [x] En la app: navegar `HomeMain`→`ListConfig`→`ItemDetail` y volver; entrar a las 4 sub-pantallas de Perfil y volver; Search funciona igual; glass y `useSearch()` operativos.
+- [x] `App.tsx` importa `AppTabs` y `SearchProvider` desde las nuevas rutas; `BottomTabs.tsx` viejo eliminado.
 
 ## Decisiones tomadas y descartadas
 
