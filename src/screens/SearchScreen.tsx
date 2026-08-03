@@ -9,7 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { useSearch } from '../context/SearchContext';
+import { useSearch } from '../shared/context/SearchContext';
 
 export default function SearchScreen() {
   const [url, setUrl] = useState('');

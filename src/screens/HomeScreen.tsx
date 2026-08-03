@@ -6,8 +6,8 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSearch } from '../context/SearchContext';
-import { GlassCard } from '../components/glass';
+import { useSearch } from '../shared/context/SearchContext';
+import { GlassCard } from '../shared/components/glass';
 
 export default function HomeScreen() {
   const { history, clearHistory } = useSearch();
