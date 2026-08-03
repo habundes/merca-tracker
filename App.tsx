@@ -2,14 +2,14 @@ import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { SearchProvider } from './src/shared/context/SearchContext';
-import BottomTabs from './src/navigation/BottomTabs';
+import AppTabs from './src/navigation/AppTabs';
 
 export default function App() {
   return (
     <SearchProvider>
       <NavigationContainer>
         <StatusBar style="auto" />
-        <BottomTabs />
+        <AppTabs />
       </NavigationContainer>
     </SearchProvider>
   );
