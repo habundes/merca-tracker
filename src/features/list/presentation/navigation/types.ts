@@ -1,5 +1,5 @@
-export type HomeStackParamList = {
-  HomeMain: undefined;
+export type ListStackParamList = {
+  ListMain: undefined;
   ListConfig: undefined;
   ItemDetail: { itemId: string };
 };

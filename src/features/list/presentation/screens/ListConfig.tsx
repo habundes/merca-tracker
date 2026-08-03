@@ -1,8 +1,8 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { HomeStackParamList } from '../navigation/types';
+import type { ListStackParamList } from '../navigation/types';
 
-type Props = NativeStackScreenProps<HomeStackParamList, 'ListConfig'>;
+type Props = NativeStackScreenProps<ListStackParamList, 'ListConfig'>;
 
 export default function ListConfig({ navigation }: Props) {
   return (

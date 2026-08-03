@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { HomeStackParamList } from '../navigation/types';
+import type { ListStackParamList } from '../navigation/types';
 
-type Props = NativeStackScreenProps<HomeStackParamList, 'ItemDetail'>;
+type Props = NativeStackScreenProps<ListStackParamList, 'ItemDetail'>;
 
 export default function ItemDetail({ route }: Props) {
   const { itemId } = route.params;

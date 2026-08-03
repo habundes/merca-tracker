@@ -10,11 +10,11 @@ import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSearch } from '../../../../shared/context/SearchContext';
 import { GlassCard } from '../../../../shared/components/glass';
-import type { HomeStackParamList } from '../navigation/types';
+import type { ListStackParamList } from '../navigation/types';
 
-type Props = NativeStackScreenProps<HomeStackParamList, 'HomeMain'>;
+type Props = NativeStackScreenProps<ListStackParamList, 'ListMain'>;
 
-export default function HomeMain({ navigation }: Props) {
+export default function ListMain({ navigation }: Props) {
   const { history, clearHistory } = useSearch();
 
   const handleClearHistory = () => {
