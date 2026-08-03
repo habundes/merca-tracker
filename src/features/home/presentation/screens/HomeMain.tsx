@@ -13,18 +13,23 @@ import type { HomeStackParamList } from '../navigation/types';
 
 type Props = NativeStackScreenProps<HomeStackParamList, 'HomeMain'>;
 
-export default function HomeMain({}: Props) {
+export default function HomeMain({ navigation }: Props) {
   const { history, clearHistory } = useSearch();
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Mis búsquedas</Text>
-        {history.length > 0 && (
-          <TouchableOpacity onPress={clearHistory}>
-            <Text style={styles.clearText}>Limpiar</Text>
+        <View style={styles.headerActions}>
+          <TouchableOpacity onPress={() => navigation.navigate('ListConfig')}>
+            <Text style={styles.configText}>Configurar</Text>
           </TouchableOpacity>
-        )}
+          {history.length > 0 && (
+            <TouchableOpacity onPress={clearHistory}>
+              <Text style={styles.clearText}>Limpiar</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
 
       {history.length === 0 ? (
@@ -42,7 +47,10 @@ export default function HomeMain({}: Props) {
           keyExtractor={(item, index) => `${item}-${index}`}
           contentContainerStyle={styles.list}
           renderItem={({ item, index }) => (
-            <View style={styles.item}>
+            <TouchableOpacity
+              style={styles.item}
+              onPress={() => navigation.navigate('ItemDetail', { itemId: item })}
+            >
               <View style={styles.indexBadge}>
                 <Text style={styles.indexText}>{index + 1}</Text>
               </View>
@@ -50,7 +58,7 @@ export default function HomeMain({}: Props) {
                 <Text style={styles.itemUrl} numberOfLines={1}>{item}</Text>
               </View>
               <Ionicons name="open-outline" size={16} color="#aaa" />
-            </View>
+            </TouchableOpacity>
           )}
         />
       )}
@@ -75,6 +83,16 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     color: '#222',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  configText: {
+    fontSize: 14,
+    color: '#2563eb',
+    fontWeight: '600',
   },
   clearText: {
     fontSize: 14,
