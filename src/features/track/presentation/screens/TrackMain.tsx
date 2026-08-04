@@ -17,8 +17,8 @@ export default function TrackMain() {
 
   const handleClearHistory = () => {
     Alert.alert(
-      'Limpiar búsquedas',
-      '¿Estás seguro que deseas limpiar tu historial de búsquedas?',
+      'Limpiar rastreos',
+      '¿Estás seguro que deseas limpiar tu historial de rastreos?',
       [
         { text: 'Cancelar', style: 'cancel' },
         { text: 'Limpiar', style: 'destructive', onPress: clearHistory },
@@ -29,9 +29,9 @@ export default function TrackMain() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Mis búsquedas</Text>
+        <Text style={styles.title}>Mis rastreos</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity onPress={() => router.push('/list/config')}>
+          <TouchableOpacity onPress={() => router.push('/track/config')}>
             <Text style={styles.configText}>Configurar</Text>
           </TouchableOpacity>
           {history.length > 0 && (
@@ -47,8 +47,8 @@ export default function TrackMain() {
           {/* Demo temporal Liquid Glass — spec 01-liquid-glass-components */}
           <GlassCard style={styles.emptyGlass}>
             <Ionicons name="search-outline" size={48} color="#ccc" />
-            <Text style={styles.emptyText}>Sin búsquedas aún</Text>
-            <Text style={styles.emptySubText}>Las URLs buscadas aparecerán aquí</Text>
+            <Text style={styles.emptyText}>Sin rastreos aún</Text>
+            <Text style={styles.emptySubText}>Las URLs rastreadas aparecerán aquí</Text>
           </GlassCard>
         </View>
       ) : (
@@ -60,7 +60,7 @@ export default function TrackMain() {
             <TouchableOpacity
               style={styles.item}
               onPress={() =>
-                router.push({ pathname: '/list/[itemId]', params: { itemId: item } })
+                router.push({ pathname: '/track/[itemId]', params: { itemId: item } })
               }
             >
               <View style={styles.indexBadge}>
