@@ -2,7 +2,7 @@
 
 ## Header
 
-- **Estado:** Aprobado
+- **Estado:** Implementado
 - **Dependencias:** Spec `03` (Migración Expo Router) — Implementado. Este cambio reencuadra el tab `list` de esa migración.
 - **Fecha:** 2026-08-04
 - **Objetivo (una frase):** Renombrar el tab "Lista" a "Rastrear" — ruta `list` → `track`, feature `src/features/list` → `src/features/track`, componentes `ListMain`/`ListConfig` → `TrackMain`/`TrackConfig`, y todos los copies visibles ("Mis búsquedas", "Configurar lista", "Limpiar búsquedas", "Sin búsquedas aún", "Las URLs buscadas…") reformulados con la terminología "rastreo/rastreos", **sin tocar `search`, `profile`, `SearchContext` ni el flujo de captura de URLs**.
