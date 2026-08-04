@@ -176,7 +176,7 @@ export default function ProfileMain() {
       <View style={styles.container}>
         <Ionicons name="person-circle-outline" size={72} color={colors.accent} />
         <Text style={styles.title}>{name || email}</Text>
-        <Text style={styles.sub}>Sesión iniciada</Text>
+        <Text style={styles.sub}>{email}</Text>
 
         <View style={styles.configSection}>
           <Text style={styles.configSectionTitle}>Configuración</Text>
