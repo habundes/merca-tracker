@@ -345,8 +345,6 @@ export default function ProfileMain() {
             <Text style={styles.actionText}>{mode === 'login' ? 'Entrar' : 'Crear cuenta'}</Text>
           </TouchableOpacity>
         </View>
-
-        {appearanceToggle}
       </ScrollView>
     </KeyboardAvoidingView>
   );
