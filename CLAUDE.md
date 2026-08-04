@@ -24,14 +24,25 @@ No test runner, linter, or formatter is configured. Type-check is the only autom
 
 ## Architecture
 
-Single-package Expo app. Entry: `index.ts` → `App.tsx` → `SearchProvider` → `NavigationContainer` → `BottomTabs`.
+Single-package Expo app using **Expo Router** (file-based routing, spec-03). Entry: `app.json` (plugins: `expo-router`) → `app/_layout.tsx` (root layout with `SearchProvider` + `StatusBar`) → `app/(tabs)/_layout.tsx` (bottom tabs navigator) → three tab groups (`lista`, `buscar`, `perfil`), initial route `buscar`.
 
-Key layout under `src/`:
+**Key layout:**
 
-- `context/` — React Context providers. `SearchContext` holds the URL search history (in-memory only, not persisted) and is the app-wide state layer. Any screen needing history uses `useSearch()`.
-- `navigation/BottomTabs.tsx` — the only navigator. Three tabs (`Historial`, `Search`, `Profile`), initial route `Search`. Icons via `@expo/vector-icons` Ionicons. Tab styling is hardcoded here.
-- `screens/` — one file per tab. Screens consume `useSearch()` for shared state.
-- `components/glass/` — Liquid Glass component system (iOS 26+, spec `01`). `GlassView` is the base wrapper; it checks `isLiquidGlassAvailable()` from `expo-glass-effect` and falls through to a plain `<View>` on Android, Web, and iOS <26. `GlassCard`, `GlassButton`, `GlassHeader` all compose `GlassView` — never import from `expo-glass-effect` directly in screens; use the wrappers so the passthrough behavior is preserved everywhere.
+- `app/` — Expo Router file structure. `_layout.tsx` at each level defines navigation structure. No manual `NavigationContainer` — router handles it.
+  - `app/_layout.tsx` — root. Wraps `SearchProvider`, sets `StatusBar`, declares root `<Stack>` with `headerShown:false`.
+  - `app/(tabs)/` — route group. Contains `_layout.tsx` with bottom `<Tabs>` navigator (three screens: `lista`, `buscar`, `perfil`), icons via `@expo/vector-icons` Ionicons.
+  - `app/(tabs)/lista/`, `app/(tabs)/buscar/`, `app/(tabs)/perfil/` — tab folders with `_layout.tsx` (per-tab `<Stack>`) and `.tsx` files (routes). Dynamic routes use `[param].tsx` syntax (e.g., `app/(tabs)/lista/[itemId].tsx`).
+  - `app/(tabs)/lista/index.tsx`, `app/(tabs)/buscar/index.tsx`, `app/(tabs)/perfil/index.tsx` — re-export screen components from `src/features/*/presentation/screens/`.
+
+- `src/` — Feature logic (feature-driven).
+  - `context/` — React Context providers. `SearchContext` holds URL search history (in-memory only, not persisted) and is the app-wide state layer. Any screen needing history uses `useSearch()`.
+  - `features/*/presentation/screens/` — screen components. Use `router.push()` (from `expo-router`) instead of `navigation.navigate()`. Dynamic params via `useLocalSearchParams<{param: type}>()` (not `route.params`).
+  - `components/glass/` — Liquid Glass component system (iOS 26+, spec `01`). `GlassView` is the base wrapper; it checks `isLiquidGlassAvailable()` from `expo-glass-effect` and falls through to a plain `<View>` on Android, Web, and iOS <26. `GlassCard`, `GlassButton`, `GlassHeader` all compose `GlassView` — never import from `expo-glass-effect` directly in screens; use the wrappers so the passthrough behavior is preserved everywhere.
+
+**Router usage:**
+- Push route (object syntax for typed params): `router.push({ pathname: '/lista/[itemId]', params: { itemId: item } })`.
+- Get route params: `const { itemId } = useLocalSearchParams<{ itemId: string }>()`.
+- React Navigation (@react-navigation/*) is uninstalled; all navigation goes through Expo Router.
 
 ## Spec-driven workflow
 
