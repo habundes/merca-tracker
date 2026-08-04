@@ -22,6 +22,7 @@ export type ThemeContextValue = {
   effectiveScheme: ColorScheme;
   colors: ThemeColors;
   setMode: (mode: ThemeMode) => void;
+  isHydrated: boolean;
 };
 
 export const lightColors: ThemeColors = {
@@ -38,7 +39,7 @@ export const lightColors: ThemeColors = {
 
 export const darkColors: ThemeColors = {
   bg: '#000000',
-  bgSecondary: '#1c1c1e',
+  bgSecondary: '#0d0d0f',
   bgTertiary: '#2c2c2e',
   text: '#ffffff',
   textMuted: '#8e8e93',
@@ -57,6 +58,7 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>('system');
+  const [isHydrated, setIsHydrated] = useState(false);
   const [systemScheme, setSystemScheme] = useState<ColorScheme>(
     (Appearance.getColorScheme() as ColorScheme) ?? 'light'
   );
@@ -68,6 +70,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       } else if (stored !== null) {
         AsyncStorage.removeItem(STORAGE_KEY);
       }
+      setIsHydrated(true);
     });
   }, []);
 
@@ -88,8 +91,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const colors = effectiveScheme === 'dark' ? darkColors : lightColors;
 
   const value = useMemo<ThemeContextValue>(
-    () => ({ mode, effectiveScheme, colors, setMode }),
-    [mode, effectiveScheme, colors]
+    () => ({ mode, effectiveScheme, colors, setMode, isHydrated }),
+    [mode, effectiveScheme, colors, isHydrated]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

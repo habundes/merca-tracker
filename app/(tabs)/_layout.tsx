@@ -7,18 +7,18 @@ export const unstable_settings = {
 };
 
 export default function TabsLayout() {
-  const { colors } = useTheme();
+  const { colors, isHydrated } = useTheme();
 
   return (
     <Tabs
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: colors.tabInactive,
+        tabBarActiveTintColor: isHydrated ? colors.accent : '#2563eb',
+        tabBarInactiveTintColor: isHydrated ? colors.tabInactive : '#aaaaaa',
         tabBarStyle: {
-          backgroundColor: colors.bgSecondary,
+          backgroundColor: isHydrated ? colors.bgSecondary : '#f9fafb',
           borderTopWidth: 1,
-          borderTopColor: colors.border,
+          borderTopColor: isHydrated ? colors.border : '#e5e7eb',
           height: 60,
           paddingBottom: 8,
         },
@@ -38,8 +38,8 @@ export default function TabsLayout() {
         options={{
           title: 'Buscar',
           headerShown: true,
-          headerStyle: { backgroundColor: colors.bgSecondary },
-          headerTintColor: colors.text,
+          headerStyle: { backgroundColor: isHydrated ? colors.bgSecondary : '#f9fafb' },
+          headerTintColor: isHydrated ? colors.text : '#111111',
         }}
       />
       <Tabs.Screen name="profile" options={{ title: 'Perfil' }} />

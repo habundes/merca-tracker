@@ -23,7 +23,7 @@ export function GlassView({
   children,
   ...rest
 }: GlassViewProps) {
-  const { colors } = useTheme();
+  const { colors, effectiveScheme } = useTheme();
 
   if (!isLiquidGlassAvailable()) {
     return (
@@ -40,7 +40,7 @@ export function GlassView({
       glassEffectStyle={glassEffectStyle}
       tintColor={tintColor}
       isInteractive={isInteractive}
-      colorScheme={colorScheme}
+      colorScheme={colorScheme ?? effectiveScheme}
       style={style}
       {...rest}
     >
