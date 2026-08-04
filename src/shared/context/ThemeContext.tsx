@@ -48,6 +48,8 @@ export const darkColors: ThemeColors = {
   tabInactive: '#8e8e93',
 };
 
+export const ON_ACCENT = '#ffffff';
+
 const STORAGE_KEY = '@merca-tracker/theme-preference';
 const VALID_MODES: ThemeMode[] = ['light', 'dark', 'system'];
 

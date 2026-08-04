@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useTheme, ThemeMode } from '../../../../shared/context/ThemeContext';
+import { useTheme, ThemeMode, ON_ACCENT } from '../../../../shared/context/ThemeContext';
 
 type Mode = 'login' | 'signup';
 
@@ -123,7 +123,7 @@ export default function ProfileMain() {
       marginTop: 4,
     },
     actionText: {
-      color: '#ffffff',
+      color: ON_ACCENT,
       fontWeight: '700',
       fontSize: 16,
     },

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useSearch } from '../../../../shared/context/SearchContext';
-import { useTheme } from '../../../../shared/context/ThemeContext';
+import { useTheme, ON_ACCENT } from '../../../../shared/context/ThemeContext';
 
 export default function SearchScreen() {
   const [url, setUrl] = useState('');
@@ -60,7 +60,7 @@ export default function SearchScreen() {
       justifyContent: 'center',
     },
     buttonText: {
-      color: '#ffffff',
+      color: ON_ACCENT,
       fontWeight: '700',
       fontSize: 15,
     },

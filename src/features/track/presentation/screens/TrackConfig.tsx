@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useTheme } from '../../../../shared/context/ThemeContext';
+import { useTheme, ON_ACCENT } from '../../../../shared/context/ThemeContext';
 
 export default function TrackConfig() {
   const router = useRouter();
@@ -27,7 +27,7 @@ export default function TrackConfig() {
       borderRadius: 10,
     },
     buttonText: {
-      color: '#ffffff',
+      color: ON_ACCENT,
       fontWeight: '600',
     },
   }), [colors]);
