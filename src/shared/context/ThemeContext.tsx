@@ -1,0 +1,100 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { Appearance } from 'react-native';
+
+export type ThemeMode = 'light' | 'dark' | 'system';
+export type ColorScheme = 'light' | 'dark';
+
+export type ThemeColors = {
+  bg: string;
+  bgSecondary: string;
+  bgTertiary: string;
+  text: string;
+  textMuted: string;
+  border: string;
+  accent: string;
+  danger: string;
+  tabInactive: string;
+};
+
+export type ThemeContextValue = {
+  mode: ThemeMode;
+  effectiveScheme: ColorScheme;
+  colors: ThemeColors;
+  setMode: (mode: ThemeMode) => void;
+};
+
+export const lightColors: ThemeColors = {
+  bg: '#ffffff',
+  bgSecondary: '#f9fafb',
+  bgTertiary: '#f3f4f6',
+  text: '#111111',
+  textMuted: '#666666',
+  border: '#e5e7eb',
+  accent: '#2563eb',
+  danger: '#dc2626',
+  tabInactive: '#aaaaaa',
+};
+
+export const darkColors: ThemeColors = {
+  bg: '#000000',
+  bgSecondary: '#1c1c1e',
+  bgTertiary: '#2c2c2e',
+  text: '#ffffff',
+  textMuted: '#8e8e93',
+  border: '#38383a',
+  accent: '#0a84ff',
+  danger: '#ff453a',
+  tabInactive: '#8e8e93',
+};
+
+const STORAGE_KEY = '@merca-tracker/theme-preference';
+const VALID_MODES: ThemeMode[] = ['light', 'dark', 'system'];
+
+const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [mode, setModeState] = useState<ThemeMode>('system');
+  const [systemScheme, setSystemScheme] = useState<ColorScheme>(
+    (Appearance.getColorScheme() as ColorScheme) ?? 'light'
+  );
+
+  useEffect(() => {
+    AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
+      if (stored && VALID_MODES.includes(stored as ThemeMode)) {
+        setModeState(stored as ThemeMode);
+      } else if (stored !== null) {
+        AsyncStorage.removeItem(STORAGE_KEY);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (mode !== 'system') return;
+    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
+      setSystemScheme((colorScheme as ColorScheme) ?? 'light');
+    });
+    return () => subscription.remove();
+  }, [mode]);
+
+  const setMode = (newMode: ThemeMode) => {
+    setModeState(newMode);
+    AsyncStorage.setItem(STORAGE_KEY, newMode);
+  };
+
+  const effectiveScheme: ColorScheme = mode === 'system' ? systemScheme : mode;
+  const colors = effectiveScheme === 'dark' ? darkColors : lightColors;
+
+  const value = useMemo<ThemeContextValue>(
+    () => ({ mode, effectiveScheme, colors, setMode }),
+    [mode, effectiveScheme, colors]
+  );
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+}
+
+export function useTheme(): ThemeContextValue {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
+  return ctx;
+}
