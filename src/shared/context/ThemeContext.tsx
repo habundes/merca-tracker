@@ -38,7 +38,7 @@ export const lightColors: ThemeColors = {
 
 export const darkColors: ThemeColors = {
   bg: '#000000',
-  bgSecondary: '#1c1c1e',
+  bgSecondary: '#0d0d0f',
   bgTertiary: '#2c2c2e',
   text: '#ffffff',
   textMuted: '#8e8e93',
