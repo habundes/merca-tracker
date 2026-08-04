@@ -11,9 +11,15 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useTheme } from '../../../../shared/context/ThemeContext';
+import { useTheme, ThemeMode } from '../../../../shared/context/ThemeContext';
 
 type Mode = 'login' | 'signup';
+
+const THEME_OPTIONS: { label: string; value: ThemeMode }[] = [
+  { label: 'Sistema', value: 'system' },
+  { label: 'Claro', value: 'light' },
+  { label: 'Oscuro', value: 'dark' },
+];
 
 export default function ProfileMain() {
   const router = useRouter();
@@ -25,7 +31,7 @@ export default function ProfileMain() {
   const [showPassword, setShowPassword] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [error, setError] = useState('');
-  const { colors } = useTheme();
+  const { colors, mode: themeMode, setMode: setThemeMode } = useTheme();
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -134,6 +140,42 @@ export default function ProfileMain() {
       fontWeight: '600',
       fontSize: 15,
     },
+    appearanceSection: {
+      width: '100%',
+      marginTop: 32,
+    },
+    appearanceSectionTitle: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      marginBottom: 10,
+    },
+    appearanceSegment: {
+      flexDirection: 'row',
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      overflow: 'hidden',
+    },
+    appearanceSegmentBtn: {
+      flex: 1,
+      paddingVertical: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.bgTertiary,
+    },
+    appearanceSegmentBtnActive: {
+      backgroundColor: colors.accent,
+    },
+    appearanceSegmentText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    appearanceSegmentTextActive: {
+      color: '#ffffff',
+    },
     demoNav: {
       marginTop: 24,
       alignItems: 'center',
@@ -171,6 +213,33 @@ export default function ProfileMain() {
     setLoggedIn(true);
   };
 
+  const appearanceToggle = (
+    <View style={styles.appearanceSection}>
+      <Text style={styles.appearanceSectionTitle}>Apariencia</Text>
+      <View style={styles.appearanceSegment}>
+        {THEME_OPTIONS.map((opt) => (
+          <TouchableOpacity
+            key={opt.value}
+            style={[
+              styles.appearanceSegmentBtn,
+              themeMode === opt.value && styles.appearanceSegmentBtnActive,
+            ]}
+            onPress={() => setThemeMode(opt.value)}
+          >
+            <Text
+              style={[
+                styles.appearanceSegmentText,
+                themeMode === opt.value && styles.appearanceSegmentTextActive,
+              ]}
+            >
+              {opt.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+
   if (loggedIn) {
     return (
       <View style={styles.container}>
@@ -180,6 +249,8 @@ export default function ProfileMain() {
         <TouchableOpacity style={styles.logoutBtn} onPress={() => { setLoggedIn(false); reset(); }}>
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
+
+        {appearanceToggle}
 
         <View style={styles.demoNav}>
           <Text style={styles.demoNavTitle}>Demo de navegación</Text>
@@ -274,6 +345,8 @@ export default function ProfileMain() {
             <Text style={styles.actionText}>{mode === 'login' ? 'Entrar' : 'Crear cuenta'}</Text>
           </TouchableOpacity>
         </View>
+
+        {appearanceToggle}
       </ScrollView>
     </KeyboardAvoidingView>
   );
