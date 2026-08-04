@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import {
   View,
   TextInput,
@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useSearch } from '../../../../shared/context/SearchContext';
+import { useTheme } from '../../../../shared/context/ThemeContext';
 
 export default function SearchScreen() {
   const [url, setUrl] = useState('');
@@ -17,6 +18,70 @@ export default function SearchScreen() {
   const [added, setAdded] = useState(false);
   const inputRef = useRef<TextInput>(null);
   const { addSearch, history } = useSearch();
+  const { colors } = useTheme();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 24,
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: '700',
+      marginBottom: 24,
+      color: colors.text,
+    },
+    row: {
+      flexDirection: 'row',
+      width: '100%',
+      alignItems: 'center',
+      gap: 8,
+    },
+    input: {
+      flex: 1,
+      height: 48,
+      borderWidth: 1.5,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      backgroundColor: colors.bgSecondary,
+      fontSize: 15,
+      color: colors.text,
+    },
+    button: {
+      height: 48,
+      paddingHorizontal: 20,
+      backgroundColor: colors.accent,
+      borderRadius: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    buttonText: {
+      color: '#ffffff',
+      fontWeight: '700',
+      fontSize: 15,
+    },
+    hint: {
+      marginTop: 16,
+      color: colors.textMuted,
+      fontSize: 13,
+    },
+    duplicate: {
+      marginTop: 16,
+      color: colors.danger,
+      fontSize: 13,
+      fontWeight: '600',
+    },
+    added: {
+      marginTop: 16,
+      color: colors.accent,
+      fontSize: 13,
+      fontWeight: '600',
+    },
+  }), [colors]);
 
   useFocusEffect(
     useCallback(() => {
@@ -51,7 +116,7 @@ export default function SearchScreen() {
           ref={inputRef}
           style={styles.input}
           placeholder="https://ejemplo.com"
-          placeholderTextColor="#aaa"
+          placeholderTextColor={colors.textMuted}
           value={url}
           onChangeText={setUrl}
           autoCapitalize="none"
@@ -72,66 +137,3 @@ export default function SearchScreen() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    marginBottom: 24,
-    color: '#222',
-  },
-  row: {
-    flexDirection: 'row',
-    width: '100%',
-    alignItems: 'center',
-    gap: 8,
-  },
-  input: {
-    flex: 1,
-    height: 48,
-    borderWidth: 1.5,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    backgroundColor: '#fff',
-    fontSize: 15,
-    color: '#222',
-  },
-  button: {
-    height: 48,
-    paddingHorizontal: 20,
-    backgroundColor: '#2563eb',
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 15,
-  },
-  hint: {
-    marginTop: 16,
-    color: '#aaa',
-    fontSize: 13,
-  },
-  duplicate: {
-    marginTop: 16,
-    color: '#dc2626',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  added: {
-    marginTop: 16,
-    color: '#16a34a',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-});
