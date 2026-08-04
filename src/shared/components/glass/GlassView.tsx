@@ -5,6 +5,7 @@ import {
   type GlassStyle,
   type GlassColorScheme,
 } from 'expo-glass-effect';
+import { useTheme } from '../../context/ThemeContext';
 
 export interface GlassViewProps extends ViewProps {
   glassEffectStyle?: GlassStyle;
@@ -18,11 +19,21 @@ export function GlassView({
   tintColor,
   isInteractive,
   colorScheme,
+  style,
   children,
   ...rest
 }: GlassViewProps) {
+  const { colors } = useTheme();
+
   if (!isLiquidGlassAvailable()) {
-    return <View {...rest}>{children}</View>;
+    return (
+      <View
+        style={[{ backgroundColor: colors.bgSecondary, borderColor: colors.border }, style]}
+        {...rest}
+      >
+        {children}
+      </View>
+    );
   }
   return (
     <ExpoGlassView
@@ -30,6 +41,7 @@ export function GlassView({
       tintColor={tintColor}
       isInteractive={isInteractive}
       colorScheme={colorScheme}
+      style={style}
       {...rest}
     >
       {children}
