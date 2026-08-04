@@ -1,16 +1,17 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { ListStackParamList } from '../navigation/types';
+import { useRouter } from 'expo-router';
 
-type Props = NativeStackScreenProps<ListStackParamList, 'ListConfig'>;
+export default function ListConfig() {
+  const router = useRouter();
 
-export default function ListConfig({ navigation }: Props) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Configurar lista</Text>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('ItemDetail', { itemId: 'demo-1' })}
+        onPress={() =>
+          router.push({ pathname: '/list/[itemId]', params: { itemId: 'demo-1' } })
+        }
       >
         <Text style={styles.buttonText}>Ver detalle de ejemplo</Text>
       </TouchableOpacity>

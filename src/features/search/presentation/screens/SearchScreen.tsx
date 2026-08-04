@@ -8,7 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 import { useSearch } from '../../../../shared/context/SearchContext';
 
 export default function SearchScreen() {
@@ -45,7 +45,7 @@ export default function SearchScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Text style={styles.title}>Buscar URL</Text>
+      <Text style={styles.title}>Rastrea un producto</Text>
       <View style={styles.row}>
         <TextInput
           ref={inputRef}

@@ -1,10 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { ProfileStackParamList } from '../navigation/types';
 
-type Props = NativeStackScreenProps<ProfileStackParamList, 'AccountSettings'>;
-
-export default function AccountSettings({}: Props) {
+export default function AccountSettings() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Ajustes de cuenta</Text>

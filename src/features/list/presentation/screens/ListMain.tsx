@@ -7,14 +7,12 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useRouter } from 'expo-router';
 import { useSearch } from '../../../../shared/context/SearchContext';
 import { GlassCard } from '../../../../shared/components/glass';
-import type { ListStackParamList } from '../navigation/types';
 
-type Props = NativeStackScreenProps<ListStackParamList, 'ListMain'>;
-
-export default function ListMain({ navigation }: Props) {
+export default function ListMain() {
+  const router = useRouter();
   const { history, clearHistory } = useSearch();
 
   const handleClearHistory = () => {
@@ -33,7 +31,7 @@ export default function ListMain({ navigation }: Props) {
       <View style={styles.header}>
         <Text style={styles.title}>Mis búsquedas</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity onPress={() => navigation.navigate('ListConfig')}>
+          <TouchableOpacity onPress={() => router.push('/list/config')}>
             <Text style={styles.configText}>Configurar</Text>
           </TouchableOpacity>
           {history.length > 0 && (
@@ -61,7 +59,9 @@ export default function ListMain({ navigation }: Props) {
           renderItem={({ item, index }) => (
             <TouchableOpacity
               style={styles.item}
-              onPress={() => navigation.navigate('ItemDetail', { itemId: item })}
+              onPress={() =>
+                router.push({ pathname: '/list/[itemId]', params: { itemId: item } })
+              }
             >
               <View style={styles.indexBadge}>
                 <Text style={styles.indexText}>{index + 1}</Text>

@@ -1,11 +1,8 @@
 import { View, Text, StyleSheet } from 'react-native';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { ListStackParamList } from '../navigation/types';
+import { useLocalSearchParams } from 'expo-router';
 
-type Props = NativeStackScreenProps<ListStackParamList, 'ItemDetail'>;
-
-export default function ItemDetail({ route }: Props) {
-  const { itemId } = route.params;
+export default function ItemDetail() {
+  const { itemId } = useLocalSearchParams<{ itemId: string }>();
 
   return (
     <View style={styles.container}>
