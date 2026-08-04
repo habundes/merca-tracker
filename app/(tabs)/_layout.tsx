@@ -21,7 +21,7 @@ export default function TabsLayout() {
         },
         tabBarIcon: ({ color, size }) => {
           const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
-            list: 'list-outline',
+            track: 'list-outline',
             search: 'search-outline',
             profile: 'person-outline',
           };
@@ -29,7 +29,7 @@ export default function TabsLayout() {
         },
       })}
     >
-      <Tabs.Screen name="list" options={{ title: 'Lista' }} />
+      <Tabs.Screen name="track" options={{ title: 'Rastrear' }} />
       <Tabs.Screen name="search" options={{ title: 'Buscar', headerShown: true }} />
       <Tabs.Screen name="profile" options={{ title: 'Perfil' }} />
     </Tabs>
