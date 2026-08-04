@@ -260,6 +260,9 @@ export default function ProfileMain() {
           <TouchableOpacity style={styles.demoNavBtn} onPress={() => router.push('/profile/payment')}>
             <Text style={styles.demoNavText}>Ajustes de pago</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.demoNavBtn} onPress={() => router.push('/profile/appearance')}>
+            <Text style={styles.demoNavText}>Apariencia</Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
