@@ -2,7 +2,7 @@
 
 ## Header
 
-- **Estado:** Aprobado
+- **Estado:** Implementado
 - **Dependencias:**
   - Spec `03` (Migración Expo Router) — Implementado. Este spec introduce theming sobre las screens ya re-exportadas en `app/(tabs)/**`.
   - Spec `04` (Renombrar tab Rastrear) — Implementado. Afecta `TrackMain`/`TrackConfig` en `src/features/track/`.
