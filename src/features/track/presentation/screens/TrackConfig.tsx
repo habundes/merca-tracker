@@ -1,8 +1,36 @@
+import { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTheme } from '../../../../shared/context/ThemeContext';
 
 export default function TrackConfig() {
   const router = useRouter();
+  const { colors } = useTheme();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 16,
+      backgroundColor: colors.bg,
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    button: {
+      backgroundColor: colors.accent,
+      paddingHorizontal: 20,
+      paddingVertical: 12,
+      borderRadius: 10,
+    },
+    buttonText: {
+      color: '#ffffff',
+      fontWeight: '600',
+    },
+  }), [colors]);
 
   return (
     <View style={styles.container}>
@@ -18,28 +46,3 @@ export default function TrackConfig() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 16,
-    backgroundColor: '#f5f5f5',
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#222',
-  },
-  button: {
-    backgroundColor: '#2563eb',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 10,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-});

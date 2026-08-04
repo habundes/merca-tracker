@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   View,
   Text,
@@ -9,11 +10,105 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSearch } from '../../../../shared/context/SearchContext';
+import { useTheme } from '../../../../shared/context/ThemeContext';
 import { GlassCard } from '../../../../shared/components/glass';
 
 export default function TrackMain() {
   const router = useRouter();
   const { history, clearHistory } = useSearch();
+  const { colors } = useTheme();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.bg,
+    },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      paddingTop: 20,
+      paddingBottom: 12,
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: '700',
+      color: colors.text,
+    },
+    headerActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 16,
+    },
+    configText: {
+      fontSize: 14,
+      color: colors.accent,
+      fontWeight: '600',
+    },
+    clearText: {
+      fontSize: 14,
+      color: colors.danger,
+      fontWeight: '600',
+    },
+    list: {
+      paddingHorizontal: 16,
+      gap: 8,
+    },
+    item: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.bgSecondary,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      paddingVertical: 14,
+      borderWidth: 1,
+      borderColor: colors.border,
+      gap: 12,
+    },
+    indexBadge: {
+      width: 28,
+      height: 28,
+      borderRadius: 14,
+      backgroundColor: colors.bgTertiary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    indexText: {
+      fontSize: 12,
+      fontWeight: '700',
+      color: colors.accent,
+    },
+    itemContent: {
+      flex: 1,
+    },
+    itemUrl: {
+      fontSize: 14,
+      color: colors.textMuted,
+    },
+    empty: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+    },
+    emptyGlass: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      paddingHorizontal: 32,
+      paddingVertical: 32,
+    },
+    emptyText: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: colors.textMuted,
+    },
+    emptySubText: {
+      fontSize: 13,
+      color: colors.textMuted,
+    },
+  }), [colors]);
 
   const handleClearHistory = () => {
     Alert.alert(
@@ -46,7 +141,7 @@ export default function TrackMain() {
         <View style={styles.empty}>
           {/* Demo temporal Liquid Glass — spec 01-liquid-glass-components */}
           <GlassCard style={styles.emptyGlass}>
-            <Ionicons name="search-outline" size={48} color="#ccc" />
+            <Ionicons name="search-outline" size={48} color={colors.textMuted} />
             <Text style={styles.emptyText}>Sin rastreos aún</Text>
             <Text style={styles.emptySubText}>Las URLs rastreadas aparecerán aquí</Text>
           </GlassCard>
@@ -69,7 +164,7 @@ export default function TrackMain() {
               <View style={styles.itemContent}>
                 <Text style={styles.itemUrl} numberOfLines={1}>{item}</Text>
               </View>
-              <Ionicons name="open-outline" size={16} color="#aaa" />
+              <Ionicons name="open-outline" size={16} color={colors.tabInactive} />
             </TouchableOpacity>
           )}
         />
@@ -77,95 +172,3 @@ export default function TrackMain() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 12,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#222',
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-  },
-  configText: {
-    fontSize: 14,
-    color: '#2563eb',
-    fontWeight: '600',
-  },
-  clearText: {
-    fontSize: 14,
-    color: '#dc2626',
-    fontWeight: '600',
-  },
-  list: {
-    paddingHorizontal: 16,
-    gap: 8,
-  },
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 14,
-    borderWidth: 1,
-    borderColor: '#e5e7eb',
-    gap: 12,
-  },
-  indexBadge: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#eff6ff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  indexText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#2563eb',
-  },
-  itemContent: {
-    flex: 1,
-  },
-  itemUrl: {
-    fontSize: 14,
-    color: '#444',
-  },
-  empty: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  emptyGlass: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingHorizontal: 32,
-    paddingVertical: 32,
-  },
-  emptyText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#bbb',
-  },
-  emptySubText: {
-    fontSize: 13,
-    color: '#ccc',
-  },
-});
