@@ -134,22 +134,22 @@ export default function ProfileMain() {
       fontWeight: '600',
       fontSize: 15,
     },
-    demoNav: {
+    configSection: {
       marginTop: 24,
       alignItems: 'center',
       gap: 8,
     },
-    demoNavTitle: {
+    configSectionTitle: {
       fontSize: 12,
       color: colors.textMuted,
       fontWeight: '600',
       textTransform: 'uppercase',
     },
-    demoNavBtn: {
+    configBtn: {
       paddingHorizontal: 16,
       paddingVertical: 8,
     },
-    demoNavText: {
+    configText: {
       color: colors.accent,
       fontWeight: '600',
       fontSize: 14,
@@ -181,16 +181,16 @@ export default function ProfileMain() {
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
 
-        <View style={styles.demoNav}>
-          <Text style={styles.demoNavTitle}>Demo de navegación</Text>
-          <TouchableOpacity style={styles.demoNavBtn} onPress={() => router.push('/profile/account')}>
-            <Text style={styles.demoNavText}>Ajustes de cuenta</Text>
+        <View style={styles.configSection}>
+          <Text style={styles.configSectionTitle}>Configuración</Text>
+          <TouchableOpacity style={styles.configBtn} onPress={() => router.push('/profile/account')}>
+            <Text style={styles.configText}>Ajustes de cuenta</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.demoNavBtn} onPress={() => router.push('/profile/payment')}>
-            <Text style={styles.demoNavText}>Ajustes de pago</Text>
+          <TouchableOpacity style={styles.configBtn} onPress={() => router.push('/profile/payment')}>
+            <Text style={styles.configText}>Ajustes de pago</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.demoNavBtn} onPress={() => router.push('/profile/appearance')}>
-            <Text style={styles.demoNavText}>Apariencia</Text>
+          <TouchableOpacity style={styles.configBtn} onPress={() => router.push('/profile/appearance')}>
+            <Text style={styles.configText}>Apariencia</Text>
           </TouchableOpacity>
         </View>
       </View>
