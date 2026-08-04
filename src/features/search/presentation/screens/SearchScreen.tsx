@@ -8,7 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useSearch } from '../../../../shared/context/SearchContext';
 import { useTheme, ON_ACCENT } from '../../../../shared/context/ThemeContext';
 
@@ -19,6 +19,7 @@ export default function SearchScreen() {
   const inputRef = useRef<TextInput>(null);
   const { addSearch, history } = useSearch();
   const { colors } = useTheme();
+  const router = useRouter();
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
