@@ -77,16 +77,16 @@ Cada paso deja árbol compilando (`npx tsc --noEmit`) y app arrancable. Branch: 
 
 ## Acceptance criteria
 
-- [ ] Existe `src/features/profile/presentation/screens/AppearanceSettings.tsx` que exporta `default` un componente funcional.
-- [ ] `AppearanceSettings` consume `useTheme()` (`mode`, `setMode`, `colors`), renderiza label "Apariencia" + segmentado horizontal de 3 botones ("Sistema" | "Claro" | "Oscuro"); activo `colors.accent` + texto `#ffffff`; inactivo `colors.bgTertiary` + `colors.text`; border `colors.border`. Tap dispara `setMode(...)`.
-- [ ] `StyleSheet.create` de `AppearanceSettings` está envuelto en `useMemo(() => StyleSheet.create({...}), [colors])`. Sin literales de color hex/`rgb`/`rgba` fuera de `#ffffff` del texto activo.
-- [ ] Existe `app/(tabs)/profile/appearance.tsx` que re-exporta `AppearanceSettings` (patrón `account.tsx`).
-- [ ] `app/(tabs)/profile/_layout.tsx` declara `<Stack.Screen name="appearance" options={{ title: 'Apariencia' }} />`.
-- [ ] `ProfileMain.tsx` renderiza en la rama `loggedIn` un `TouchableOpacity` con texto "Apariencia" dentro del bloque `demoNav`, bajo "Ajustes de pago", que hace `router.push('/profile/appearance')`. Mismo estilo `demoNavBtn` / `demoNavText`.
-- [ ] `ProfileMain.tsx` **no** contiene ya: constante `THEME_OPTIONS`, variable `appearanceToggle`, `themeMode`/`setThemeMode` en el destructure de `useTheme()`, ni los estilos `appearanceSection`, `appearanceSectionTitle`, `appearanceSegment`, `appearanceSegmentBtn`, `appearanceSegmentBtnActive`, `appearanceSegmentText`, `appearanceSegmentTextActive`.
-- [ ] `grep -RIn "appearanceSegment\|appearanceSection\|THEME_OPTIONS" src app` devuelve resultados **solo** en `AppearanceSettings.tsx`.
-- [ ] En login/signup (sin `loggedIn`) el link "Apariencia" no es alcanzable desde `ProfileMain`.
-- [ ] `npx tsc --noEmit` pasa sin errores.
+- [x] Existe `src/features/profile/presentation/screens/AppearanceSettings.tsx` que exporta `default` un componente funcional.
+- [x] `AppearanceSettings` consume `useTheme()` (`mode`, `setMode`, `colors`), renderiza label "Apariencia" + segmentado horizontal de 3 botones ("Sistema" | "Claro" | "Oscuro"); activo `colors.accent` + texto `#ffffff`; inactivo `colors.bgTertiary` + `colors.text`; border `colors.border`. Tap dispara `setMode(...)`.
+- [x] `StyleSheet.create` de `AppearanceSettings` está envuelto en `useMemo(() => StyleSheet.create({...}), [colors])`. Sin literales de color hex/`rgb`/`rgba` fuera de `#ffffff` del texto activo.
+- [x] Existe `app/(tabs)/profile/appearance.tsx` que re-exporta `AppearanceSettings` (patrón `account.tsx`).
+- [x] `app/(tabs)/profile/_layout.tsx` declara `<Stack.Screen name="appearance" options={{ title: 'Apariencia' }} />`.
+- [x] `ProfileMain.tsx` renderiza en la rama `loggedIn` un `TouchableOpacity` con texto "Apariencia" dentro del bloque `demoNav`, bajo "Ajustes de pago", que hace `router.push('/profile/appearance')`. Mismo estilo `demoNavBtn` / `demoNavText`.
+- [x] `ProfileMain.tsx` **no** contiene ya: constante `THEME_OPTIONS`, variable `appearanceToggle`, `themeMode`/`setThemeMode` en el destructure de `useTheme()`, ni los estilos `appearanceSection`, `appearanceSectionTitle`, `appearanceSegment`, `appearanceSegmentBtn`, `appearanceSegmentBtnActive`, `appearanceSegmentText`, `appearanceSegmentTextActive`.
+- [x] `grep -RIn "appearanceSegment\|appearanceSection\|THEME_OPTIONS" src app` devuelve resultados **solo** en `AppearanceSettings.tsx`.
+- [x] En login/signup (sin `loggedIn`) el link "Apariencia" no es alcanzable desde `ProfileMain`.
+- [x] `npx tsc --noEmit` pasa sin errores.
 - [ ] Verificación manual: tap en "Apariencia" navega a la screen; los 3 botones cambian el tema en vivo; header de la screen dice "Apariencia" y respeta light/dark; preferencia persiste tras relaunch.
 
 ## Decisiones tomadas y descartadas
