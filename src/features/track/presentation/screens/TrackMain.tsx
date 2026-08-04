@@ -11,7 +11,7 @@ import { useRouter } from 'expo-router';
 import { useSearch } from '../../../../shared/context/SearchContext';
 import { GlassCard } from '../../../../shared/components/glass';
 
-export default function ListMain() {
+export default function TrackMain() {
   const router = useRouter();
   const { history, clearHistory } = useSearch();
 

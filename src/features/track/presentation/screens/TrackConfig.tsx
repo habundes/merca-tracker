@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 
-export default function ListConfig() {
+export default function TrackConfig() {
   const router = useRouter();
 
   return (
