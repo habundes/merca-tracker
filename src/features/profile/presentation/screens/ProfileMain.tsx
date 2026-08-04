@@ -52,10 +52,10 @@ export default function ProfileMain() {
 
         <View style={styles.demoNav}>
           <Text style={styles.demoNavTitle}>Demo de navegación</Text>
-          <TouchableOpacity style={styles.demoNavBtn} onPress={() => router.push('/perfil/account')}>
+          <TouchableOpacity style={styles.demoNavBtn} onPress={() => router.push('/profile/account')}>
             <Text style={styles.demoNavText}>Ajustes de cuenta</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.demoNavBtn} onPress={() => router.push('/perfil/payment')}>
+          <TouchableOpacity style={styles.demoNavBtn} onPress={() => router.push('/profile/payment')}>
             <Text style={styles.demoNavText}>Ajustes de pago</Text>
           </TouchableOpacity>
         </View>

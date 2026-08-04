@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 export const unstable_settings = {
-  initialRouteName: 'buscar',
+  initialRouteName: 'search',
 };
 
 export default function TabsLayout() {
@@ -21,17 +21,17 @@ export default function TabsLayout() {
         },
         tabBarIcon: ({ color, size }) => {
           const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
-            lista: 'list-outline',
-            buscar: 'search-outline',
-            perfil: 'person-outline',
+            list: 'list-outline',
+            search: 'search-outline',
+            profile: 'person-outline',
           };
           return <Ionicons name={icons[route.name]} size={size} color={color} />;
         },
       })}
     >
-      <Tabs.Screen name="lista" options={{ title: 'Lista' }} />
-      <Tabs.Screen name="buscar" options={{ title: 'Buscar', headerShown: true }} />
-      <Tabs.Screen name="perfil" options={{ title: 'Perfil' }} />
+      <Tabs.Screen name="list" options={{ title: 'Lista' }} />
+      <Tabs.Screen name="search" options={{ title: 'Buscar', headerShown: true }} />
+      <Tabs.Screen name="profile" options={{ title: 'Perfil' }} />
     </Tabs>
   );
 }

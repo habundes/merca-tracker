@@ -45,7 +45,7 @@ export default function SearchScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Text style={styles.title}>Buscar URL</Text>
+      <Text style={styles.title}>Rastrea un producto</Text>
       <View style={styles.row}>
         <TextInput
           ref={inputRef}

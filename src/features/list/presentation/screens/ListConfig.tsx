@@ -10,7 +10,7 @@ export default function ListConfig() {
       <TouchableOpacity
         style={styles.button}
         onPress={() =>
-          router.push({ pathname: '/lista/[itemId]', params: { itemId: 'demo-1' } })
+          router.push({ pathname: '/list/[itemId]', params: { itemId: 'demo-1' } })
         }
       >
         <Text style={styles.buttonText}>Ver detalle de ejemplo</Text>

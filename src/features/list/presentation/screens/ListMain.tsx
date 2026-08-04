@@ -31,7 +31,7 @@ export default function ListMain() {
       <View style={styles.header}>
         <Text style={styles.title}>Mis búsquedas</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity onPress={() => router.push('/lista/config')}>
+          <TouchableOpacity onPress={() => router.push('/list/config')}>
             <Text style={styles.configText}>Configurar</Text>
           </TouchableOpacity>
           {history.length > 0 && (
@@ -60,7 +60,7 @@ export default function ListMain() {
             <TouchableOpacity
               style={styles.item}
               onPress={() =>
-                router.push({ pathname: '/lista/[itemId]', params: { itemId: item } })
+                router.push({ pathname: '/list/[itemId]', params: { itemId: item } })
               }
             >
               <View style={styles.indexBadge}>

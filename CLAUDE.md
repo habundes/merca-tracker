@@ -29,7 +29,7 @@ Single-package Expo app. Entry: `index.ts` → `App.tsx` → `SearchProvider` �
 Key layout under `src/`:
 
 - `context/` — React Context providers. `SearchContext` holds the URL search history (in-memory only, not persisted) and is the app-wide state layer. Any screen needing history uses `useSearch()`.
-- `navigation/BottomTabs.tsx` — the only navigator. Three tabs (`Historial`, `Buscar`, `Perfil`), initial route `Buscar`. Icons via `@expo/vector-icons` Ionicons. Tab styling is hardcoded here.
+- `navigation/BottomTabs.tsx` — the only navigator. Three tabs (`Historial`, `Search`, `Profile`), initial route `Search`. Icons via `@expo/vector-icons` Ionicons. Tab styling is hardcoded here.
 - `screens/` — one file per tab. Screens consume `useSearch()` for shared state.
 - `components/glass/` — Liquid Glass component system (iOS 26+, spec `01`). `GlassView` is the base wrapper; it checks `isLiquidGlassAvailable()` from `expo-glass-effect` and falls through to a plain `<View>` on Android, Web, and iOS <26. `GlassCard`, `GlassButton`, `GlassHeader` all compose `GlassView` — never import from `expo-glass-effect` directly in screens; use the wrappers so the passthrough behavior is preserved everywhere.
 

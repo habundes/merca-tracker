@@ -8,7 +8,7 @@
   - Base: Expo SDK 57, React Navigation 7 (`@react-navigation/native`, `@react-navigation/bottom-tabs` ya instalados).
   - **Requiere `@react-navigation/native-stack`** (`^7`, compatible RN Nav 7) — lo instala el usuario; este spec solo lo configura.
 - **Fecha:** 2026-08-03
-- **Objetivo (una frase):** Introducir navegación anidada por tab (native-stacks) bajo clean architecture feature-first (`src/features/<f>/{domain,data,presentation}`), entregando la capa presentation real (navegación tipada + pantallas placeholder) para Home y Perfil, Search como pantalla única, y carpetas domain/data vacías con convención documentada — sin lógica, datos ni persistencia.
+- **Objetivo (una frase):** Introducir navegación anidada por tab (native-stacks) bajo clean architecture feature-first (`src/features/<f>/{domain,data,presentation}`), entregando la capa presentation real (navegación tipada + pantallas placeholder) para Home y Profile, Search como pantalla única, y carpetas domain/data vacías con convención documentada — sin lógica, datos ni persistencia.
 
 ## Scope
 
@@ -68,8 +68,8 @@ import type { ProfileStackParamList } from '../features/profile/presentation/nav
 
 export type AppTabsParamList = {
   Historial: NavigatorScreenParams<HomeStackParamList>;
-  Buscar: undefined;                                  // pantalla única, sin stack
-  Perfil: NavigatorScreenParams<ProfileStackParamList>;
+  Search: undefined;                                  // pantalla única, sin stack
+  Profile: NavigatorScreenParams<ProfileStackParamList>;
 };
 
 declare global {
@@ -79,7 +79,7 @@ declare global {
 }
 ```
 
-Screens tipan props con `NativeStackScreenProps<...>` (stacks) o `BottomTabScreenProps<AppTabsParamList, 'Buscar'>` (Search). `ItemDetail` es la única con param (`itemId: string`).
+Screens tipan props con `NativeStackScreenProps<...>` (stacks) o `BottomTabScreenProps<AppTabsParamList, 'Search'>` (Search). `ItemDetail` es la única con param (`itemId: string`).
 
 **Convención domain/data** (documentada en `index.ts` de cada carpeta vacía, con `export {}`):
 
@@ -98,10 +98,10 @@ Cada paso deja el proyecto compilando (`tsc --noEmit`) y la app arrancando. Se c
 5. **Profile presentation.** `screens/` (`ProfileMain` = ProfileScreen actual movido/renombrado, `Login`, `SignUp`, `AccountSettings`, `PaymentSettings`, placeholders con navegación). `navigation/types.ts` (`ProfileStackParamList`). `navigation/ProfileStack.tsx` (native-stack, `initialRouteName: ProfileMain`, header propio).
 6. **Search presentation.** Mover `SearchScreen` → `src/features/search/presentation/screens/SearchScreen.tsx`. Sin stack.
 7. **`src/navigation/types.ts`.** `AppTabsParamList` componiendo las param lists de features + `declare global` de `RootParamList`.
-8. **`src/navigation/AppTabs.tsx`.** Reemplaza `BottomTabs`. Tabs: `Historial`→`HomeStack`, `Buscar`→`SearchScreen` (`options={{ headerShown: true }}`), `Perfil`→`ProfileStack`. `screenOptions`: `headerShown:false` global, conservar iconos Ionicons + estilos de tab actuales. `initialRouteName:'Buscar'`.
+8. **`src/navigation/AppTabs.tsx`.** Reemplaza `BottomTabs`. Tabs: `Historial`→`HomeStack`, `Search`→`SearchScreen` (`options={{ headerShown: true }}`), `Profile`→`ProfileStack`. `screenOptions`: `headerShown:false` global, conservar iconos Ionicons + estilos de tab actuales. `initialRouteName:'Search'`.
 9. **Cablear `App.tsx`.** Importar `AppTabs` (nueva ruta) y `SearchProvider` (`src/shared/context`). Borrar `src/navigation/BottomTabs.tsx` viejo.
 10. **Navegación funcional.** Botones con `navigation.navigate(...)` tipados; `ItemDetail` navegado desde `ListConfig`/`HomeMain` con un `itemId` de ejemplo; back nativo del header.
-11. **Verificación final.** `tsc --noEmit` sin errores. App arranca; navegación `HomeMain`→`ListConfig`→`ItemDetail` y `Perfil`→(`Login`/`SignUp`/`AccountSettings`/`PaymentSettings`) con back; Search igual con su header; glass y `useSearch()` operativos desde `shared/`.
+11. **Verificación final.** `tsc --noEmit` sin errores. App arranca; navegación `HomeMain`→`ListConfig`→`ItemDetail` y `Profile`→(`Login`/`SignUp`/`AccountSettings`/`PaymentSettings`) con back; Search igual con su header; glass y `useSearch()` operativos desde `shared/`.
 
 ## Acceptance criteria
 
@@ -110,11 +110,11 @@ Cada paso deja el proyecto compilando (`tsc --noEmit`) y la app arrancando. Se c
 - [x] `SearchContext` vive en `src/shared/context/` y glass en `src/shared/components/glass/`; no quedan `src/context/` ni `src/components/` viejos.
 - [x] `HomeStack` (native-stack) con rutas `HomeMain`, `ListConfig`, `ItemDetail`; header propio por pantalla.
 - [x] `ProfileStack` (native-stack) con rutas `ProfileMain`, `Login`, `SignUp`, `AccountSettings`, `PaymentSettings`; header propio.
-- [x] `AppTabs` reemplaza a `BottomTabs`: tabs `headerShown:false`, `Historial`→HomeStack, `Buscar`→SearchScreen (con header a nivel tab), `Perfil`→ProfileStack; iconos y estilos de tab conservados; `initialRouteName:'Buscar'`.
+- [x] `AppTabs` reemplaza a `BottomTabs`: tabs `headerShown:false`, `Historial`→HomeStack, `Search`→SearchScreen (con header a nivel tab), `Profile`→ProfileStack; iconos y estilos de tab conservados; `initialRouteName:'Search'`.
 - [x] Param lists co-locadas por feature; `src/navigation/types.ts` compone `AppTabsParamList` y declara `RootParamList` (tipado global de `useNavigation`).
 - [x] `ItemDetail` recibe y usa `route.params.itemId: string`.
 - [x] `tsc --noEmit` pasa sin errores.
-- [x] En la app: navegar `HomeMain`→`ListConfig`→`ItemDetail` y volver; entrar a las 4 sub-pantallas de Perfil y volver; Search funciona igual; glass y `useSearch()` operativos.
+- [x] En la app: navegar `HomeMain`→`ListConfig`→`ItemDetail` y volver; entrar a las 4 sub-pantallas de Profile y volver; Search funciona igual; glass y `useSearch()` operativos.
 - [x] `App.tsx` importa `AppTabs` y `SearchProvider` desde las nuevas rutas; `BottomTabs.tsx` viejo eliminado.
 
 ## Decisiones tomadas y descartadas
