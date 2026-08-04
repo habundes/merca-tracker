@@ -2,7 +2,7 @@
 
 ## Header
 
-- **Estado:** Aprobado
+- **Estado:** Implementado
 - **Dependencias:**
   - Spec `06` (Apariencia screen propia) — Implementado. Provee el bloque `demoNav` con los 3 links (Ajustes de cuenta / Ajustes de pago / Apariencia) que este spec renombra y reordena.
   - Base: Expo SDK 57, React 19.2, RN 0.86, TS 6.
@@ -58,17 +58,17 @@ Cada paso deja el árbol compilando (`npx tsc --noEmit`) y la app arrancable. Br
 
 ## Acceptance criteria
 
-- [ ] `ProfileMain.tsx` no contiene ya los identificadores `demoNav`, `demoNavTitle`, `demoNavBtn`, `demoNavText`; existen `configSection`, `configSectionTitle`, `configBtn`, `configText` en su lugar.
-- [ ] El texto visible del título de la sección es "Configuración" (ya no "Demo de navegación").
-- [ ] El `TouchableOpacity` de "Cerrar sesión" aparece en el JSX **después** del bloque `configSection` (debajo del link "Apariencia"), no antes.
-- [ ] `logoutBtn.marginTop` es `8` (ya no `24`).
-- [ ] El `<Text style={styles.sub}>` ya no contiene el literal "Sesión iniciada"; muestra `{email}`.
-- [ ] El `<Text style={styles.title}>` usa `{name || 'John Doe'}` (ya no `{name || email}`).
-- [ ] Login (sin nombre) → título muestra "John Doe"; signup (con nombre) → título muestra el nombre real ingresado.
-- [ ] Los 3 links (Ajustes de cuenta / Ajustes de pago / Apariencia) mantienen su texto, orden y destino de `router.push`.
-- [ ] `grep -RIn "demoNav" src app` no devuelve resultados.
-- [ ] `npx tsc --noEmit` pasa sin errores nuevos introducidos por este cambio (los errores preexistentes de rutas tipadas, ver nota de riesgos, no son responsabilidad de este spec).
-- [ ] Verificación manual: login y signup ambos muestran el header correcto; "Cerrar sesión" queda visualmente separado del último link sin gap excesivo ni pegado.
+- [x] `ProfileMain.tsx` no contiene ya los identificadores `demoNav`, `demoNavTitle`, `demoNavBtn`, `demoNavText`; existen `configSection`, `configSectionTitle`, `configBtn`, `configText` en su lugar.
+- [x] El texto visible del título de la sección es "Configuración" (ya no "Demo de navegación").
+- [x] El `TouchableOpacity` de "Cerrar sesión" aparece en el JSX **después** del bloque `configSection` (debajo del link "Apariencia"), no antes.
+- [x] `logoutBtn.marginTop` es `40` (ajustado durante verificación visual desde el `8` originalmente propuesto por separación insuficiente).
+- [x] El `<Text style={styles.sub}>` ya no contiene el literal "Sesión iniciada"; muestra `{email}`.
+- [x] El `<Text style={styles.title}>` usa `{name || 'John Doe'}` (ya no `{name || email}`).
+- [x] Login (sin nombre) → título muestra "John Doe"; signup (con nombre) → título muestra el nombre real ingresado.
+- [x] Los 3 links (Ajustes de cuenta / Ajustes de pago / Apariencia) mantienen su texto, orden y destino de `router.push`.
+- [x] `grep -RIn "demoNav" src app` no devuelve resultados.
+- [x] `npx tsc --noEmit` pasa sin errores nuevos introducidos por este cambio (los errores preexistentes de rutas tipadas, ver nota de riesgos, no son responsabilidad de este spec).
+- [x] Verificación manual: login y signup ambos muestran el header correcto; "Cerrar sesión" queda visualmente separado del último link sin gap excesivo ni pegado.
 
 ## Decisiones tomadas y descartadas
 
