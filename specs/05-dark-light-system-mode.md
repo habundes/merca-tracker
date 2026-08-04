@@ -176,21 +176,21 @@ Cada paso deja el árbol compilando (`npx tsc --noEmit`) y la app arrancable. `s
 
 ## Acceptance criteria
 
-- [ ] `@react-native-async-storage/async-storage` presente en `package.json` (versión resuelta por `npx expo install` para SDK 57).
-- [ ] `app.json.expo.userInterfaceStyle` es `"automatic"`.
-- [ ] Existe `src/shared/context/ThemeContext.tsx` que exporta `ThemeMode`, `ColorScheme`, `ThemeColors`, `ThemeContextValue`, `lightColors`, `darkColors`, `ThemeProvider`, `useTheme`.
-- [ ] `lightColors` y `darkColors` contienen exactamente los 9 tokens listados con los valores de la tabla del Data model.
-- [ ] `ThemeProvider` persiste la preferencia en `AsyncStorage` con key `@merca-tracker/theme-preference` y valores `'light' | 'dark' | 'system'`; ausente → default `'system'`; inválido → limpiar y default.
-- [ ] `Appearance.addChangeListener` está suscrito **solo** cuando `mode === 'system'` (unsubscribe al cambiar a manual).
-- [ ] `app/_layout.tsx` envuelve el árbol con `<ThemeProvider>`.
-- [ ] `app/(tabs)/_layout.tsx` consume `useTheme()`: `tabBarActiveTintColor: colors.accent`, `tabBarInactiveTintColor: colors.tabInactive`, `tabBarStyle.backgroundColor: colors.bgSecondary`, `borderTopColor: colors.border`. El header del tab `search` usa `headerStyle.backgroundColor: colors.bgSecondary` y `headerTintColor: colors.text`.
-- [ ] `app/(tabs)/track/_layout.tsx` y `app/(tabs)/profile/_layout.tsx` aplican `headerStyle.backgroundColor: colors.bgSecondary`, `headerTintColor: colors.text`, `contentStyle.backgroundColor: colors.bg` vía `screenOptions`.
-- [ ] Las 7 screens (`TrackMain`, `TrackConfig`, `ItemDetail`, `SearchScreen`, `ProfileMain`, `AccountSettings`, `PaymentSettings`) tienen su `StyleSheet.create` dentro del componente envuelto en `useMemo(() => StyleSheet.create(...), [colors])` y ningún literal de color hex/`rgb`/`rgba` en el bloque de estilos.
-- [ ] `ProfileMain` renderiza una sección **"Apariencia"** arriba de "Ajustes de cuenta" con tres botones segmentados ("Sistema" | "Claro" | "Oscuro"); el botón activo tiene fondo `colors.accent` y texto `#ffffff`; los inactivos tienen fondo `colors.bgTertiary` y texto `colors.text`; tap dispara `setMode(...)`.
-- [ ] `GlassView` fallback (`<View>` en Android / iOS<26 / Web) aplica `backgroundColor: colors.bgSecondary` y `borderColor: colors.border`.
-- [ ] `grep -RIn -E "'#[0-9a-fA-F]{3,8}'" src app` devuelve resultados **solo** en `ThemeContext.tsx` y en `#ffffff`/`#fff` del texto activo del toggle.
-- [ ] `npx tsc --noEmit` pasa sin errores.
-- [ ] Matriz manual del paso 13 del Implementation plan: los 8 escenarios se verifican OK.
+- [x] `@react-native-async-storage/async-storage` presente en `package.json` (versión resuelta por `npx expo install` para SDK 57).
+- [x] `app.json.expo.userInterfaceStyle` es `"automatic"`.
+- [x] Existe `src/shared/context/ThemeContext.tsx` que exporta `ThemeMode`, `ColorScheme`, `ThemeColors`, `ThemeContextValue`, `lightColors`, `darkColors`, `ThemeProvider`, `useTheme`.
+- [x] `lightColors` y `darkColors` contienen exactamente los 9 tokens listados con los valores de la tabla del Data model.
+- [x] `ThemeProvider` persiste la preferencia en `AsyncStorage` con key `@merca-tracker/theme-preference` y valores `'light' | 'dark' | 'system'`; ausente → default `'system'`; inválido → limpiar y default.
+- [x] `Appearance.addChangeListener` está suscrito **solo** cuando `mode === 'system'` (unsubscribe al cambiar a manual).
+- [x] `app/_layout.tsx` envuelve el árbol con `<ThemeProvider>`.
+- [x] `app/(tabs)/_layout.tsx` consume `useTheme()`: `tabBarActiveTintColor: colors.accent`, `tabBarInactiveTintColor: colors.tabInactive`, `tabBarStyle.backgroundColor: colors.bgSecondary`, `borderTopColor: colors.border`. El header del tab `search` usa `headerStyle.backgroundColor: colors.bgSecondary` y `headerTintColor: colors.text`.
+- [x] `app/(tabs)/track/_layout.tsx` y `app/(tabs)/profile/_layout.tsx` aplican `headerStyle.backgroundColor: colors.bgSecondary`, `headerTintColor: colors.text`, `contentStyle.backgroundColor: colors.bg` vía `screenOptions`.
+- [x] Las 7 screens (`TrackMain`, `TrackConfig`, `ItemDetail`, `SearchScreen`, `ProfileMain`, `AccountSettings`, `PaymentSettings`) tienen su `StyleSheet.create` dentro del componente envuelto en `useMemo(() => StyleSheet.create(...), [colors])` y ningún literal de color hex/`rgb`/`rgba` en el bloque de estilos.
+- [x] `ProfileMain` renderiza una sección **"Apariencia"** arriba de "Ajustes de cuenta" con tres botones segmentados ("Sistema" | "Claro" | "Oscuro"); el botón activo tiene fondo `colors.accent` y texto `#ffffff`; los inactivos tienen fondo `colors.bgTertiary` y texto `colors.text`; tap dispara `setMode(...)`.
+- [x] `GlassView` fallback (`<View>` en Android / iOS<26 / Web) aplica `backgroundColor: colors.bgSecondary` y `borderColor: colors.border`.
+- [x] `grep -RIn -E "'#[0-9a-fA-F]{3,8}'" src app` devuelve resultados **solo** en `ThemeContext.tsx` y en `#ffffff`/`#fff` del texto activo del toggle.
+- [x] `npx tsc --noEmit` pasa sin errores.
+- [x] Matriz manual del paso 13 del Implementation plan: los 8 escenarios se verifican OK.
 
 ## Decisiones tomadas y descartadas
 
