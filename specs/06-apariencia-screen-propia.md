@@ -2,7 +2,7 @@
 
 ## Header
 
-- **Estado:** Aprobado
+- **Estado:** Implementado
 - **Dependencias:**
   - Spec `03` (Migración Expo Router) — Implementado. Provee `router.push` y layout de `profile` stack.
   - Spec `05` (Dark mode con toggle en Perfil) — Implementado. Provee `ThemeContext`, `useTheme`, `setMode`, tokens semánticos. Este spec **revierte** la decisión de spec 05 de mantener el toggle inline en `ProfileMain`.
