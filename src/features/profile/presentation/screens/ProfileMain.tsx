@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,8 +11,15 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useTheme, ThemeMode, ON_ACCENT } from '../../../../shared/context/ThemeContext';
 
 type Mode = 'login' | 'signup';
+
+const THEME_OPTIONS: { label: string; value: ThemeMode }[] = [
+  { label: 'Sistema', value: 'system' },
+  { label: 'Claro', value: 'light' },
+  { label: 'Oscuro', value: 'dark' },
+];
 
 export default function ProfileMain() {
   const router = useRouter();
@@ -24,6 +31,172 @@ export default function ProfileMain() {
   const [showPassword, setShowPassword] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [error, setError] = useState('');
+  const { colors, mode: themeMode, setMode: setThemeMode } = useTheme();
+
+  const styles = useMemo(() => StyleSheet.create({
+    container: {
+      flexGrow: 1,
+      backgroundColor: colors.bg,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 28,
+      paddingVertical: 40,
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: '700',
+      color: colors.text,
+      marginTop: 12,
+    },
+    sub: {
+      fontSize: 14,
+      color: colors.textMuted,
+      marginTop: 6,
+    },
+    toggle: {
+      flexDirection: 'row',
+      marginTop: 24,
+      backgroundColor: colors.bgTertiary,
+      borderRadius: 10,
+      padding: 4,
+    },
+    toggleBtn: {
+      paddingHorizontal: 28,
+      paddingVertical: 8,
+      borderRadius: 8,
+    },
+    toggleActive: {
+      backgroundColor: colors.bgSecondary,
+      shadowColor: colors.text,
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      elevation: 2,
+    },
+    toggleText: {
+      fontSize: 14,
+      color: colors.textMuted,
+      fontWeight: '600',
+    },
+    toggleTextActive: {
+      color: colors.accent,
+    },
+    form: {
+      width: '100%',
+      marginTop: 24,
+      gap: 12,
+    },
+    input: {
+      height: 48,
+      borderWidth: 1.5,
+      borderColor: colors.border,
+      borderRadius: 10,
+      paddingHorizontal: 14,
+      backgroundColor: colors.bgSecondary,
+      fontSize: 15,
+      color: colors.text,
+    },
+    passwordRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+    },
+    eyeBtn: {
+      height: 48,
+      paddingHorizontal: 12,
+      justifyContent: 'center',
+      backgroundColor: colors.bgSecondary,
+      borderWidth: 1.5,
+      borderColor: colors.border,
+      borderRadius: 10,
+    },
+    error: {
+      color: colors.danger,
+      fontSize: 13,
+      textAlign: 'center',
+    },
+    actionBtn: {
+      height: 48,
+      backgroundColor: colors.accent,
+      borderRadius: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 4,
+    },
+    actionText: {
+      color: ON_ACCENT,
+      fontWeight: '700',
+      fontSize: 16,
+    },
+    logoutBtn: {
+      marginTop: 24,
+      paddingHorizontal: 24,
+      paddingVertical: 12,
+      borderWidth: 1.5,
+      borderColor: colors.accent,
+      borderRadius: 10,
+    },
+    logoutText: {
+      color: colors.accent,
+      fontWeight: '600',
+      fontSize: 15,
+    },
+    appearanceSection: {
+      width: '100%',
+      marginTop: 32,
+    },
+    appearanceSectionTitle: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textMuted,
+      textTransform: 'uppercase',
+      marginBottom: 10,
+    },
+    appearanceSegment: {
+      flexDirection: 'row',
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 10,
+      overflow: 'hidden',
+    },
+    appearanceSegmentBtn: {
+      flex: 1,
+      paddingVertical: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.bgTertiary,
+    },
+    appearanceSegmentBtnActive: {
+      backgroundColor: colors.accent,
+    },
+    appearanceSegmentText: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.text,
+    },
+    appearanceSegmentTextActive: {
+      color: '#ffffff',
+    },
+    demoNav: {
+      marginTop: 24,
+      alignItems: 'center',
+      gap: 8,
+    },
+    demoNavTitle: {
+      fontSize: 12,
+      color: colors.textMuted,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+    },
+    demoNavBtn: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+    },
+    demoNavText: {
+      color: colors.accent,
+      fontWeight: '600',
+      fontSize: 14,
+    },
+  }), [colors]);
 
   const reset = () => { setEmail(''); setPassword(''); setConfirm(''); setName(''); setError(''); };
 
@@ -40,15 +213,44 @@ export default function ProfileMain() {
     setLoggedIn(true);
   };
 
+  const appearanceToggle = (
+    <View style={styles.appearanceSection}>
+      <Text style={styles.appearanceSectionTitle}>Apariencia</Text>
+      <View style={styles.appearanceSegment}>
+        {THEME_OPTIONS.map((opt) => (
+          <TouchableOpacity
+            key={opt.value}
+            style={[
+              styles.appearanceSegmentBtn,
+              themeMode === opt.value && styles.appearanceSegmentBtnActive,
+            ]}
+            onPress={() => setThemeMode(opt.value)}
+          >
+            <Text
+              style={[
+                styles.appearanceSegmentText,
+                themeMode === opt.value && styles.appearanceSegmentTextActive,
+              ]}
+            >
+              {opt.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+  );
+
   if (loggedIn) {
     return (
       <View style={styles.container}>
-        <Ionicons name="person-circle-outline" size={72} color="#2563eb" />
+        <Ionicons name="person-circle-outline" size={72} color={colors.accent} />
         <Text style={styles.title}>{name || email}</Text>
         <Text style={styles.sub}>Sesión iniciada</Text>
         <TouchableOpacity style={styles.logoutBtn} onPress={() => { setLoggedIn(false); reset(); }}>
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </TouchableOpacity>
+
+        {appearanceToggle}
 
         <View style={styles.demoNav}>
           <Text style={styles.demoNavTitle}>Demo de navegación</Text>
@@ -65,14 +267,14 @@ export default function ProfileMain() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      style={{ flex: 1, backgroundColor: colors.bg }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <Ionicons name="person-circle-outline" size={72} color="#ccc" />
+        <Ionicons name="person-circle-outline" size={72} color={colors.textMuted} />
         <Text style={styles.title}>{mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}</Text>
 
-        {/* Toggle */}
+        {/* Toggle login/signup */}
         <View style={styles.toggle}>
           <TouchableOpacity
             style={[styles.toggleBtn, mode === 'login' && styles.toggleActive]}
@@ -93,7 +295,7 @@ export default function ProfileMain() {
             <TextInput
               style={styles.input}
               placeholder="Nombre completo"
-              placeholderTextColor="#aaa"
+              placeholderTextColor={colors.textMuted}
               value={name}
               onChangeText={setName}
             />
@@ -102,7 +304,7 @@ export default function ProfileMain() {
           <TextInput
             style={styles.input}
             placeholder="Correo electrónico"
-            placeholderTextColor="#aaa"
+            placeholderTextColor={colors.textMuted}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -113,13 +315,13 @@ export default function ProfileMain() {
             <TextInput
               style={[styles.input, { flex: 1 }]}
               placeholder="Contraseña"
-              placeholderTextColor="#aaa"
+              placeholderTextColor={colors.textMuted}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
             />
             <TouchableOpacity style={styles.eyeBtn} onPress={() => setShowPassword(v => !v)}>
-              <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="#888" />
+              <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.textMuted} />
             </TouchableOpacity>
           </View>
 
@@ -127,7 +329,7 @@ export default function ProfileMain() {
             <TextInput
               style={styles.input}
               placeholder="Confirmar contraseña"
-              placeholderTextColor="#aaa"
+              placeholderTextColor={colors.textMuted}
               value={confirm}
               onChangeText={setConfirm}
               secureTextEntry={!showPassword}
@@ -147,132 +349,3 @@ export default function ProfileMain() {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: '#f5f5f5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 28,
-    paddingVertical: 40,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#222',
-    marginTop: 12,
-  },
-  sub: {
-    fontSize: 14,
-    color: '#777',
-    marginTop: 6,
-  },
-  toggle: {
-    flexDirection: 'row',
-    marginTop: 24,
-    backgroundColor: '#e5e7eb',
-    borderRadius: 10,
-    padding: 4,
-  },
-  toggleBtn: {
-    paddingHorizontal: 28,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  toggleActive: {
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  toggleText: {
-    fontSize: 14,
-    color: '#888',
-    fontWeight: '600',
-  },
-  toggleTextActive: {
-    color: '#2563eb',
-  },
-  form: {
-    width: '100%',
-    marginTop: 24,
-    gap: 12,
-  },
-  input: {
-    height: 48,
-    borderWidth: 1.5,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    backgroundColor: '#fff',
-    fontSize: 15,
-    color: '#222',
-  },
-  passwordRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  eyeBtn: {
-    height: 48,
-    paddingHorizontal: 12,
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-    borderWidth: 1.5,
-    borderColor: '#ccc',
-    borderRadius: 10,
-  },
-  error: {
-    color: '#dc2626',
-    fontSize: 13,
-    textAlign: 'center',
-  },
-  actionBtn: {
-    height: 48,
-    backgroundColor: '#2563eb',
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 4,
-  },
-  actionText: {
-    color: '#fff',
-    fontWeight: '700',
-    fontSize: 16,
-  },
-  logoutBtn: {
-    marginTop: 24,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderWidth: 1.5,
-    borderColor: '#2563eb',
-    borderRadius: 10,
-  },
-  logoutText: {
-    color: '#2563eb',
-    fontWeight: '600',
-    fontSize: 15,
-  },
-  demoNav: {
-    marginTop: 24,
-    alignItems: 'center',
-    gap: 8,
-  },
-  demoNavTitle: {
-    fontSize: 12,
-    color: '#999',
-    fontWeight: '600',
-    textTransform: 'uppercase',
-  },
-  demoNavBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-  },
-  demoNavText: {
-    color: '#2563eb',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-});

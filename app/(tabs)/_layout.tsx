@@ -1,21 +1,24 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from '../../src/shared/context/ThemeContext';
 
 export const unstable_settings = {
   initialRouteName: 'search',
 };
 
 export default function TabsLayout() {
+  const { colors } = useTheme();
+
   return (
     <Tabs
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: '#2563eb',
-        tabBarInactiveTintColor: '#aaa',
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.tabInactive,
         tabBarStyle: {
-          backgroundColor: '#fff',
+          backgroundColor: colors.bgSecondary,
           borderTopWidth: 1,
-          borderTopColor: '#e5e7eb',
+          borderTopColor: colors.border,
           height: 60,
           paddingBottom: 8,
         },
@@ -30,7 +33,15 @@ export default function TabsLayout() {
       })}
     >
       <Tabs.Screen name="track" options={{ title: 'Rastrear' }} />
-      <Tabs.Screen name="search" options={{ title: 'Buscar', headerShown: true }} />
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: 'Buscar',
+          headerShown: true,
+          headerStyle: { backgroundColor: colors.bgSecondary },
+          headerTintColor: colors.text,
+        }}
+      />
       <Tabs.Screen name="profile" options={{ title: 'Perfil' }} />
     </Tabs>
   );
