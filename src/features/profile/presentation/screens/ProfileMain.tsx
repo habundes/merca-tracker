@@ -122,7 +122,7 @@ export default function ProfileMain() {
       fontSize: 16,
     },
     logoutBtn: {
-      marginTop: 8,
+      marginTop: 40,
       paddingHorizontal: 24,
       paddingVertical: 12,
       borderWidth: 1.5,
