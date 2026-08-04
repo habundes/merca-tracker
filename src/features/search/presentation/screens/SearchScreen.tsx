@@ -102,8 +102,7 @@ export default function SearchScreen() {
     setDuplicate(false);
     addSearch(trimmed);
     setUrl('');
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2500);
+    router.push('/track');
   };
 
   return (
