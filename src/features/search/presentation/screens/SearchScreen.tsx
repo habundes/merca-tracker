@@ -15,7 +15,7 @@ import { useTheme, ON_ACCENT } from '../../../../shared/context/ThemeContext';
 export default function SearchScreen() {
   const [url, setUrl] = useState('');
   const [duplicate, setDuplicate] = useState(false);
-  const [added, setAdded] = useState(false);
+
   const inputRef = useRef<TextInput>(null);
   const { addSearch, history } = useSearch();
   const { colors } = useTheme();
@@ -130,9 +130,7 @@ export default function SearchScreen() {
       </View>
       {duplicate
         ? <Text style={styles.duplicate}>URL ya agregada anteriormente</Text>
-        : added
-          ? <Text style={styles.added}>URL agregada al historial</Text>
-          : <Text style={styles.hint}>Las búsquedas se guardan en Lista</Text>
+        : <Text style={styles.hint}>Las búsquedas se guarda en Rastrear</Text>
       }
     </KeyboardAvoidingView>
   );
