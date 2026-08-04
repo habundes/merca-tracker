@@ -1,16 +1,16 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 
-export default function ListConfig() {
+export default function TrackConfig() {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Configurar lista</Text>
+      <Text style={styles.title}>Configurar rastreo</Text>
       <TouchableOpacity
         style={styles.button}
         onPress={() =>
-          router.push({ pathname: '/list/[itemId]', params: { itemId: 'demo-1' } })
+          router.push({ pathname: '/track/[itemId]', params: { itemId: 'demo-1' } })
         }
       >
         <Text style={styles.buttonText}>Ver detalle de ejemplo</Text>
