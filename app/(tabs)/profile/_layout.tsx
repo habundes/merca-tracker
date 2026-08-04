@@ -15,6 +15,7 @@ export default function PerfilLayout() {
       <Stack.Screen name="index" options={{ title: 'Perfil' }} />
       <Stack.Screen name="account" options={{ title: 'Ajustes de cuenta' }} />
       <Stack.Screen name="payment" options={{ title: 'Ajustes de pago' }} />
+      <Stack.Screen name="appearance" options={{ title: 'Apariencia' }} />
     </Stack>
   );
 }
