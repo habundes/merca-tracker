@@ -122,7 +122,7 @@ export default function ProfileMain() {
       fontSize: 16,
     },
     logoutBtn: {
-      marginTop: 24,
+      marginTop: 8,
       paddingHorizontal: 24,
       paddingVertical: 12,
       borderWidth: 1.5,
@@ -177,9 +177,6 @@ export default function ProfileMain() {
         <Ionicons name="person-circle-outline" size={72} color={colors.accent} />
         <Text style={styles.title}>{name || email}</Text>
         <Text style={styles.sub}>Sesión iniciada</Text>
-        <TouchableOpacity style={styles.logoutBtn} onPress={() => { setLoggedIn(false); reset(); }}>
-          <Text style={styles.logoutText}>Cerrar sesión</Text>
-        </TouchableOpacity>
 
         <View style={styles.configSection}>
           <Text style={styles.configSectionTitle}>Configuración</Text>
@@ -193,6 +190,10 @@ export default function ProfileMain() {
             <Text style={styles.configText}>Apariencia</Text>
           </TouchableOpacity>
         </View>
+
+        <TouchableOpacity style={styles.logoutBtn} onPress={() => { setLoggedIn(false); reset(); }}>
+          <Text style={styles.logoutText}>Cerrar sesión</Text>
+        </TouchableOpacity>
       </View>
     );
   }
