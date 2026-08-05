@@ -76,12 +76,6 @@ export default function SearchScreen() {
       fontSize: 13,
       fontWeight: '600',
     },
-    added: {
-      marginTop: 16,
-      color: colors.accent,
-      fontSize: 13,
-      fontWeight: '600',
-    },
   }), [colors]);
 
   useFocusEffect(
