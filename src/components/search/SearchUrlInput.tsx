@@ -3,11 +3,10 @@ import {
   Pressable,
   StyleSheet,
   TextInput,
-  View,
   type TextInputProps,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { GlassView } from '../../shared/components/glass';
+import { TextField } from '../../shared/components/adaptive';
 import { useTheme } from '../../shared/context/ThemeContext';
 
 export interface SearchUrlInputProps {
@@ -38,7 +37,7 @@ export const SearchUrlInput = forwardRef<TextInput, SearchUrlInputProps>(
     };
 
     return (
-      <GlassView
+      <TextField
         style={[
           styles.container,
           { borderColor: colors.border },
@@ -62,7 +61,7 @@ export const SearchUrlInput = forwardRef<TextInput, SearchUrlInputProps>(
             <Ionicons name="close-circle" size={20} color={colors.textMuted} />
           </Pressable>
         )}
-      </GlassView>
+      </TextField>
     );
   },
 );

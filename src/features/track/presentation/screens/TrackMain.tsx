@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSearch } from '../../../../shared/context/SearchContext';
 import { useTheme } from '../../../../shared/context/ThemeContext';
-import { GlassCard } from '../../../../shared/components/glass';
+import { Card } from '../../../../shared/components/adaptive';
 
 export default function TrackMain() {
   const router = useRouter();
@@ -140,11 +140,11 @@ export default function TrackMain() {
       {history.length === 0 ? (
         <View style={styles.empty}>
           {/* Demo temporal Liquid Glass — spec 01-liquid-glass-components */}
-          <GlassCard style={styles.emptyGlass}>
+          <Card style={styles.emptyGlass}>
             <Ionicons name="search-outline" size={48} color={colors.textMuted} />
             <Text style={styles.emptyText}>Sin rastreos aún</Text>
             <Text style={styles.emptySubText}>Las URLs rastreadas aparecerán aquí</Text>
-          </GlassCard>
+          </Card>
         </View>
       ) : (
         <FlatList
