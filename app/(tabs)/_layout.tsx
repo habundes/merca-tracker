@@ -29,10 +29,15 @@ export default function TabsLayout() {
     : isHydrated
       ? colors.accent
       : '#2563eb';
+  // Títulos un poco más grandes en Android (el default MD3 es ~12sp). En iOS se
+  // deja el tamaño nativo. El tamaño de ícono es fijo nativo y no es ajustable.
+  const labelStyle = isIOS ? undefined : { fontSize: 13 };
+
   return (
     <NativeTabs
       backgroundColor={backgroundColor}
       tintColor={tintColor}
+      labelStyle={labelStyle}
       // Sin píldora de indicador en Android (MD3): el color activo lo da tintColor.
       // Evita el lavanda del tema Material por defecto. Ignorado en iOS.
       disableIndicator
