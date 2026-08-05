@@ -32,7 +32,7 @@ export default function SearchScreen() {
           flex: 1,
           backgroundColor: colors.bg,
           paddingHorizontal: 20,
-          paddingTop: 16,
+          justifyContent: 'center',
         },
         feedbackSlot: {
           marginTop: 12,
