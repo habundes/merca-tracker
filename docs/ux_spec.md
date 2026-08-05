@@ -122,7 +122,7 @@ Notas:
 ### Navigation Flow After Successful Product Add
 
 ```
-User on Search tab (Tab 1)
+User on Search tab
     ↓
 Pastes URL → keyboard opens after 1s → taps Enter
     ↓
@@ -173,7 +173,7 @@ Dedicated screen for adding products. No product list here — only URL input, f
 ├──────────────────────────────────┤
 │ 📢 [AdMob Banner — free only]    │  ← Fixed bottom, above tab bar
 ├──────────────────────────────────┤
-│    🔍    │    📋    │    👤      │  ← Native tab bar (Liquid Glass)
+│    📋    │    🔍    │    👤     │  ← Native tab bar (Liquid Glass)
 └──────────────────────────────────┘
 
 Liquid Glass elements:
@@ -206,7 +206,7 @@ Liquid Glass elements:
 ├──────────────────────────────────┤
 │ 📢 [AdMob Banner — free only]    │  ← Fixed bottom, above nav bar
 ├──────────────────────────────────┤
-│    🔍    │    📋    │    👤      │  ← Material 3 Bottom Navigation
+│    📋    │    🔍    │    👤     │  ← Material 3 Bottom Navigation
 └──────────────────────────────────┘
 
 Material 3 elements:
