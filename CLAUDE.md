@@ -1,12 +1,8 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Critical constraint
 
 Expo SDK is pinned to **57**. The API has changed vs older versions. Before writing native/Expo code, consult the exact versioned docs: https://docs.expo.dev/versions/v57.0.0/. Do not rely on training knowledge for Expo APIs — verify against the installed version.
 
-Related pins to respect when adding code: React 19.2, React Native 0.86, TypeScript 6, React Navigation 7.
+Related pins to respect when adding code: React 19.2, React Native 0.86, TypeScript 6, Expo Router.
 
 ## Architecture
 
