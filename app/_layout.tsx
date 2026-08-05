@@ -1,14 +1,26 @@
-import { Stack } from 'expo-router';
+import { Stack, ThemeProvider as NavigationThemeProvider, DarkTheme, DefaultTheme } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SearchProvider } from '@/shared/context/SearchContext';
-import { ThemeProvider } from '@/shared/context/ThemeContext';
+import { ThemeProvider, useTheme } from '@/shared/context/ThemeContext';
+
+function RootNavigator() {
+  const { effectiveScheme } = useTheme();
+  const isDark = effectiveScheme === 'dark';
+  return (
+    // El ThemeProvider de navegación mantiene la chrome nativa (tab bar, headers)
+    // consistente con el modo de la app y evita el parpadeo al cambiar de tab.
+    <NavigationThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <Stack screenOptions={{ headerShown: false }} />
+    </NavigationThemeProvider>
+  );
+}
 
 export default function RootLayout() {
   return (
     <ThemeProvider>
       <SearchProvider>
-        <StatusBar style="auto" />
-        <Stack screenOptions={{ headerShown: false }} />
+        <RootNavigator />
       </SearchProvider>
     </ThemeProvider>
   );

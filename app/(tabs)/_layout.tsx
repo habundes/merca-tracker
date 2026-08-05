@@ -1,6 +1,6 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
-import { Platform } from 'react-native';
-import { useTheme } from '@/shared/context/ThemeContext';
+import { Platform, DynamicColorIOS } from 'react-native';
+import { useTheme, lightColors, darkColors } from '@/shared/context/ThemeContext';
 
 // Ruta ancla del navegador de tabs. El landing real lo maneja app/index.tsx
 // con un <Redirect href="/search" />.
@@ -8,23 +8,27 @@ export const unstable_settings = {
   anchor: 'search',
 };
 
-const isAndroid = Platform.OS === 'android';
+const isIOS = Platform.OS === 'ios';
 
 export default function TabsLayout() {
   const { colors, isHydrated } = useTheme();
 
   // NativeTabs renderiza la barra nativa: Material 3 en Android (con su pill
-  // indicator nativo) y Liquid Glass en iOS 26+. Coloreamos según el tema de
-  // la app para respetar el modo forzado (light/dark) aunque no coincida con
-  // el del sistema. Fallbacks pre-hidratación evitan el flash de color.
-  const backgroundColor = isHydrated
-    ? isAndroid
+  // indicator nativo) y Liquid Glass en iOS 26+.
+  // En iOS usamos DynamicColorIOS para que la barra se resuelva a nivel nativo
+  // contra el trait de apariencia (que ThemeContext fuerza al modo de la app),
+  // evitando el parpadeo a claro al cambiar de tab en modo oscuro.
+  // En Android coloreamos con el tema (con fallback pre-hidratación).
+  const backgroundColor = isIOS
+    ? DynamicColorIOS({ light: lightColors.bgSecondary, dark: darkColors.bgSecondary })
+    : isHydrated
       ? colors.surface
-      : colors.bgSecondary
-    : isAndroid
-      ? '#fef7ff'
-      : '#f9fafb';
-  const tintColor = isHydrated ? colors.accent : '#2563eb';
+      : '#fef7ff';
+  const tintColor = isIOS
+    ? DynamicColorIOS({ light: lightColors.accent, dark: darkColors.accent })
+    : isHydrated
+      ? colors.accent
+      : '#2563eb';
   const indicatorColor = isHydrated ? colors.primaryContainer : '#eaddff';
 
   return (

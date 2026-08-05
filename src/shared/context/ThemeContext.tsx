@@ -101,6 +101,19 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.remove();
   }, [mode]);
 
+  // Fuerza la apariencia nativa (trait de iOS/Android) al modo elegido en la app.
+  // Sin esto, la chrome nativa —la barra de NativeTabs y los colores DynamicColorIOS—
+  // resuelve contra el esquema del sistema y parpadea a claro al cambiar de tab en
+  // modo oscuro. Con `null` (modo 'system') vuelve a seguir al sistema.
+  useEffect(() => {
+    // `null` resetea al esquema del sistema; el tipo de RN 0.86 no lo incluye
+    // pese a soportarlo en runtime, de ahí el cast al tipo del parámetro.
+    const scheme = (mode === 'system' ? null : mode) as Parameters<
+      typeof Appearance.setColorScheme
+    >[0];
+    Appearance.setColorScheme(scheme);
+  }, [mode]);
+
   const setMode = (newMode: ThemeMode) => {
     setModeState(newMode);
     AsyncStorage.setItem(STORAGE_KEY, newMode);
