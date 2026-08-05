@@ -1,1 +1,1 @@
-export { default } from '../../../src/features/track/presentation/screens/TrackMain';
+export { default } from '@/features/track/presentation/screens/TrackMain';

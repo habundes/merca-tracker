@@ -1,10 +1,9 @@
 import { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
-import { useTheme, ON_ACCENT } from '../../../../shared/context/ThemeContext';
+import { Link } from 'expo-router';
+import { useTheme, ON_ACCENT } from '@/shared/context/ThemeContext';
 
 export default function TrackConfig() {
-  const router = useRouter();
   const { colors } = useTheme();
 
   const styles = useMemo(() => StyleSheet.create({
@@ -35,14 +34,14 @@ export default function TrackConfig() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Configurar rastreo</Text>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() =>
-          router.push({ pathname: '/track/[itemId]', params: { itemId: 'demo-1' } })
-        }
+      <Link
+        href={{ pathname: '/track/[itemId]', params: { itemId: encodeURIComponent('demo-1') } }}
+        asChild
       >
-        <Text style={styles.buttonText}>Ver detalle de ejemplo</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Ver detalle de ejemplo</Text>
+        </TouchableOpacity>
+      </Link>
     </View>
   );
 }

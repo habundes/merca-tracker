@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useTheme, ThemeMode } from '../../../../shared/context/ThemeContext';
+import { useTheme, ThemeMode } from '@/shared/context/ThemeContext';
 
 const THEME_OPTIONS: { label: string; value: ThemeMode }[] = [
   { label: 'Sistema', value: 'system' },

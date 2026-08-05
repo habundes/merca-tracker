@@ -1,7 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { SearchProvider } from '../src/shared/context/SearchContext';
-import { ThemeProvider } from '../src/shared/context/ThemeContext';
+import { SearchProvider } from '@/shared/context/SearchContext';
+import { ThemeProvider } from '@/shared/context/ThemeContext';
 
 export default function RootLayout() {
   return (

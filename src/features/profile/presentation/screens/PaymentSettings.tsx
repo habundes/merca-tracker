@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useTheme } from '../../../../shared/context/ThemeContext';
+import { useTheme } from '@/shared/context/ThemeContext';
 
 export default function PaymentSettings() {
   const { colors } = useTheme();

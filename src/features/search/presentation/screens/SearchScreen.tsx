@@ -7,8 +7,8 @@ import {
   Platform,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { useSearch } from '../../../../shared/context/SearchContext';
-import { useTheme } from '../../../../shared/context/ThemeContext';
+import { useSearch } from '@/shared/context/SearchContext';
+import { useTheme } from '@/shared/context/ThemeContext';
 import {
   SearchFeedback,
   SearchHelp,
