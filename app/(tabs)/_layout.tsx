@@ -11,7 +11,7 @@ export const unstable_settings = {
 const isIOS = Platform.OS === 'ios';
 
 export default function TabsLayout() {
-  const { colors, isHydrated, effectiveScheme } = useTheme();
+  const { colors, isHydrated } = useTheme();
 
   // NativeTabs renderiza la barra nativa: Material 3 en Android (con su pill
   // indicator nativo) y Liquid Glass en iOS 26+.
@@ -29,15 +29,13 @@ export default function TabsLayout() {
     : isHydrated
       ? colors.accent
       : '#2563eb';
-  // Píldora del indicador activo (Android MD3): gris neutro (no el lavanda de
-  // primaryContainer/surfaceVariant) para no chocar con el acento azul de la app.
-  const indicatorColor = effectiveScheme === 'dark' ? '#3c3c41' : '#d9d9de';
-
   return (
     <NativeTabs
       backgroundColor={backgroundColor}
       tintColor={tintColor}
-      indicatorColor={indicatorColor}
+      // Sin píldora de indicador en Android (MD3): el color activo lo da tintColor.
+      // Evita el lavanda del tema Material por defecto. Ignorado en iOS.
+      disableIndicator
     >
       <NativeTabs.Trigger name="track">
         <NativeTabs.Trigger.Icon sf={{ default: 'list.bullet', selected: 'list.bullet' }} md="list" />
