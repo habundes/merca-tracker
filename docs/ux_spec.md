@@ -1,9 +1,9 @@
 # Mercadolibre Price Tracker — UX Specification
 
-**Project:** Mobile app (iOS & Android) — Fast & Intuitive UI  
-**Goal:** Users prefer the app over Mercadolibre's own app/website for price monitoring  
-**Key Differentiator:** Everything visible at a glance — no tedious navigation  
-**Last Updated:** May 29, 2026  
+**Project:** Mobile app (iOS & Android) — Fast & Intuitive UI
+**Goal:** Users prefer the app over Mercadolibre's own app/website for price monitoring
+**Key Differentiator:** Everything visible at a glance — no tedious navigation
+**Last Updated:** May 29, 2026
 
 ---
 
@@ -52,64 +52,73 @@
 
 ## Navigation Structure
 
-### Bottom Tab Navigation — Native Tabs
+### Bottom Tab Navigation
 
-3 tabs, icons only (no text labels), first screen on launch is **Search**.
+3 tabs con **icono + label**, primer screen al abrir es **Buscar** (`initialRouteName: 'search'`).
+Implementado con el `<Tabs>` JS de Expo Router (react-navigation bottom-tabs), no con tabs nativos.
 
 ```
-iOS (UITabBarController — native):        Android (Bottom Navigation — Material 3):
-┌─────────────────────────────────┐       ┌─────────────────────────────────┐
-│                                 │       │                                 │
-│         [Screen Content]        │       │         [Screen Content]        │
-│                                 │       │                                 │
-├─────────────────────────────────┤       ├─────────────────────────────────┤
-│   🔍      │    📋     │    👤   │       │   🔍      │    📋     │    👤   │
-└─────────────────────────────────┘       └─────────────────────────────────┘
-  Search        Tracklist    Profile        Search        Tracklist    Profile
- (launch)
-
-iOS Tab Icons (SF Symbols):
-  🔍 Search    → magnifyingglass
-  📋 Tracklist → list.bullet
-  👤 Profile   → person.circle
-
-Android Tab Icons (Material Symbols):
-  🔍 Search    → search
-  📋 Tracklist → format_list_bulleted
-  👤 Profile   → account_circle
-
-iOS active tab:    filled icon + system tint color
-Android active tab: filled icon + primary color with indicator pill (MD3)
+iOS y Android (mismo orden y layout):
+┌─────────────────────────────────┐
+│                                 │
+│         [Screen Content]        │
+│                                 │
+├─────────────────────────────────┤
+│   📋     │    🔍     │    👤   │
+│ Rastrear   Buscar     Perfil    │
+└─────────────────────────────────┘
+   track      search    profile
 ```
+
+Iconos (Ionicons, cross-platform — no SF Symbols ni Material Symbols nativos):
+
+| Tab | activo (filled) | inactivo (outline) |
+|-----|-----------------|--------------------|
+| Rastrear (`track`)  | `list`   | `list-outline`   |
+| Buscar (`search`)   | `search` | `search-outline` |
+| Perfil (`profile`)  | `person` | `person-outline` |
+
+Estado activo: **icono filled + tint** (`colors.accent`, del tema). Sin indicator pill.
+
+Tab bar por plataforma:
+  - **iOS:** fondo translúcido vía `GlassView` (Liquid Glass en iOS 26; cae a vista plana en iOS<26).
+    No es el `UITabBarController` nativo — aproximación con el sistema Glass del proyecto.
+  - **Android / Web:** barra opaca (`backgroundColor: colors.bgSecondary` + borde superior).
+    No es `NavigationBar` MD3 nativo; sin indicator pill.
 
 ### App Structure
 
-```
-App Root (Native Bottom Tabs)
-│
-├── Tab 1: 🔍 Search (launch screen)
-│   └── Search Screen
-│       ├── URL input
-│       ├── Feedback messages (below input)
-│       ├── Hint text ("Cómo obtener la URL")
-│       └── Ad banner fixed bottom (free tier only)
-│
-├── Tab 2: 📋 Tracklist
-│   └── Tracklist Screen
-│       ├── Status bar (X/5 · X/2 🔄)
-│       ├── Product cards stack (newest on top)
-│       │   ├── Card (collapsed)
-│       │   └── Card (expanded)
-│       └── Ad banner fixed bottom (free tier only)
-│
-└── Tab 3: 👤 Profile
-    └── Account Screen
-        ├── Subscription status
-        ├── Manage subscription (Stripe portal)
-        └── Notification settings
+Refleja la estructura real en `app/` (Expo Router, file-based). Nombres de ruta ≡ carpetas.
 
-Configure Mode Screen → Modal/push from Tracklist (not a tab)
 ```
+app/
+├── _layout.tsx                 ← Root: ThemeProvider > SearchProvider > StatusBar + <Stack headerShown:false>
+├── index.tsx                   ← Redirect → /search
+└── (tabs)/
+    ├── _layout.tsx             ← <Tabs> Ionicons, initialRouteName: 'search'
+    │
+    ├── track/                  ← Tab 1: 📋 "Rastrear"  (list-outline)
+    │   ├── _layout.tsx         ← <Stack> con headers temáticos
+    │   ├── index.tsx           ← "Mis rastreos" (stack de cards)
+    │   ├── config.tsx          ← "Configurar rastreo"
+    │   └── [itemId].tsx        ← "Detalle" (ruta dinámica)
+    │
+    ├── search.tsx              ← Tab 2: 🔍 "Buscar" (search-outline) — pantalla inicial
+    │
+    └── profile/                ← Tab 3: 👤 "Perfil" (person-outline)
+        ├── _layout.tsx         ← <Stack> con headers temáticos
+        ├── index.tsx           ← "Perfil"
+        ├── account.tsx         ← "Ajustes de cuenta"
+        ├── payment.tsx         ← "Ajustes de pago"
+        └── appearance.tsx      ← "Apariencia" (theme mode: light/dark/system)
+```
+
+Notas:
+- `initialRouteName: 'search'` en `(tabs)/_layout.tsx` → **Search** es la pantalla al abrir.
+- `app/index.tsx` redirige a `/search` para arranques que caen en la raíz.
+- Cada `.tsx` de pantalla re-exporta el screen desde `src/features/{track,search,profile}/presentation/screens/`.
+- Configurar rastreo es una ruta dentro del stack de `track/` (no modal ni tab).
+- Providers en root: `ThemeProvider` (mode + colors, persist AsyncStorage), `SearchProvider` (historial de URLs en memoria).
 
 ### Navigation Flow After Successful Product Add
 
@@ -350,7 +359,7 @@ iOS (collapsed):
 
 Price change indicator variants:
   $749  📉 -$150  (dropped — green price, red badge)
-  $949  📈 +$200  (increased — red price, orange badge)  
+  $949  📈 +$200  (increased — red price, orange badge)
   $899  ➡️        (no change — gray)
   $899  ⏸ pausado  (wish price triggered — yellow)
   $899  ⚠️ no disp. (unavailable — gray strikethrough)
@@ -400,9 +409,9 @@ Wish price paused state:
   Historial de checks:
   ● May 30  $745  🎯
   ● ...
-  
+
   Modo: Wish Price (alcanzado)
-  
+
   [Nuevo precio deseado]  [Eliminar]
 ```
 
@@ -533,7 +542,7 @@ iOS:
 │   Slots disponibles: 1/2     │
 │   [Activar Intervalo]        │
 │                              │
-│ ○ Precio Deseado             │  ← mutually exclusive  
+│ ○ Precio Deseado             │  ← mutually exclusive
 │   Target: [$_______]         │
 │   Cada: [24hrs] (fijo free)  │
 │   Slots disponibles: 1/2     │
@@ -1404,7 +1413,7 @@ Onboarding complete — tooltips never shown again
 
 ---
 
-**Document version:** 1.0  
-**Last updated:** May 29, 2026  
-**Status:** Ready for implementation  
+**Document version:** 1.0
+**Last updated:** May 29, 2026
+**Status:** Ready for implementation
 **Related:** mercadolibre_tracker_simplified.md (main spec)
