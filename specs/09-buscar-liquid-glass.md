@@ -18,8 +18,9 @@
 - `SearchUrlInput`: input glass (icono 🔗 + `TextInput` + botón ✕ para limpiar, visible solo con texto). Placeholder "🔗 Pega URL de Mercadolibre".
 - `SearchFeedback`: pill glass (cápsula) debajo del input, con icono + color por `type` (`error` | `warning` | `loading` | `success` | `hint`). En este spec solo se renderizan `warning` (URL duplicada) y `hint` (mensaje por defecto); los demás tipos quedan soportados en la API para el spec futuro de la máquina de estados.
 - `SearchHelp`: divider + bloque "💡 Cómo obtener la URL" con el texto del ux_spec.
-- Reescribir el markup de `SearchScreen.tsx`: título grande "Buscar Producto", contenido alineado arriba (large-title iOS), componiendo los 3 componentes nuevos. Se conserva intacta la lógica existente (`handleSearch`, autofocus, providers).
+- Reescribir el markup de `SearchScreen.tsx`, componiendo los 3 componentes nuevos. Se conserva intacta la lógica existente (`handleSearch`, autofocus, providers).
 - Fallback correcto en Android / iOS <26: `GlassView` cae a `View` plano (`bgSecondary` + borde `border`), legible en light y dark.
+- **Header nativo "Buscar" uniforme con `track/` y `profile/`.** Convertir `app/(tabs)/search.tsx` a un stack (`app/(tabs)/search/_layout.tsx` + `app/(tabs)/search/index.tsx`) con `<Stack.Screen options={{title:'Buscar'}}/>`, replicando el patrón de `track/_layout.tsx`. Eliminar el título grande interno "Buscar Producto" del screen para no duplicar con el header nativo.
 
 **No incluye (queda para otro spec):**
 - Integración Decodo, validación de formato/dominio de URL (solo Mercadolibre México), y la máquina de estados completa: loading (`Verificando producto...`), no disponible, lista llena (5/5), success con auto-navegación.
@@ -62,18 +63,25 @@ Branch: `spec-09-buscar-liquid-glass`. Cada paso deja `npx tsc --noEmit` verde.
 2. **`SearchFeedback`.** Crear `src/components/search/SearchFeedback.tsx`. Compone `GlassView` como cápsula (`borderRadius: 999`, padding H 14 / V 8, row, gap 6). Mapa local `type → { icon, color }`: `error`/`warning` → `colors.danger` (warning documentado como `#FF9500` en ux_spec, se usa naranja local), `success` → `#34C759`, `loading`/`hint` → `colors.textMuted`. Renderiza icono + `Text` con el `message`.
 3. **`SearchHelp`.** Crear `src/components/search/SearchHelp.tsx`. Divider (`borderTopWidth: StyleSheet.hairlineWidth`, `colors.border`) + título "💡 Cómo obtener la URL:" + cuerpo "Abre Mercadolibre → encuentra un producto → copia la URL desde el navegador o app". Texto `colors.textMuted`.
 4. **Barrel export.** `src/components/search/index.ts` reexporta los 3 componentes y sus tipos.
-5. **Reescribir `SearchScreen.tsx`.** Conservar imports y toda la lógica (`useSearch`, `useTheme`, `useRouter`, `useFocusEffect` con autofocus 100 ms, `handleSearch` completo). Reemplazar el markup por: `KeyboardAvoidingView` (contenido alineado arriba, `paddingTop` para large title) > `Text` título "Buscar Producto" (28–34 px, weight 700, `colors.text`) > `<SearchUrlInput …>` > `<SearchFeedback type={duplicate ? 'warning' : 'hint'} message={…} />` > `<SearchHelp />`. Eliminar el botón sólido "Ir" (el submit ocurre por teclado y el ✕ limpia).
+5. **Reescribir `SearchScreen.tsx`.** Conservar imports y toda la lógica (`useSearch`, `useTheme`, `useRouter`, `useFocusEffect` con autofocus 100 ms, `handleSearch` completo). Reemplazar el markup por: `KeyboardAvoidingView` (`paddingTop` para respirar bajo el header) > `<SearchUrlInput …>` > `<SearchFeedback type={duplicate ? 'warning' : 'hint'} message={…} />` > `<SearchHelp />`. Eliminar el botón sólido "Ir" (el submit ocurre por teclado y el ✕ limpia). Eliminar el `<Text>` título "Buscar Producto" — ahora lo aporta el header nativo del stack (Paso 7).
 6. **Verificación final.** `npx tsc --noEmit` sin errores; verificación manual en iOS 26+ y fallback en Android/iOS<26 (ver sección de verificación).
+7. **Header nativo Buscar.** Convertir `app/(tabs)/search.tsx` a un stack:
+   - Crear `app/(tabs)/search/_layout.tsx` clonando el patrón de `app/(tabs)/track/_layout.tsx`: `<Stack>` con `headerStyle`, `headerTintColor`, `contentStyle` desde `useTheme()`, y `<Stack.Screen name="index" options={{ title: 'Buscar' }} />`.
+   - Crear `app/(tabs)/search/index.tsx` que re-exporte `SearchScreen` (idéntico al `search.tsx` actual).
+   - Borrar `app/(tabs)/search.tsx`.
+   - `unstable_settings.initialRouteName: 'search'` en `app/(tabs)/_layout.tsx` sigue funcionando (Expo Router resuelve `search` como carpeta o archivo indistintamente).
 
 ## Acceptance criteria
 
-- [ ] Existen `src/components/search/SearchUrlInput.tsx`, `SearchFeedback.tsx`, `SearchHelp.tsx` e `index.ts`.
-- [ ] `SearchScreen.tsx` usa los 3 componentes nuevos; ya no hay `TextInput` plano ni botón "Ir" inline.
-- [ ] La lógica se conserva: URL nueva → `addSearch` + `router.push('/track')`; URL duplicada → pill `warning`; ✕ limpia el input.
-- [ ] `npx tsc --noEmit` pasa sin errores nuevos.
+- [x] Existen `src/components/search/SearchUrlInput.tsx`, `SearchFeedback.tsx`, `SearchHelp.tsx` e `index.ts`.
+- [x] `SearchScreen.tsx` usa los 3 componentes nuevos; ya no hay `TextInput` plano ni botón "Ir" inline.
+- [x] La lógica se conserva: URL nueva → `addSearch` + `router.push('/track')`; URL duplicada → pill `warning`; ✕ limpia el input.
+- [x] `npx tsc --noEmit` pasa sin errores nuevos.
 - [ ] En iOS 26+, input y pill de feedback muestran material Liquid Glass real (no placeholder).
 - [ ] En Android / iOS <26, el input cae a `View` plano (`bgSecondary` + borde `border`) legible en light y dark, siguiendo `effectiveScheme` al alternar tema.
-- [ ] El bloque "💡 Cómo obtener la URL" es visible bajo el feedback.
+- [x] El bloque "💡 Cómo obtener la URL" es visible bajo el feedback.
+- [ ] La tab Buscar muestra un header nativo con el título "Buscar", uniforme con Rastrear ("Mis rastreos") y Perfil. El large-title interno del screen ya no existe.
+- [ ] `app/(tabs)/search/` es una carpeta con `_layout.tsx` (Stack) e `index.tsx` (re-export de `SearchScreen`); `app/(tabs)/search.tsx` fue eliminado.
 
 ## Decisiones tomadas y descartadas
 
@@ -83,6 +91,7 @@ Branch: `spec-09-buscar-liquid-glass`. Cada paso deja `npx tsc --noEmit` verde.
 - **Quitar el botón "Ir" (vs conservarlo):** el mock iOS del ux_spec no muestra botón; el submit va por teclado (`returnKeyType`/`onSubmitEditing`) y el ✕ limpia. Descartado conservarlo para un look glass más limpio.
 - **Constantes de color locales para success/warning (vs tokens de tema):** `ThemeContext` no tiene verde ni naranja; se usan valores locales del ux_spec para no ampliar el tema en un spec visual acotado.
 - **`borderWidth` explícito en el `style` del input:** el fallback de `GlassView` no aplica `borderWidth` por sí solo, así que se pasa en `style` para que el borde se vea en glass y en fallback.
+- **Header nativo del stack (vs large-title interno del screen):** durante la verificación manual se observó que Buscar carecía del header que sí muestran Rastrear y Perfil. Se decidió uniformar convirtiendo `search.tsx` a stack (`search/{_layout,index}.tsx`) y eliminar el `<Text>` "Buscar Producto" interno para no duplicar título. Se agregó como Paso 7 al plan original.
 
 ## Verificación end-to-end
 

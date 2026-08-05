@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback, useMemo } from 'react';
 import {
   StyleSheet,
-  Text,
   TextInput,
   View,
   KeyboardAvoidingView,
@@ -33,13 +32,7 @@ export default function SearchScreen() {
           flex: 1,
           backgroundColor: colors.bg,
           paddingHorizontal: 20,
-          paddingTop: 24,
-        },
-        title: {
-          fontSize: 32,
-          fontWeight: '700',
-          color: colors.text,
-          marginBottom: 20,
+          paddingTop: 16,
         },
         feedbackSlot: {
           marginTop: 12,
@@ -83,8 +76,6 @@ export default function SearchScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Text style={styles.title}>Buscar Producto</Text>
-
       <SearchUrlInput
         ref={inputRef}
         value={url}
