@@ -96,7 +96,7 @@ export default function SearchScreen() {
     setDuplicate(false);
     addSearch(trimmed);
     setUrl('');
-    router.push('/track');
+    router.push('/(tabs)/track');
   };
 
   return (
