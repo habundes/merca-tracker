@@ -20,7 +20,7 @@ Single-package Expo app using **Expo Router** (file-based routing, spec-03). Ent
 - `src/` — Feature logic.
   - `shared/context/` — React Context providers. `SearchContext` holds in-memory URL search history (`useSearch()`). `ThemeContext` provides `mode` (`light`/`dark`/`system`), `setMode`, resolved `colors`, and `isHydrated`; mode persisted via AsyncStorage (spec-05).
   - `features/{track,search,profile,list}/presentation/screens/` — screens use `router.push()` and `useLocalSearchParams<{param: type}>()`.
-  - `components/glass/` — Liquid Glass system (iOS 26+, spec-01). `GlassView` base wrapper checks `isLiquidGlassAvailable()` from `expo-glass-effect`, falls through to plain `<View>` on Android/Web/iOS<26. `GlassCard`, `GlassButton`, `GlassHeader` compose `GlassView`; passes explicit `colorScheme` to the native material. Never import `expo-glass-effect` directly in screens.
+  - `shared/components/glass/` — Liquid Glass system (iOS 26+, spec-01). `GlassView` base wrapper checks `isLiquidGlassAvailable()` from `expo-glass-effect`, falls through to plain `<View>` on Android/Web/iOS<26. `GlassCard`, `GlassButton`, `GlassHeader` compose `GlassView`; passes explicit `colorScheme` to the native material. Never import `expo-glass-effect` directly in screens.
 
 **Router usage:**
 - Push with typed params: `router.push({ pathname: '/track/[itemId]', params: { itemId: item } })`.
