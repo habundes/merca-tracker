@@ -15,6 +15,13 @@ export type ThemeColors = {
   accent: string;
   danger: string;
   tabInactive: string;
+  // Tokens MD3 (aditivos, Android). No afectan glass/iOS.
+  surface: string;
+  surfaceVariant: string;
+  outline: string;
+  primaryContainer: string;
+  onPrimaryContainer: string;
+  elevationTint: string;
 };
 
 export type ThemeContextValue = {
@@ -35,6 +42,12 @@ export const lightColors: ThemeColors = {
   accent: '#2563eb',
   danger: '#dc2626',
   tabInactive: '#aaaaaa',
+  surface: '#fef7ff',
+  surfaceVariant: '#e7e0ec',
+  outline: '#79747e',
+  primaryContainer: '#eaddff',
+  onPrimaryContainer: '#21005d',
+  elevationTint: '#6750a4',
 };
 
 export const darkColors: ThemeColors = {
@@ -47,6 +60,12 @@ export const darkColors: ThemeColors = {
   accent: '#0a84ff',
   danger: '#ff453a',
   tabInactive: '#8e8e93',
+  surface: '#1c1b1f',
+  surfaceVariant: '#49454f',
+  outline: '#938f99',
+  primaryContainer: '#4f378b',
+  onPrimaryContainer: '#eaddff',
+  elevationTint: '#d0bcff',
 };
 
 export const ON_ACCENT = '#ffffff';
