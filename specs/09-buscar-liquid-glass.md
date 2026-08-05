@@ -2,7 +2,7 @@
 
 ## Header
 
-- **Estado:** Aprobado
+- **Estado:** Implementado
 - **Dependencias:** spec 01 (sistema `GlassView`/`GlassCard`/`GlassButton`/`GlassHeader`), spec 05 (tema `useTheme()`), spec 08 (navegación a Rastrear tras búsqueda).
 - **Fecha:** 2026-08-05
 - **Objetivo (una frase):** Rediseñar **solo la capa visual** de la pantalla Buscar en iOS aplicando el material Liquid Glass del spec 01 (input glass, botón ✕, pill de feedback y bloque "Cómo obtener la URL"), sin tocar la lógica de búsqueda ni introducir Decodo/validación.
@@ -78,10 +78,10 @@ Branch: `spec-09-buscar-liquid-glass`. Cada paso deja `npx tsc --noEmit` verde.
 - [x] La lógica se conserva: URL nueva → `addSearch` + `router.push('/track')`; URL duplicada → pill `warning`; ✕ limpia el input.
 - [x] `npx tsc --noEmit` pasa sin errores nuevos.
 - [ ] En iOS 26+, input y pill de feedback muestran material Liquid Glass real (no placeholder).
-- [ ] En Android / iOS <26, el input cae a `View` plano (`bgSecondary` + borde `border`) legible en light y dark, siguiendo `effectiveScheme` al alternar tema.
+- [x] En Android / iOS <26, el input cae a `View` plano (`bgSecondary` + borde `border`) legible en light y dark, siguiendo `effectiveScheme` al alternar tema.
 - [x] El bloque "💡 Cómo obtener la URL" es visible bajo el feedback.
-- [ ] La tab Buscar muestra un header nativo con el título "Buscar", uniforme con Rastrear ("Mis rastreos") y Perfil. El large-title interno del screen ya no existe.
-- [ ] `app/(tabs)/search/` es una carpeta con `_layout.tsx` (Stack) e `index.tsx` (re-export de `SearchScreen`); `app/(tabs)/search.tsx` fue eliminado.
+- [x] La tab Buscar muestra un header nativo con el título "Buscar", uniforme con Rastrear ("Mis rastreos") y Perfil. El large-title interno del screen ya no existe.
+- [x] `app/(tabs)/search/` es una carpeta con `_layout.tsx` (Stack) e `index.tsx` (re-export de `SearchScreen`); `app/(tabs)/search.tsx` fue eliminado.
 
 ## Decisiones tomadas y descartadas
 
