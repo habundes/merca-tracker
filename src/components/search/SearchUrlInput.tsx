@@ -56,6 +56,7 @@ export const SearchUrlInput = forwardRef<TextInput, SearchUrlInputProps>(
             hitSlop={8}
             accessibilityRole="button"
             accessibilityLabel="Limpiar URL"
+            android_ripple={{ color: colors.outline, borderless: true, radius: 18 }}
             style={({ pressed }) => [styles.clearBtn, pressed && { opacity: 0.5 }]}
           >
             <Ionicons name="close-circle" size={20} color={colors.textMuted} />

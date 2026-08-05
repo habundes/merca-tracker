@@ -4,6 +4,7 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
+  Pressable,
   StyleSheet,
   Alert,
 } from 'react-native';
@@ -65,6 +66,7 @@ export default function TrackMain() {
       borderWidth: 1,
       borderColor: colors.border,
       gap: 12,
+      overflow: 'hidden',
     },
     indexBadge: {
       width: 28,
@@ -152,8 +154,9 @@ export default function TrackMain() {
           keyExtractor={(item, index) => `${item}-${index}`}
           contentContainerStyle={styles.list}
           renderItem={({ item, index }) => (
-            <TouchableOpacity
+            <Pressable
               style={styles.item}
+              android_ripple={{ color: colors.outline }}
               onPress={() =>
                 router.push({ pathname: '/track/[itemId]', params: { itemId: item } })
               }
@@ -165,7 +168,7 @@ export default function TrackMain() {
                 <Text style={styles.itemUrl} numberOfLines={1}>{item}</Text>
               </View>
               <Ionicons name="open-outline" size={16} color={colors.tabInactive} />
-            </TouchableOpacity>
+            </Pressable>
           )}
         />
       )}
