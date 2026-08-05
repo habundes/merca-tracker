@@ -8,17 +8,18 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useSearch } from '../../../../shared/context/SearchContext';
 import { useTheme, ON_ACCENT } from '../../../../shared/context/ThemeContext';
 
 export default function SearchScreen() {
   const [url, setUrl] = useState('');
   const [duplicate, setDuplicate] = useState(false);
-  const [added, setAdded] = useState(false);
+
   const inputRef = useRef<TextInput>(null);
   const { addSearch, history } = useSearch();
   const { colors } = useTheme();
+  const router = useRouter();
 
   const styles = useMemo(() => StyleSheet.create({
     container: {
@@ -75,12 +76,6 @@ export default function SearchScreen() {
       fontSize: 13,
       fontWeight: '600',
     },
-    added: {
-      marginTop: 16,
-      color: colors.accent,
-      fontSize: 13,
-      fontWeight: '600',
-    },
   }), [colors]);
 
   useFocusEffect(
@@ -101,8 +96,7 @@ export default function SearchScreen() {
     setDuplicate(false);
     addSearch(trimmed);
     setUrl('');
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2500);
+    router.push('/track');
   };
 
   return (
@@ -130,9 +124,7 @@ export default function SearchScreen() {
       </View>
       {duplicate
         ? <Text style={styles.duplicate}>URL ya agregada anteriormente</Text>
-        : added
-          ? <Text style={styles.added}>URL agregada al historial</Text>
-          : <Text style={styles.hint}>Las búsquedas se guardan en Lista</Text>
+        : <Text style={styles.hint}>Las búsquedas se guarda en Rastrear</Text>
       }
     </KeyboardAvoidingView>
   );
