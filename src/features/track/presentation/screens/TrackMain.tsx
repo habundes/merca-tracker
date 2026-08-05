@@ -4,6 +4,7 @@ import {
   Text,
   FlatList,
   TouchableOpacity,
+  Pressable,
   StyleSheet,
   Alert,
 } from 'react-native';
@@ -11,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSearch } from '../../../../shared/context/SearchContext';
 import { useTheme } from '../../../../shared/context/ThemeContext';
-import { GlassCard } from '../../../../shared/components/glass';
+import { Card } from '../../../../shared/components/adaptive';
 
 export default function TrackMain() {
   const router = useRouter();
@@ -65,6 +66,7 @@ export default function TrackMain() {
       borderWidth: 1,
       borderColor: colors.border,
       gap: 12,
+      overflow: 'hidden',
     },
     indexBadge: {
       width: 28,
@@ -140,11 +142,11 @@ export default function TrackMain() {
       {history.length === 0 ? (
         <View style={styles.empty}>
           {/* Demo temporal Liquid Glass — spec 01-liquid-glass-components */}
-          <GlassCard style={styles.emptyGlass}>
+          <Card style={styles.emptyGlass}>
             <Ionicons name="search-outline" size={48} color={colors.textMuted} />
             <Text style={styles.emptyText}>Sin rastreos aún</Text>
             <Text style={styles.emptySubText}>Las URLs rastreadas aparecerán aquí</Text>
-          </GlassCard>
+          </Card>
         </View>
       ) : (
         <FlatList
@@ -152,8 +154,9 @@ export default function TrackMain() {
           keyExtractor={(item, index) => `${item}-${index}`}
           contentContainerStyle={styles.list}
           renderItem={({ item, index }) => (
-            <TouchableOpacity
+            <Pressable
               style={styles.item}
+              android_ripple={{ color: colors.outline }}
               onPress={() =>
                 router.push({ pathname: '/track/[itemId]', params: { itemId: item } })
               }
@@ -165,7 +168,7 @@ export default function TrackMain() {
                 <Text style={styles.itemUrl} numberOfLines={1}>{item}</Text>
               </View>
               <Ionicons name="open-outline" size={16} color={colors.tabInactive} />
-            </TouchableOpacity>
+            </Pressable>
           )}
         />
       )}

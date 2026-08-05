@@ -1,6 +1,6 @@
 import { StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { GlassView } from '../../shared/components/glass';
+import { Surface } from '../../shared/components/adaptive';
 import { useTheme } from '../../shared/context/ThemeContext';
 
 export type SearchFeedbackType = 'error' | 'warning' | 'loading' | 'success' | 'hint';
@@ -37,12 +37,12 @@ export function SearchFeedback({ type, message }: SearchFeedbackProps) {
   const { icon, color } = useVisual(type);
 
   return (
-    <GlassView style={[styles.container, { borderColor: colors.border }]}>
+    <Surface style={[styles.container, { borderColor: colors.border }]}>
       <Ionicons name={icon} size={16} color={color} style={styles.icon} />
       <Text style={[styles.text, { color }]} numberOfLines={2}>
         {message}
       </Text>
-    </GlassView>
+    </Surface>
   );
 }
 
