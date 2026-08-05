@@ -29,7 +29,9 @@ export default function TabsLayout() {
     : isHydrated
       ? colors.accent
       : '#2563eb';
-  const indicatorColor = isHydrated ? colors.primaryContainer : '#eaddff';
+  // Píldora del indicador activo (Android MD3): tono neutro de superficie en vez
+  // del morado primaryContainer, para no chocar con el acento azul de la app.
+  const indicatorColor = isHydrated ? colors.surfaceVariant : '#e7e0ec';
 
   return (
     <NativeTabs
