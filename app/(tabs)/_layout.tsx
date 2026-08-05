@@ -1,8 +1,6 @@
 import { Tabs } from 'expo-router';
-import { Platform, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/shared/context/ThemeContext';
-import { GlassView } from '../../src/shared/components/glass';
 
 export const unstable_settings = {
   initialRouteName: 'search',
@@ -18,7 +16,6 @@ const ICONS: Record<string, IconPair> = {
 
 export default function TabsLayout() {
   const { colors, isHydrated } = useTheme();
-  const isIOS = Platform.OS === 'ios';
 
   return (
     <Tabs
@@ -26,11 +23,11 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarActiveTintColor: isHydrated ? colors.accent : '#2563eb',
         tabBarInactiveTintColor: isHydrated ? colors.tabInactive : '#aaaaaa',
-        // On iOS use a translucent glass background (Liquid Glass on iOS 26,
-        // falls back to a plain view elsewhere). Keep an opaque bar on Android/Web.
-        tabBarBackground: isIOS ? () => <GlassView style={StyleSheet.absoluteFill} /> : undefined,
+        // Solid themed bar on every platform. A translucent GlassView background
+        // was tried on iOS but the Liquid Glass material rendered gray in dark mode
+        // and its native colorScheme did not refresh on light→dark toggles.
         tabBarStyle: {
-          backgroundColor: isIOS ? 'transparent' : isHydrated ? colors.bgSecondary : '#f9fafb',
+          backgroundColor: isHydrated ? colors.bgSecondary : '#f9fafb',
           borderTopWidth: 1,
           borderTopColor: isHydrated ? colors.border : '#e5e7eb',
           height: 60,

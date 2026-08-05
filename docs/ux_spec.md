@@ -80,11 +80,10 @@ Iconos (Ionicons, cross-platform — no SF Symbols ni Material Symbols nativos):
 
 Estado activo: **icono filled + tint** (`colors.accent`, del tema). Sin indicator pill.
 
-Tab bar por plataforma:
-  - **iOS:** fondo translúcido vía `GlassView` (Liquid Glass en iOS 26; cae a vista plana en iOS<26).
-    No es el `UITabBarController` nativo — aproximación con el sistema Glass del proyecto.
-  - **Android / Web:** barra opaca (`backgroundColor: colors.bgSecondary` + borde superior).
-    No es `NavigationBar` MD3 nativo; sin indicator pill.
+Tab bar (todas las plataformas): barra opaca temática (`backgroundColor: colors.bgSecondary` + borde
+superior `colors.border`). Se descartó el fondo `GlassView` en iOS: el material Liquid Glass se veía
+gris en dark y su `colorScheme` nativo no se refrescaba al alternar light↔dark. No es `UITabBarController`
+Liquid Glass ni `NavigationBar` MD3 nativos; sin indicator pill.
 
 ### App Structure
 
