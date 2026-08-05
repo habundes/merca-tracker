@@ -1,6 +1,6 @@
 # SPEC 08 — Navegar a Rastrear tras búsqueda exitosa
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Dependencias:** SPEC 03 (Migración Expo Router), SPEC 04 (Renombrar tab a Rastrear). Reutiliza `SearchContext.addSearch` (spec 03) y la ruta `/track` (spec 04).
 > **Fecha:** 2026-08-04
 > **Objetivo:** Tras un "Ir" con URL nueva en `/search`, agregar la URL al historial y navegar automáticamente a la tab `/track` para verla en el listado; los duplicados siguen bloqueando con el mensaje inline actual sin navegar.
