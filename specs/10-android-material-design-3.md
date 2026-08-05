@@ -2,7 +2,7 @@
 
 ## Header
 
-- **Estado:** Aprobado
+- **Estado:** Implementado
 - **Dependencias:** spec 01 (sistema `GlassView`/`GlassCard`/`GlassButton`/`GlassHeader`), spec 05 (tema `useTheme()` con light/dark/system), spec 09 (rediseño Buscar).
 - **Fecha:** 2026-08-05
 - **Objetivo (una frase):** Implementar la capa de diseño **Material Design 3 solo para Android** con paridad visual respecto al Liquid Glass ya existente en iOS, mediante componentes MD3 dedicados y una capa adaptativa que elige glass (iOS) vs MD3 (Android), sin tocar iOS ni la lógica de negocio.
@@ -74,15 +74,15 @@ Branch: `spec-10-android-material-design-3` (autocreada). Cada paso deja `npx ts
 
 ## Acceptance criteria
 
-- [ ] `ThemeColors` incluye tokens MD3 (`surface`, `surfaceVariant`, `outline`, `primaryContainer`, `onPrimaryContainer`, `elevationTint`) en light y dark; los tokens iOS existentes siguen intactos.
-- [ ] Existe `src/shared/components/md3/` con `MaterialSurface`, `MaterialCard`, `MaterialButton`, `MaterialHeader`, `MaterialTextField` e `index.ts`.
-- [ ] Existe `src/shared/components/adaptive/` que en Android renderiza los MD3 y en iOS los glass.
-- [ ] Search y Track consumen la capa adaptativa; ningún screen importa `glass/` directamente salvo la propia capa adaptativa.
-- [ ] En Android el tab activo muestra indicator pill; en iOS la tab bar queda igual que hoy.
-- [ ] En Android el input de búsqueda se ve como OutlinedTextField (outline 1dp, esquinas redondeadas), cards con elevación, botones con ripple.
-- [ ] `npx tsc --noEmit` sin errores nuevos.
-- [ ] Alternar light/dark/system en Apariencia (spec-05) actualiza correctamente los colores MD3.
-- [ ] iOS 26+ no cambia (glass idéntico a antes).
+- [x] `ThemeColors` incluye tokens MD3 (`surface`, `surfaceVariant`, `outline`, `primaryContainer`, `onPrimaryContainer`, `elevationTint`) en light y dark; los tokens iOS existentes siguen intactos.
+- [x] Existe `src/shared/components/md3/` con `MaterialSurface`, `MaterialCard`, `MaterialButton`, `MaterialHeader`, `MaterialTextField` e `index.ts`.
+- [x] Existe `src/shared/components/adaptive/` que en Android renderiza los MD3 y en iOS los glass.
+- [x] Search y Track consumen la capa adaptativa; ningún screen importa `glass/` directamente salvo la propia capa adaptativa.
+- [x] En Android el tab activo muestra indicator pill; en iOS la tab bar queda igual que hoy.
+- [x] En Android el input de búsqueda se ve como OutlinedTextField (outline 1dp, esquinas redondeadas), cards con elevación, botones con ripple.
+- [x] `npx tsc --noEmit` sin errores nuevos.
+- [x] Alternar light/dark/system en Apariencia (spec-05) actualiza correctamente los colores MD3.
+- [x] iOS 26+ no cambia (glass idéntico a antes).
 
 ## Decisiones tomadas y descartadas
 
