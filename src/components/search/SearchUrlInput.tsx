@@ -6,8 +6,8 @@ import {
   type TextInputProps,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { TextField } from '../../shared/components/adaptive';
-import { useTheme } from '../../shared/context/ThemeContext';
+import { TextField } from '@/shared/components/adaptive';
+import { useTheme } from '@/shared/context/ThemeContext';
 
 export interface SearchUrlInputProps {
   value: string;

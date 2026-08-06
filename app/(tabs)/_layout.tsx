@@ -1,86 +1,73 @@
-import { Tabs } from 'expo-router';
-import { Platform, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../src/shared/context/ThemeContext';
+import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { Platform, DynamicColorIOS } from 'react-native';
+import { useTheme, lightColors, darkColors } from '@/shared/context/ThemeContext';
 
-const isAndroid = Platform.OS === 'android';
-
+// Ruta ancla del navegador de tabs. El landing real lo maneja app/index.tsx
+// con un <Redirect href="/search" />.
 export const unstable_settings = {
-  initialRouteName: 'search',
+  anchor: 'search',
 };
 
-type IconPair = { active: keyof typeof Ionicons.glyphMap; inactive: keyof typeof Ionicons.glyphMap };
-
-const ICONS: Record<string, IconPair> = {
-  track: { active: 'list', inactive: 'list-outline' },
-  search: { active: 'search', inactive: 'search-outline' },
-  profile: { active: 'person', inactive: 'person-outline' },
-};
+const isIOS = Platform.OS === 'ios';
 
 export default function TabsLayout() {
   const { colors, isHydrated } = useTheme();
 
+  // NativeTabs renderiza la barra nativa: Material 3 en Android (con su pill
+  // indicator nativo) y Liquid Glass en iOS 26+.
+  // En iOS usamos DynamicColorIOS para que la barra se resuelva a nivel nativo
+  // contra el trait de apariencia (que ThemeContext fuerza al modo de la app),
+  // evitando el parpadeo a claro al cambiar de tab en modo oscuro.
+  // En Android coloreamos con el tema (con fallback pre-hidratación).
+  const backgroundColor = isIOS
+    ? DynamicColorIOS({ light: lightColors.bgSecondary, dark: darkColors.bgSecondary })
+    : isHydrated
+      ? colors.surface
+      : '#fef7ff';
+  // Tab activo con color de texto (blanco en oscuro, casi negro en claro —
+  // "blanco" sobre barra oscura, sin desaparecer en modo claro) e inactivo en
+  // gris tenue. En iOS via DynamicColorIOS para adaptación nativa sin parpadeo.
+  const activeColor = isIOS
+    ? DynamicColorIOS({ light: lightColors.text, dark: darkColors.text })
+    : isHydrated
+      ? colors.text
+      : '#111111';
+  const inactiveColor = isIOS
+    ? DynamicColorIOS({ light: lightColors.tabInactive, dark: darkColors.tabInactive })
+    : isHydrated
+      ? colors.tabInactive
+      : '#8e8e93';
+
+  // fontSize solo en Android (iOS conserva el tamaño de label nativo).
+  const labelFont = isIOS ? {} : { fontSize: 15 };
+  const iconColor = { default: inactiveColor, selected: activeColor };
+  const labelStyle = {
+    default: { ...labelFont, color: inactiveColor },
+    selected: { ...labelFont, color: activeColor },
+  };
+
   return (
-    <Tabs
-      screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarActiveTintColor: isHydrated ? colors.accent : '#2563eb',
-        tabBarInactiveTintColor: isHydrated ? colors.tabInactive : '#aaaaaa',
-        // Solid themed bar on every platform. A translucent GlassView background
-        // was tried on iOS but the Liquid Glass material rendered gray in dark mode
-        // and its native colorScheme did not refresh on light→dark toggles.
-        tabBarStyle: isAndroid
-          ? {
-              // NavigationBar MD3: superficie sin borde superior, algo más alta.
-              backgroundColor: isHydrated ? colors.surface : '#fef7ff',
-              borderTopWidth: 0,
-              height: 68,
-              paddingBottom: 10,
-              paddingTop: 6,
-            }
-          : {
-              backgroundColor: isHydrated ? colors.bgSecondary : '#f9fafb',
-              borderTopWidth: 1,
-              borderTopColor: isHydrated ? colors.border : '#e5e7eb',
-              height: 60,
-              paddingBottom: 8,
-            },
-        tabBarIcon: ({ focused, color, size }) => {
-          const pair = ICONS[route.name];
-          const name = focused ? pair.active : pair.inactive;
-          if (isAndroid) {
-            // Indicator pill MD3: fondo primaryContainer tras el icono activo.
-            const iconColor = focused
-              ? isHydrated
-                ? colors.onPrimaryContainer
-                : '#21005d'
-              : color;
-            return (
-              <View
-                style={{
-                  width: 56,
-                  height: 32,
-                  borderRadius: 16,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  backgroundColor: focused
-                    ? isHydrated
-                      ? colors.primaryContainer
-                      : '#eaddff'
-                    : 'transparent',
-                }}
-              >
-                <Ionicons name={name} size={size} color={iconColor} />
-              </View>
-            );
-          }
-          return <Ionicons name={name} size={size} color={color} />;
-        },
-      })}
+    <NativeTabs
+      backgroundColor={backgroundColor}
+      tintColor={activeColor}
+      iconColor={iconColor}
+      labelStyle={labelStyle}
+      // Sin píldora de indicador en Android (MD3): el color activo lo da tintColor.
+      // Evita el lavanda del tema Material por defecto. Ignorado en iOS.
+      disableIndicator
     >
-      <Tabs.Screen name="track" options={{ title: 'Rastrear' }} />
-      <Tabs.Screen name="search" options={{ title: 'Buscar' }} />
-      <Tabs.Screen name="profile" options={{ title: 'Perfil' }} />
-    </Tabs>
+      <NativeTabs.Trigger name="track">
+        <NativeTabs.Trigger.Icon sf={{ default: 'list.bullet', selected: 'list.bullet' }} md="list" />
+        <NativeTabs.Trigger.Label>Rastrear</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="search">
+        <NativeTabs.Trigger.Icon sf="magnifyingglass" md="search" />
+        <NativeTabs.Trigger.Label>Buscar</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="profile">
+        <NativeTabs.Trigger.Icon sf={{ default: 'person', selected: 'person.fill' }} md="person" />
+        <NativeTabs.Trigger.Label>Perfil</NativeTabs.Trigger.Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }

@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { Appearance } from 'react-native';
+import { Appearance, Platform } from 'react-native';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 export type ColorScheme = 'light' | 'dark';
@@ -99,6 +99,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       setSystemScheme((colorScheme as ColorScheme) ?? 'light');
     });
     return () => subscription.remove();
+  }, [mode]);
+
+  // Fuerza la apariencia nativa al modo elegido en la app. Solo iOS: sin esto,
+  // la barra de NativeTabs y los colores DynamicColorIOS resuelven contra el
+  // esquema del sistema y parpadean a claro al cambiar de tab en modo oscuro.
+  // En Android NO se aplica: su AppearanceModule.setColorScheme exige un valor
+  // no-null (revienta con `null`) y su barra usa color explícito, no el trait.
+  useEffect(() => {
+    if (Platform.OS !== 'ios') return;
+    // `null` resetea al esquema del sistema; el tipo de RN 0.86 no lo incluye
+    // pese a soportarlo en runtime (iOS), de ahí el cast al tipo del parámetro.
+    const scheme = (mode === 'system' ? null : mode) as Parameters<
+      typeof Appearance.setColorScheme
+    >[0];
+    Appearance.setColorScheme(scheme);
   }, [mode]);
 
   const setMode = (newMode: ThemeMode) => {

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../../shared/context/ThemeContext';
+import { useTheme } from '@/shared/context/ThemeContext';
 
 export function SearchHelp() {
   const { colors } = useTheme();

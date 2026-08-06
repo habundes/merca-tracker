@@ -10,13 +10,12 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useTheme, ON_ACCENT } from '../../../../shared/context/ThemeContext';
+import { Link } from 'expo-router';
+import { useTheme, ON_ACCENT } from '@/shared/context/ThemeContext';
 
 type Mode = 'login' | 'signup';
 
 export default function ProfileMain() {
-  const router = useRouter();
   const [mode, setMode] = useState<Mode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -180,15 +179,30 @@ export default function ProfileMain() {
 
         <View style={styles.configSection}>
           <Text style={styles.configSectionTitle}>Configuración</Text>
-          <TouchableOpacity style={styles.configBtn} onPress={() => router.push('/profile/account')}>
-            <Text style={styles.configText}>Ajustes de cuenta</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.configBtn} onPress={() => router.push('/profile/payment')}>
-            <Text style={styles.configText}>Ajustes de pago</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.configBtn} onPress={() => router.push('/profile/appearance')}>
-            <Text style={styles.configText}>Apariencia</Text>
-          </TouchableOpacity>
+          <Link href="/profile/account" asChild>
+            <Link.Trigger>
+              <TouchableOpacity style={styles.configBtn}>
+                <Text style={styles.configText}>Ajustes de cuenta</Text>
+              </TouchableOpacity>
+            </Link.Trigger>
+            <Link.Preview />
+          </Link>
+          <Link href="/profile/payment" asChild>
+            <Link.Trigger>
+              <TouchableOpacity style={styles.configBtn}>
+                <Text style={styles.configText}>Ajustes de pago</Text>
+              </TouchableOpacity>
+            </Link.Trigger>
+            <Link.Preview />
+          </Link>
+          <Link href="/profile/appearance" asChild>
+            <Link.Trigger>
+              <TouchableOpacity style={styles.configBtn}>
+                <Text style={styles.configText}>Apariencia</Text>
+              </TouchableOpacity>
+            </Link.Trigger>
+            <Link.Preview />
+          </Link>
         </View>
 
         <TouchableOpacity style={styles.logoutBtn} onPress={() => { setLoggedIn(false); reset(); }}>

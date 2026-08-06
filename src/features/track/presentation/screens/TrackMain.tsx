@@ -9,14 +9,13 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useSearch } from '../../../../shared/context/SearchContext';
-import { useTheme } from '../../../../shared/context/ThemeContext';
-import { Card } from '../../../../shared/components/adaptive';
+import { Link } from 'expo-router';
+import { useSearch } from '@/shared/context/SearchContext';
+import { useTheme } from '@/shared/context/ThemeContext';
+import { Card } from '@/shared/components/adaptive';
 
 export default function TrackMain() {
-  const router = useRouter();
-  const { history, clearHistory } = useSearch();
+  const { history, clearHistory, removeSearch } = useSearch();
   const { colors } = useTheme();
 
   const styles = useMemo(() => StyleSheet.create({
@@ -128,9 +127,11 @@ export default function TrackMain() {
       <View style={styles.header}>
         <Text style={styles.title}>Mis rastreos</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity onPress={() => router.push('/track/config')}>
-            <Text style={styles.configText}>Configurar</Text>
-          </TouchableOpacity>
+          <Link href="/track/config" asChild>
+            <TouchableOpacity>
+              <Text style={styles.configText}>Configurar</Text>
+            </TouchableOpacity>
+          </Link>
           {history.length > 0 && (
             <TouchableOpacity onPress={handleClearHistory}>
               <Text style={styles.clearText}>Limpiar</Text>
@@ -154,21 +155,33 @@ export default function TrackMain() {
           keyExtractor={(item, index) => `${item}-${index}`}
           contentContainerStyle={styles.list}
           renderItem={({ item, index }) => (
-            <Pressable
-              style={styles.item}
-              android_ripple={{ color: colors.outline }}
-              onPress={() =>
-                router.push({ pathname: '/track/[itemId]', params: { itemId: item } })
-              }
+            <Link
+              href={{ pathname: '/track/[itemId]', params: { itemId: encodeURIComponent(item) } }}
+              asChild
             >
-              <View style={styles.indexBadge}>
-                <Text style={styles.indexText}>{index + 1}</Text>
-              </View>
-              <View style={styles.itemContent}>
-                <Text style={styles.itemUrl} numberOfLines={1}>{item}</Text>
-              </View>
-              <Ionicons name="open-outline" size={16} color={colors.tabInactive} />
-            </Pressable>
+              <Link.Trigger>
+                <Pressable style={styles.item} android_ripple={{ color: colors.outline }}>
+                  <View style={styles.indexBadge}>
+                    <Text style={styles.indexText}>{index + 1}</Text>
+                  </View>
+                  <View style={styles.itemContent}>
+                    <Text style={styles.itemUrl} numberOfLines={1}>{item}</Text>
+                  </View>
+                  <Ionicons name="open-outline" size={16} color={colors.tabInactive} />
+                </Pressable>
+              </Link.Trigger>
+              {/* Vista previa (peek) y menú contextual — iOS; en Android solo navega. */}
+              <Link.Preview />
+              <Link.Menu>
+                <Link.MenuAction
+                  icon="trash"
+                  destructive
+                  onPress={() => removeSearch(item)}
+                >
+                  Eliminar del historial
+                </Link.MenuAction>
+              </Link.Menu>
+            </Link>
           )}
         />
       )}
