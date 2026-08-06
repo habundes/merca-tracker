@@ -39,7 +39,7 @@ export default function TabsLayout() {
       : '#8e8e93';
 
   // fontSize solo en Android (iOS conserva el tamaño de label nativo).
-  const labelFont = isIOS ? {} : { fontSize: 13 };
+  const labelFont = isIOS ? {} : { fontSize: 15 };
   const iconColor = { default: inactiveColor, selected: activeColor };
   const labelStyle = {
     default: { ...labelFont, color: inactiveColor },
