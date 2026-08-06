@@ -32,8 +32,11 @@ export default function TabsLayout() {
     : isHydrated
       ? colors.text
       : '#111111';
+  // Inactivo iOS: gris apagado que invierte con el tema (oscuro sobre barra dark,
+  // claro/tenue sobre barra light) vía DynamicColorIOS, para no verse prominente
+  // en modo claro. Android sigue con tabInactive del tema (que ya invierte).
   const inactiveColor = isIOS
-    ? DynamicColorIOS({ light: lightColors.tabInactive, dark: darkColors.tabInactive })
+    ? DynamicColorIOS({ light: '#a8a8ad', dark: '#6b6b70' })
     : isHydrated
       ? colors.tabInactive
       : '#8e8e93';
