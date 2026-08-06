@@ -24,19 +24,33 @@ export default function TabsLayout() {
     : isHydrated
       ? colors.surface
       : '#fef7ff';
-  const tintColor = isIOS
-    ? DynamicColorIOS({ light: lightColors.accent, dark: darkColors.accent })
+  // Tab activo con color de texto (blanco en oscuro, casi negro en claro —
+  // "blanco" sobre barra oscura, sin desaparecer en modo claro) e inactivo en
+  // gris tenue. En iOS via DynamicColorIOS para adaptación nativa sin parpadeo.
+  const activeColor = isIOS
+    ? DynamicColorIOS({ light: lightColors.text, dark: darkColors.text })
     : isHydrated
-      ? colors.accent
-      : '#2563eb';
-  // Títulos un poco más grandes en Android (el default MD3 es ~12sp). En iOS se
-  // deja el tamaño nativo. El tamaño de ícono es fijo nativo y no es ajustable.
-  const labelStyle = isIOS ? undefined : { fontSize: 13 };
+      ? colors.text
+      : '#111111';
+  const inactiveColor = isIOS
+    ? DynamicColorIOS({ light: lightColors.tabInactive, dark: darkColors.tabInactive })
+    : isHydrated
+      ? colors.tabInactive
+      : '#8e8e93';
+
+  // fontSize solo en Android (iOS conserva el tamaño de label nativo).
+  const labelFont = isIOS ? {} : { fontSize: 13 };
+  const iconColor = { default: inactiveColor, selected: activeColor };
+  const labelStyle = {
+    default: { ...labelFont, color: inactiveColor },
+    selected: { ...labelFont, color: activeColor },
+  };
 
   return (
     <NativeTabs
       backgroundColor={backgroundColor}
-      tintColor={tintColor}
+      tintColor={activeColor}
+      iconColor={iconColor}
       labelStyle={labelStyle}
       // Sin píldora de indicador en Android (MD3): el color activo lo da tintColor.
       // Evita el lavanda del tema Material por defecto. Ignorado en iOS.
