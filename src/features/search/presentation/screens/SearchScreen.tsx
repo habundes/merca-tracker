@@ -14,7 +14,7 @@ import {
   SearchHelp,
   SearchUrlInput,
   type SearchFeedbackType,
-} from '../../../../components/search';
+} from '@/features/search/presentation/components';
 
 export default function SearchScreen() {
   const [url, setUrl] = useState('');

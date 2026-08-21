@@ -14,11 +14,10 @@ export interface SearchUrlInputProps {
   onChangeText: (text: string) => void;
   onSubmit: () => void;
   onClear: () => void;
-  editable?: boolean;
 }
 
 export const SearchUrlInput = forwardRef<TextInput, SearchUrlInputProps>(
-  ({ value, onChangeText, onSubmit, onClear, editable = true }, ref) => {
+  ({ value, onChangeText, onSubmit, onClear }, ref) => {
     const { colors } = useTheme();
     const showClear = value.length > 0;
 
@@ -26,7 +25,6 @@ export const SearchUrlInput = forwardRef<TextInput, SearchUrlInputProps>(
       value,
       onChangeText,
       onSubmitEditing: onSubmit,
-      editable,
       placeholder: 'Pega URL de Mercadolibre',
       placeholderTextColor: colors.textMuted,
       keyboardType: 'url',
