@@ -1,4 +1,4 @@
-import { View, type ViewProps } from 'react-native';
+import { StyleSheet, View, type ViewProps } from 'react-native';
 import {
   GlassView as ExpoGlassView,
   isLiquidGlassAvailable,
@@ -28,7 +28,14 @@ export function GlassView({
   if (!isLiquidGlassAvailable()) {
     return (
       <View
-        style={[{ backgroundColor: colors.bgSecondary, borderColor: colors.border }, style]}
+        style={[
+          {
+            backgroundColor: colors.bgSecondary,
+            borderColor: colors.border,
+            borderWidth: StyleSheet.hairlineWidth,
+          },
+          style,
+        ]}
         {...rest}
       >
         {children}

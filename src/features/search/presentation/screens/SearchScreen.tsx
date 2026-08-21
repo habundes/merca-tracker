@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from 'react';
+import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
 import {
   StyleSheet,
   TextInput,
@@ -21,6 +21,7 @@ export default function SearchScreen() {
   const [duplicate, setDuplicate] = useState(false);
 
   const inputRef = useRef<TextInput>(null);
+  const duplicateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { addSearch, history } = useSearch();
   const { colors } = useTheme();
   const router = useRouter();
@@ -52,12 +53,20 @@ export default function SearchScreen() {
     }, []),
   );
 
+  useEffect(
+    () => () => {
+      if (duplicateTimerRef.current) clearTimeout(duplicateTimerRef.current);
+    },
+    [],
+  );
+
   const handleSearch = () => {
     const trimmed = url.trim();
     if (!trimmed) return;
     if (history.includes(trimmed)) {
       setDuplicate(true);
-      setTimeout(() => setDuplicate(false), 2500);
+      if (duplicateTimerRef.current) clearTimeout(duplicateTimerRef.current);
+      duplicateTimerRef.current = setTimeout(() => setDuplicate(false), 2500);
       return;
     }
     setDuplicate(false);
