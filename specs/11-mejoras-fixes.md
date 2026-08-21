@@ -2,7 +2,7 @@
 
 ## Header
 
-- **Estado:** Aprobado
+- **Estado:** Implementado
 - **Dependencias:** spec 01 (sistema `glass/`), spec 05 (`ThemeContext` light/dark/system), spec 09 (rediseño Buscar), spec 10 (capa adaptativa + MD3). Toca `SearchContext`, `ThemeContext`, `GlassView`, `SearchScreen`, pantallas y `app/(tabs)/_layout.tsx`.
 - **Fecha:** 2026-08-21
 - **Objetivo (una frase):** Corregir tres bugs reales de robustez y aplicar mejoras incrementales de rendimiento, duplicación e higiene detectadas en la revisión del proyecto, sin cambiar comportamiento visible ni alcance de producto.
@@ -72,16 +72,16 @@ Branch: `spec-11-mejoras-fixes` (autocreada). Cada paso deja `npx tsc --noEmit` 
 
 ## Acceptance criteria
 
-- [ ] `ThemeContext.getItem` y `setMode` tienen `.catch`; un error de storage deja `isHydrated=true` (no atasca en fallback).
-- [ ] El fallback de `GlassView` pinta borde visible (la card vacía de `TrackMain` muestra borde).
-- [ ] `SearchScreen` no deja timers activos tras desmontar; sin warning de `setState` en desmontado.
-- [ ] `SearchContext` memoiza value + handlers; consumidores no re-renderizan sin cambio de historial.
-- [ ] Existe `useThemedStyles` y los 8 archivos lo usan; sin `useMemo(StyleSheet.create…)` duplicado.
-- [ ] Los colores de fallback pre-hidratación referencian tokens de `ThemeContext` (sin hex duplicados).
-- [ ] Account y Payment comparten una sola pantalla parametrizada.
-- [ ] No quedan exports/componentes adaptativos sin uso; `errors/errors.txt` borrado; `app.json` con slug `merca-tracker`; `ProfileLayout` renombrado; `components/search/` bajo el feature con alias `@/`.
-- [ ] `useSearch` lanza fuera de su provider.
-- [ ] `npx tsc --noEmit` sin errores nuevos.
+- [x] `ThemeContext.getItem` y `setMode` tienen `.catch`; un error de storage deja `isHydrated=true` (no atasca en fallback).
+- [x] El fallback de `GlassView` pinta borde visible (la card vacía de `TrackMain` muestra borde).
+- [x] `SearchScreen` no deja timers activos tras desmontar; sin warning de `setState` en desmontado.
+- [x] `SearchContext` memoiza value + handlers; consumidores no re-renderizan sin cambio de historial.
+- [x] Existe `useThemedStyles` y los 8 archivos lo usan; sin `useMemo(StyleSheet.create…)` duplicado.
+- [x] Los colores de fallback pre-hidratación referencian tokens de `ThemeContext` (sin hex duplicados).
+- [x] Account y Payment comparten una sola pantalla parametrizada.
+- [x] No quedan exports/componentes adaptativos sin uso; `errors/errors.txt` borrado; `app.json` con slug `merca-tracker`; `ProfileLayout` renombrado; `components/search/` bajo el feature con alias `@/`.
+- [x] `useSearch` lanza fuera de su provider.
+- [x] `npx tsc --noEmit` sin errores nuevos.
 
 ## Decisiones tomadas y descartadas
 
