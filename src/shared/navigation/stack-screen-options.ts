@@ -1,4 +1,4 @@
-import type { ThemeColors } from '@/shared/context/ThemeContext';
+import { lightColors, type ThemeColors } from '@/shared/context/ThemeContext';
 
 /**
  * screenOptions compartidas por los Stack anidados de cada tab.
@@ -7,8 +7,8 @@ import type { ThemeColors } from '@/shared/context/ThemeContext';
  */
 export function stackScreenOptions(colors: ThemeColors, isHydrated: boolean) {
   return {
-    headerStyle: { backgroundColor: isHydrated ? colors.bgSecondary : '#f9fafb' },
-    headerTintColor: isHydrated ? colors.text : '#111111',
-    contentStyle: { backgroundColor: isHydrated ? colors.bg : '#ffffff' },
+    headerStyle: { backgroundColor: isHydrated ? colors.bgSecondary : lightColors.bgSecondary },
+    headerTintColor: isHydrated ? colors.text : lightColors.text,
+    contentStyle: { backgroundColor: isHydrated ? colors.bg : lightColors.bg },
   };
 }

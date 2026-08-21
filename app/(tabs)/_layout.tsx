@@ -23,7 +23,7 @@ export default function TabsLayout() {
     ? DynamicColorIOS({ light: lightColors.bgSecondary, dark: darkColors.bgSecondary })
     : isHydrated
       ? colors.surface
-      : '#fef7ff';
+      : lightColors.surface;
   // Tab activo con color de texto (blanco en oscuro, casi negro en claro —
   // "blanco" sobre barra oscura, sin desaparecer en modo claro) e inactivo en
   // gris tenue. En iOS via DynamicColorIOS para adaptación nativa sin parpadeo.
@@ -31,12 +31,12 @@ export default function TabsLayout() {
     ? DynamicColorIOS({ light: lightColors.text, dark: darkColors.text })
     : isHydrated
       ? colors.text
-      : '#111111';
+      : lightColors.text;
   const inactiveColor = isIOS
     ? DynamicColorIOS({ light: lightColors.tabInactive, dark: darkColors.tabInactive })
     : isHydrated
       ? colors.tabInactive
-      : '#8e8e93';
+      : lightColors.tabInactive;
 
   // fontSize solo en Android (iOS conserva el tamaño de label nativo).
   const labelFont = isIOS ? {} : { fontSize: 15 };
