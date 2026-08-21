@@ -7,12 +7,7 @@ type SearchContextType = {
   clearHistory: () => void;
 };
 
-const SearchContext = createContext<SearchContextType>({
-  history: [],
-  addSearch: () => {},
-  removeSearch: () => {},
-  clearHistory: () => {},
-});
+const SearchContext = createContext<SearchContextType | undefined>(undefined);
 
 export function SearchProvider({ children }: { children: React.ReactNode }) {
   const [history, setHistory] = useState<string[]>([]);
@@ -35,4 +30,8 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   return <SearchContext.Provider value={value}>{children}</SearchContext.Provider>;
 }
 
-export const useSearch = () => useContext(SearchContext);
+export function useSearch(): SearchContextType {
+  const ctx = useContext(SearchContext);
+  if (!ctx) throw new Error('useSearch must be used within SearchProvider');
+  return ctx;
+}
