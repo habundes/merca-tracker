@@ -1,12 +1,10 @@
-import { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Link } from 'expo-router';
-import { useTheme, ON_ACCENT } from '@/shared/context/ThemeContext';
+import { ON_ACCENT } from '@/shared/context/ThemeContext';
+import { useThemedStyles } from '@/shared/hooks/useThemedStyles';
 
 export default function TrackConfig() {
-  const { colors } = useTheme();
-
-  const styles = useMemo(() => StyleSheet.create({
+  const styles = useThemedStyles((colors) => StyleSheet.create({
     container: {
       flex: 1,
       alignItems: 'center',
@@ -29,7 +27,7 @@ export default function TrackConfig() {
       color: ON_ACCENT,
       fontWeight: '600',
     },
-  }), [colors]);
+  }));
 
   return (
     <View style={styles.container}>

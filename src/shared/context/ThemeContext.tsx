@@ -83,14 +83,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
-      if (stored && VALID_MODES.includes(stored as ThemeMode)) {
-        setModeState(stored as ThemeMode);
-      } else if (stored !== null) {
-        AsyncStorage.removeItem(STORAGE_KEY);
-      }
-      setIsHydrated(true);
-    });
+    AsyncStorage.getItem(STORAGE_KEY)
+      .then((stored) => {
+        if (stored && VALID_MODES.includes(stored as ThemeMode)) {
+          setModeState(stored as ThemeMode);
+        } else if (stored !== null) {
+          AsyncStorage.removeItem(STORAGE_KEY);
+        }
+      })
+      .catch(() => {})
+      // Pase lo que pase con storage, hidratamos: sin esto un rechazo dejaría
+      // isHydrated=false para siempre y a todos los consumidores en fallback.
+      .finally(() => setIsHydrated(true));
   }, []);
 
   useEffect(() => {
@@ -118,7 +122,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setMode = (newMode: ThemeMode) => {
     setModeState(newMode);
-    AsyncStorage.setItem(STORAGE_KEY, newMode);
+    AsyncStorage.setItem(STORAGE_KEY, newMode).catch(() => {});
   };
 
   const effectiveScheme: ColorScheme = mode === 'system' ? systemScheme : mode;

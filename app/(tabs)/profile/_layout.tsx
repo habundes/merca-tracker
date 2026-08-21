@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { stackScreenOptions } from '@/shared/navigation/stack-screen-options';
 
-export default function PerfilLayout() {
+export default function ProfileLayout() {
   const { colors, isHydrated } = useTheme();
 
   return (
