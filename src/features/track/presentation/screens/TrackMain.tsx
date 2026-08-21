@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import {
   View,
   Text,
@@ -12,13 +11,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useSearch } from '@/shared/context/SearchContext';
 import { useTheme } from '@/shared/context/ThemeContext';
+import { useThemedStyles } from '@/shared/hooks/useThemedStyles';
 import { Card } from '@/shared/components/adaptive';
 
 export default function TrackMain() {
   const { history, clearHistory, removeSearch } = useSearch();
   const { colors } = useTheme();
 
-  const styles = useMemo(() => StyleSheet.create({
+  const styles = useThemedStyles((colors) => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.bg,
@@ -109,7 +109,7 @@ export default function TrackMain() {
       fontSize: 13,
       color: colors.textMuted,
     },
-  }), [colors]);
+  }));
 
   const handleClearHistory = () => {
     Alert.alert(

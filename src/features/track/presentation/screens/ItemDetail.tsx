@@ -1,11 +1,10 @@
 import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { useTheme } from '@/shared/context/ThemeContext';
+import { useThemedStyles } from '@/shared/hooks/useThemedStyles';
 
 export default function ItemDetail() {
   const { itemId } = useLocalSearchParams<{ itemId: string }>();
-  const { colors } = useTheme();
 
   // itemId llega codificado (una URL puede contener / ? & #). Lo decodificamos
   // para mostrar el valor original; si falta o está corrupto, mostramos aviso.
@@ -18,7 +17,7 @@ export default function ItemDetail() {
     }
   }, [itemId]);
 
-  const styles = useMemo(() => StyleSheet.create({
+  const styles = useThemedStyles((colors) => StyleSheet.create({
     container: {
       flex: 1,
       alignItems: 'center',
@@ -37,7 +36,7 @@ export default function ItemDetail() {
       color: colors.textMuted,
       textAlign: 'center',
     },
-  }), [colors]);
+  }));
 
   if (!url) {
     return (

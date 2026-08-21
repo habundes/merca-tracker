@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useTheme, ON_ACCENT } from '@/shared/context/ThemeContext';
+import { useThemedStyles } from '@/shared/hooks/useThemedStyles';
 
 type Mode = 'login' | 'signup';
 
@@ -26,7 +27,7 @@ export default function ProfileMain() {
   const [error, setError] = useState('');
   const { colors } = useTheme();
 
-  const styles = useMemo(() => StyleSheet.create({
+  const styles = useThemedStyles((colors) => StyleSheet.create({
     container: {
       flexGrow: 1,
       backgroundColor: colors.bg,
@@ -153,7 +154,7 @@ export default function ProfileMain() {
       fontWeight: '600',
       fontSize: 14,
     },
-  }), [colors]);
+  }));
 
   const reset = () => { setEmail(''); setPassword(''); setConfirm(''); setName(''); setError(''); };
 

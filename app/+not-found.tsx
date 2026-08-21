@@ -1,12 +1,9 @@
-import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Link, Stack } from 'expo-router';
-import { useTheme } from '@/shared/context/ThemeContext';
+import { useThemedStyles } from '@/shared/hooks/useThemedStyles';
 
 export default function NotFound() {
-  const { colors } = useTheme();
-
-  const styles = useMemo(() => StyleSheet.create({
+  const styles = useThemedStyles((colors) => StyleSheet.create({
     container: {
       flex: 1,
       alignItems: 'center',
@@ -31,7 +28,7 @@ export default function NotFound() {
       color: colors.accent,
       marginTop: 8,
     },
-  }), [colors]);
+  }));
 
   return (
     <>
