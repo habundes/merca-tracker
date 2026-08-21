@@ -58,7 +58,7 @@ export default function TabsLayout() {
     >
       <NativeTabs.Trigger name="track">
         <NativeTabs.Trigger.Icon sf={{ default: 'list.bullet', selected: 'list.bullet' }} md="list" />
-        <NativeTabs.Trigger.Label>Rastrear</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Label>Mis Rastreos</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="search">
         <NativeTabs.Trigger.Icon sf="magnifyingglass" md="search" />
