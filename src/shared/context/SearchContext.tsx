@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
 type SearchContextType = {
   history: string[];
@@ -17,21 +17,22 @@ const SearchContext = createContext<SearchContextType>({
 export function SearchProvider({ children }: { children: React.ReactNode }) {
   const [history, setHistory] = useState<string[]>([]);
 
-  const addSearch = (url: string) => {
+  const addSearch = useCallback((url: string) => {
     setHistory(prev => [url, ...prev.filter(u => u !== url)]);
-  };
+  }, []);
 
-  const removeSearch = (url: string) => {
+  const removeSearch = useCallback((url: string) => {
     setHistory(prev => prev.filter(u => u !== url));
-  };
+  }, []);
 
-  const clearHistory = () => setHistory([]);
+  const clearHistory = useCallback(() => setHistory([]), []);
 
-  return (
-    <SearchContext.Provider value={{ history, addSearch, removeSearch, clearHistory }}>
-      {children}
-    </SearchContext.Provider>
+  const value = useMemo(
+    () => ({ history, addSearch, removeSearch, clearHistory }),
+    [history, addSearch, removeSearch, clearHistory],
   );
+
+  return <SearchContext.Provider value={value}>{children}</SearchContext.Provider>;
 }
 
 export const useSearch = () => useContext(SearchContext);
