@@ -102,4 +102,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  sendBtn: {
+    marginLeft: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
