@@ -1,1 +1,1 @@
-export { default } from '../../../src/features/profile/presentation/screens/AppearanceSettings';
+export { default } from '@/features/profile/presentation/screens/AppearanceSettings';

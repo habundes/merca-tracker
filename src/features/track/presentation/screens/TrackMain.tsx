@@ -1,24 +1,24 @@
-import { useMemo } from 'react';
 import {
   View,
   Text,
   FlatList,
   TouchableOpacity,
+  Pressable,
   StyleSheet,
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useSearch } from '../../../../shared/context/SearchContext';
-import { useTheme } from '../../../../shared/context/ThemeContext';
-import { GlassCard } from '../../../../shared/components/glass';
+import { Link } from 'expo-router';
+import { useSearch } from '@/shared/context/SearchContext';
+import { useTheme } from '@/shared/context/ThemeContext';
+import { useThemedStyles } from '@/shared/hooks/useThemedStyles';
+import { Card } from '@/shared/components/adaptive';
 
 export default function TrackMain() {
-  const router = useRouter();
-  const { history, clearHistory } = useSearch();
+  const { history, clearHistory, removeSearch } = useSearch();
   const { colors } = useTheme();
 
-  const styles = useMemo(() => StyleSheet.create({
+  const styles = useThemedStyles((colors) => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.bg,
@@ -65,6 +65,7 @@ export default function TrackMain() {
       borderWidth: 1,
       borderColor: colors.border,
       gap: 12,
+      overflow: 'hidden',
     },
     indexBadge: {
       width: 28,
@@ -108,7 +109,7 @@ export default function TrackMain() {
       fontSize: 13,
       color: colors.textMuted,
     },
-  }), [colors]);
+  }));
 
   const handleClearHistory = () => {
     Alert.alert(
@@ -126,9 +127,11 @@ export default function TrackMain() {
       <View style={styles.header}>
         <Text style={styles.title}>Mis rastreos</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity onPress={() => router.push('/track/config')}>
-            <Text style={styles.configText}>Configurar</Text>
-          </TouchableOpacity>
+          <Link href="/track/config" asChild>
+            <TouchableOpacity>
+              <Text style={styles.configText}>Configurar</Text>
+            </TouchableOpacity>
+          </Link>
           {history.length > 0 && (
             <TouchableOpacity onPress={handleClearHistory}>
               <Text style={styles.clearText}>Limpiar</Text>
@@ -140,11 +143,11 @@ export default function TrackMain() {
       {history.length === 0 ? (
         <View style={styles.empty}>
           {/* Demo temporal Liquid Glass — spec 01-liquid-glass-components */}
-          <GlassCard style={styles.emptyGlass}>
+          <Card style={styles.emptyGlass}>
             <Ionicons name="search-outline" size={48} color={colors.textMuted} />
             <Text style={styles.emptyText}>Sin rastreos aún</Text>
             <Text style={styles.emptySubText}>Las URLs rastreadas aparecerán aquí</Text>
-          </GlassCard>
+          </Card>
         </View>
       ) : (
         <FlatList
@@ -152,20 +155,33 @@ export default function TrackMain() {
           keyExtractor={(item, index) => `${item}-${index}`}
           contentContainerStyle={styles.list}
           renderItem={({ item, index }) => (
-            <TouchableOpacity
-              style={styles.item}
-              onPress={() =>
-                router.push({ pathname: '/track/[itemId]', params: { itemId: item } })
-              }
+            <Link
+              href={{ pathname: '/track/[itemId]', params: { itemId: encodeURIComponent(item) } }}
+              asChild
             >
-              <View style={styles.indexBadge}>
-                <Text style={styles.indexText}>{index + 1}</Text>
-              </View>
-              <View style={styles.itemContent}>
-                <Text style={styles.itemUrl} numberOfLines={1}>{item}</Text>
-              </View>
-              <Ionicons name="open-outline" size={16} color={colors.tabInactive} />
-            </TouchableOpacity>
+              <Link.Trigger>
+                <Pressable style={styles.item} android_ripple={{ color: colors.outline }}>
+                  <View style={styles.indexBadge}>
+                    <Text style={styles.indexText}>{index + 1}</Text>
+                  </View>
+                  <View style={styles.itemContent}>
+                    <Text style={styles.itemUrl} numberOfLines={1}>{item}</Text>
+                  </View>
+                  <Ionicons name="open-outline" size={16} color={colors.tabInactive} />
+                </Pressable>
+              </Link.Trigger>
+              {/* Vista previa (peek) y menú contextual — iOS; en Android solo navega. */}
+              <Link.Preview />
+              <Link.Menu>
+                <Link.MenuAction
+                  icon="trash"
+                  destructive
+                  onPress={() => removeSearch(item)}
+                >
+                  Eliminar del historial
+                </Link.MenuAction>
+              </Link.Menu>
+            </Link>
           )}
         />
       )}

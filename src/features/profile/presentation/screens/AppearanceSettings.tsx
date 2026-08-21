@@ -1,6 +1,6 @@
-import { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useTheme, ThemeMode } from '../../../../shared/context/ThemeContext';
+import { useTheme, ThemeMode } from '@/shared/context/ThemeContext';
+import { useThemedStyles } from '@/shared/hooks/useThemedStyles';
 
 const THEME_OPTIONS: { label: string; value: ThemeMode }[] = [
   { label: 'Sistema', value: 'system' },
@@ -9,9 +9,9 @@ const THEME_OPTIONS: { label: string; value: ThemeMode }[] = [
 ];
 
 export default function AppearanceSettings() {
-  const { colors, mode, setMode } = useTheme();
+  const { mode, setMode } = useTheme();
 
-  const styles = useMemo(() => StyleSheet.create({
+  const styles = useThemedStyles((colors) => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.bg,
@@ -50,7 +50,7 @@ export default function AppearanceSettings() {
     segmentTextActive: {
       color: '#ffffff',
     },
-  }), [colors]);
+  }));
 
   return (
     <View style={styles.container}>

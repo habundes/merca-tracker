@@ -1,1 +1,1 @@
-export { default } from '../../../src/features/profile/presentation/screens/AccountSettings';
+export { default } from '@/features/profile/presentation/screens/AccountSettings';
