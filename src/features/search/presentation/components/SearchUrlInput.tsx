@@ -60,6 +60,18 @@ export const SearchUrlInput = forwardRef<TextInput, SearchUrlInputProps>(
             <Ionicons name="close-circle" size={20} color={colors.textMuted} />
           </Pressable>
         )}
+        {showClear && (
+          <Pressable
+            onPress={onSubmit}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="Rastrear URL"
+            android_ripple={{ color: colors.outline, borderless: true, radius: 18 }}
+            style={({ pressed }) => [styles.sendBtn, pressed && { opacity: 0.5 }]}
+          >
+            <Ionicons name="arrow-forward-circle" size={22} color={colors.accent} />
+          </Pressable>
+        )}
       </TextField>
     );
   },
@@ -86,6 +98,11 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   clearBtn: {
+    marginLeft: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sendBtn: {
     marginLeft: 8,
     alignItems: 'center',
     justifyContent: 'center',
