@@ -1,6 +1,6 @@
 # SPEC 15 — Icono Android del tab Mis Rastreos
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Dependencias:** spec 03 (migración a Expo Router / NativeTabs), spec 14 (cambió el `sf` de iOS de "track" a `tray.full`/`tray.full.fill`). Toca `app/(tabs)/_layout.tsx`.
 > **Fecha:** 2026-08-25
 > **Objetivo:** Actualizar el ícono Android (`md`) del tab "Mis Rastreos" para que combine visualmente con el nuevo ícono iOS (`tray.full`/`tray.full.fill`, spec 14), ya que el `md` actual (`list`) quedó desalineado con ese significado.
@@ -34,10 +34,10 @@ que sigue en `list`, que ya no combina visualmente con el nuevo significado de "
 
 ## Criterios de aceptación
 
-- [ ] En Android, el tab "Mis Rastreos" muestra el nuevo icono fijo, sin distinción
+- [x] En Android, el tab "Mis Rastreos" muestra el nuevo icono fijo, sin distinción
       outline/fill (igual que hoy con Perfil).
-- [ ] En iOS no hay ningún cambio visual (este spec no toca `sf`).
-- [ ] El label "Mis Rastreos" no cambia.
+- [x] En iOS no hay ningún cambio visual (este spec no toca `sf`).
+- [x] El label "Mis Rastreos" no cambia.
 
 ## Decisiones tomadas
 
