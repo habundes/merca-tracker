@@ -2,8 +2,9 @@ import { StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Surface } from '@/shared/components/adaptive';
 import { useTheme } from '@/shared/context/ThemeContext';
+import type { SearchFeedbackType } from '@/features/search/domain';
 
-export type SearchFeedbackType = 'error' | 'warning' | 'loading' | 'success' | 'hint';
+export type { SearchFeedbackType };
 
 export interface SearchFeedbackProps {
   type: SearchFeedbackType;
