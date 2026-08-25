@@ -17,10 +17,10 @@ import { useThemedStyles } from '@/shared/hooks/useThemedStyles';
 import { Card } from '@/shared/components/adaptive';
 import { Toast } from '@/shared/components/Toast';
 
-// Holgura para librar la tab bar flotante (Liquid Glass) en iOS, que se dibuja
-// sobre el contenido edge-to-edge. En Android la barra es sólida y el contenido
-// ya queda por encima, así que basta un margen pequeño.
-const IOS_TAB_BAR_CLEARANCE = 80;
+// En iOS el safe-area inset inferior YA incluye la tab bar flotante (Liquid
+// Glass), así que basta sumarle un pequeño margen para separarla. En Android la
+// barra es sólida y el contenido ya queda por encima, así que va un margen fijo.
+const IOS_TOAST_GAP = 12;
 const ANDROID_TOAST_MARGIN = 32;
 
 export default function TrackMain() {
@@ -29,7 +29,7 @@ export default function TrackMain() {
   const insets = useSafeAreaInsets();
   const toastBottomOffset =
     Platform.OS === 'ios'
-      ? insets.bottom + IOS_TAB_BAR_CLEARANCE
+      ? insets.bottom + IOS_TOAST_GAP
       : ANDROID_TOAST_MARGIN;
 
   const styles = useThemedStyles((colors) => StyleSheet.create({
