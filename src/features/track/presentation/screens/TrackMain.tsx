@@ -13,9 +13,10 @@ import { useSearch } from '@/shared/context/SearchContext';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { useThemedStyles } from '@/shared/hooks/useThemedStyles';
 import { Card } from '@/shared/components/adaptive';
+import { Toast } from '@/shared/components/Toast';
 
 export default function TrackMain() {
-  const { history, clearHistory, removeSearch } = useSearch();
+  const { history, clearHistory, removeSearch, lastAdded, setLastAdded } = useSearch();
   const { colors } = useTheme();
 
   const styles = useThemedStyles((colors) => StyleSheet.create({
@@ -183,6 +184,13 @@ export default function TrackMain() {
               </Link.Menu>
             </Link>
           )}
+        />
+      )}
+
+      {lastAdded != null && (
+        <Toast
+          message={`«${lastAdded}» agregado!`}
+          onHide={() => setLastAdded(null)}
         />
       )}
     </View>
