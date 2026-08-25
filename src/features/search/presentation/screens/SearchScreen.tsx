@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo, useEffect } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import {
   StyleSheet,
   TextInput,
@@ -6,25 +6,21 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { useSearch } from '@/shared/context/SearchContext';
+import { useFocusEffect } from 'expo-router';
 import { useTheme } from '@/shared/context/ThemeContext';
 import {
   SearchFeedback,
   SearchHelp,
   SearchUrlInput,
-  type SearchFeedbackType,
 } from '@/features/search/presentation/components';
+import { useProductSearch } from '@/features/search/presentation/hooks/useProductSearch';
+import { feedbackForStatus } from '@/features/search/domain';
 
 export default function SearchScreen() {
-  const [url, setUrl] = useState('');
-  const [duplicate, setDuplicate] = useState(false);
-
-  const inputRef = useRef<TextInput>(null);
-  const duplicateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const { addSearch, history } = useSearch();
   const { colors } = useTheme();
-  const router = useRouter();
+  const inputRef = useRef<TextInput>(null);
+  const { value, status, disabled, onChangeText, onClear, onSubmit } =
+    useProductSearch();
 
   const styles = useMemo(
     () =>
@@ -53,32 +49,7 @@ export default function SearchScreen() {
     }, []),
   );
 
-  useEffect(
-    () => () => {
-      if (duplicateTimerRef.current) clearTimeout(duplicateTimerRef.current);
-    },
-    [],
-  );
-
-  const handleSearch = () => {
-    const trimmed = url.trim();
-    if (!trimmed) return;
-    if (history.includes(trimmed)) {
-      setDuplicate(true);
-      if (duplicateTimerRef.current) clearTimeout(duplicateTimerRef.current);
-      duplicateTimerRef.current = setTimeout(() => setDuplicate(false), 2500);
-      return;
-    }
-    setDuplicate(false);
-    addSearch(trimmed);
-    setUrl('');
-    router.push('/track');
-  };
-
-  const feedbackType: SearchFeedbackType = duplicate ? 'warning' : 'hint';
-  const feedbackMessage = duplicate
-    ? 'URL ya agregada anteriormente'
-    : 'Las búsquedas se guardan en Rastrear';
+  const feedback = feedbackForStatus(status);
 
   return (
     <KeyboardAvoidingView
@@ -87,14 +58,15 @@ export default function SearchScreen() {
     >
       <SearchUrlInput
         ref={inputRef}
-        value={url}
-        onChangeText={setUrl}
-        onSubmit={handleSearch}
-        onClear={() => setUrl('')}
+        value={value}
+        onChangeText={onChangeText}
+        onSubmit={onSubmit}
+        onClear={onClear}
+        disabled={disabled}
       />
 
       <View style={styles.feedbackSlot}>
-        <SearchFeedback type={feedbackType} message={feedbackMessage} />
+        <SearchFeedback type={feedback.type} message={feedback.message} />
       </View>
 
       <View style={styles.helpSlot}>
