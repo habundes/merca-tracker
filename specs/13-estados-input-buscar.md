@@ -1,6 +1,6 @@
 # SPEC 13 — Estados del input de Buscar (validaciones + backend simulado)
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Dependencias:** spec 09 (rediseño Buscar), spec 11 (componentes en `search/presentation/components/`, quitó prop `editable`), spec 12 (botón enviar `arrow-forward-circle`), spec 05 (`useTheme`/colores), spec 10 (capa adaptativa). Toca `SearchScreen`, `SearchUrlInput`, `SearchContext`, `SearchFeedback` (reuso), `TrackMain` (+toast nuevo), nuevos `search/domain/` y `search/data/`, y `docs/ux_spec.md`.
 > **Fecha:** 2026-08-25
 > **Objetivo:** Implementar la máquina de estados del input de Buscar —validación de formato ML México, duplicado y lista llena (5/5), más estados de backend simulados (verificando → disponible/no-disponible) y popover de éxito— tomando en cuenta el botón de enviar del spec 12.
