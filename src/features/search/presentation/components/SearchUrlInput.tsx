@@ -14,10 +14,11 @@ export interface SearchUrlInputProps {
   onChangeText: (text: string) => void;
   onSubmit: () => void;
   onClear: () => void;
+  disabled?: boolean;
 }
 
 export const SearchUrlInput = forwardRef<TextInput, SearchUrlInputProps>(
-  ({ value, onChangeText, onSubmit, onClear }, ref) => {
+  ({ value, onChangeText, onSubmit, onClear, disabled = false }, ref) => {
     const { colors } = useTheme();
     const showClear = value.length > 0;
 
@@ -25,6 +26,7 @@ export const SearchUrlInput = forwardRef<TextInput, SearchUrlInputProps>(
       value,
       onChangeText,
       onSubmitEditing: onSubmit,
+      editable: !disabled,
       placeholder: 'Pega URL de Mercadolibre',
       placeholderTextColor: colors.textMuted,
       keyboardType: 'url',
@@ -39,6 +41,7 @@ export const SearchUrlInput = forwardRef<TextInput, SearchUrlInputProps>(
         style={[
           styles.container,
           { borderColor: colors.border },
+          disabled && styles.disabled,
         ]}
       >
         <Ionicons
@@ -51,9 +54,11 @@ export const SearchUrlInput = forwardRef<TextInput, SearchUrlInputProps>(
         {showClear && (
           <Pressable
             onPress={onClear}
+            disabled={disabled}
             hitSlop={8}
             accessibilityRole="button"
             accessibilityLabel="Limpiar URL"
+            accessibilityState={{ disabled }}
             android_ripple={{ color: colors.outline, borderless: true, radius: 18 }}
             style={({ pressed }) => [styles.clearBtn, pressed && { opacity: 0.5 }]}
           >
@@ -63,9 +68,11 @@ export const SearchUrlInput = forwardRef<TextInput, SearchUrlInputProps>(
         {showClear && (
           <Pressable
             onPress={onSubmit}
+            disabled={disabled}
             hitSlop={8}
             accessibilityRole="button"
             accessibilityLabel="Rastrear URL"
+            accessibilityState={{ disabled }}
             android_ripple={{ color: colors.outline, borderless: true, radius: 18 }}
             style={({ pressed }) => [styles.sendBtn, pressed && { opacity: 0.5 }]}
           >
@@ -88,6 +95,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     height: 48,
     overflow: 'hidden',
+  },
+  disabled: {
+    opacity: 0.5,
   },
   leadingIcon: {
     marginRight: 8,
