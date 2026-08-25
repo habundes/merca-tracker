@@ -274,7 +274,7 @@ Tracklist full (input disabled):
 ┌────────────────────────────────┐
 │ 🔗 Pega URL de Mercadolibre   │  ← disabled, grayed out
 └────────────────────────────────┘
-  ⚠️ Lista llena (5/5). Ve a Tracklist para eliminar un producto.
+  ⚠️ Lista llena (5/5). Elimina un producto para agregar otro.
 
 
 ✅ Success → auto-navigate to Tracklist tab:
