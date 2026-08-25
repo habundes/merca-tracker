@@ -251,21 +251,21 @@ User taps Enter → keyboard closes → validation error:
 
 User taps Enter → keyboard closes → loading:
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │   ← input disabled
+│ https://articulo.mercadolib... │ ✕ │ >  ← input, ✕ y > deshabilitados
 └────────────────────────────────┘
   ⏳ Verificando producto...
 
 
 Product unavailable:
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
   ❌ Este producto ya no está disponible en Mercadolibre.
 
 
 Already tracking:
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
   ⚠️ Ya estás rastreando este producto.
 
@@ -284,6 +284,19 @@ Tracklist full (input disabled):
   ✅ iPhone 15 Pro agregado!
 → App switches to Tracklist tab, new product at top, expanded
 ```
+
+### URLs dummy de prueba
+
+Mientras no exista el backend real (Decodo), el chequeo de producto es simulado
+(`checkProductFake`). La disponibilidad se decide por convención sobre la URL: una
+URL válida de Mercadolibre México que **termine en `MLM-0`** se considera no
+disponible; cualquier otra, disponible.
+
+| Caso             | URL de ejemplo                                        | Resultado                              |
+| ---------------- | ----------------------------------------------------- | -------------------------------------- |
+| No disponible    | `https://articulo.mercadolibre.com.mx/MLM-0`          | ❌ "…ya no está disponible…"            |
+| Disponible       | `https://articulo.mercadolibre.com.mx/MLM-1234567890` | ✅ se agrega y navega a Rastrear         |
+| Formato inválido | `https://amazon.com/x`                                | ⚠️ "Solo URLs de Mercadolibre México." |
 
 ---
 
@@ -627,20 +640,20 @@ Default (empty):
 
 User pastes URL (no keyboard yet):
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
 
 
 After 1 second debounce → keyboard opens automatically:
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
 [Teclado del dispositivo abre — usuario toca Enter/Enviar]
 
 
 User taps Enter → keyboard closes → validation error:
 ┌────────────────────────────────┐
-│ https://amazon.com/...         │ ✕ │
+│ https://amazon.com/...         │ ✕ │ >
 └────────────────────────────────┘
   ⚠️ Solo URLs de Mercadolibre México.
   [Producto NO agregado]
@@ -648,15 +661,15 @@ User taps Enter → keyboard closes → validation error:
 
 User taps Enter → keyboard closes → Loading (Decodo):
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
   ⏳ Verificando producto...
-  [Input desactivado mientras carga]
+  [Input, ✕ y > desactivados mientras carga]
 
 
 Product unavailable:
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
   ❌ Este producto ya no está disponible en Mercadolibre.
   [Producto NO agregado]
@@ -664,7 +677,7 @@ Product unavailable:
 
 Already tracking:
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
   ⚠️ Ya estás rastreando este producto.
   [Producto NO agregado]
