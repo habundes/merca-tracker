@@ -4,7 +4,8 @@ import { Surface } from '@/shared/components/adaptive';
 import { useTheme } from '@/shared/context/ThemeContext';
 
 export interface ToastProps {
-  message: string;
+  message: string; // parte principal; se trunca con "…" si no cabe
+  suffix?: string; // texto fijo que nunca se trunca (p. ej. " agregado!")
   duration?: number; // ms visible antes de auto-ocultarse
   bottomOffset?: number; // distancia desde el borde inferior (para librar tab bars, etc.)
   onHide: () => void;
@@ -20,6 +21,7 @@ const FADE_MS = 200;
 // Toast no asume que exista una tab bar.
 export function Toast({
   message,
+  suffix,
   duration = DEFAULT_DURATION,
   bottomOffset = DEFAULT_BOTTOM_OFFSET,
   onHide,
@@ -50,7 +52,7 @@ export function Toast({
     }, duration);
 
     return () => clearTimeout(hideTimer);
-  }, [message, duration, opacity]);
+  }, [message, suffix, duration, opacity]);
 
   return (
     <Animated.View
@@ -58,9 +60,18 @@ export function Toast({
       style={[styles.wrapper, { opacity, bottom: bottomOffset }]}
     >
       <Surface style={[styles.pill, { borderColor: colors.border }]}>
-        <Text style={[styles.text, { color: colors.text }]} numberOfLines={2}>
+        <Text
+          style={[styles.text, styles.messageText, { color: colors.text }]}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
           {message}
         </Text>
+        {suffix ? (
+          <Text style={[styles.text, { color: colors.text }]} numberOfLines={1}>
+            {suffix}
+          </Text>
+        ) : null}
       </Surface>
     </Animated.View>
   );
@@ -75,6 +86,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderRadius: 999,
     borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: 16,
@@ -85,6 +98,8 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 14,
     fontWeight: '600',
-    textAlign: 'center',
+  },
+  messageText: {
+    flexShrink: 1, // el nombre se encoge y se trunca; el suffix se mantiene
   },
 });

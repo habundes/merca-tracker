@@ -202,7 +202,8 @@ export default function TrackMain() {
 
       {lastAdded != null && (
         <Toast
-          message={`«${lastAdded}» agregado!`}
+          message={`«${lastAdded}`}
+          suffix="» agregado!"
           bottomOffset={toastBottomOffset}
           onHide={() => setLastAdded(null)}
         />
