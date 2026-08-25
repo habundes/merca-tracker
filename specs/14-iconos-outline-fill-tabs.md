@@ -1,6 +1,6 @@
 # SPEC 14 — Iconos outline/fill en tabs Mis Rastreos y Buscar
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Dependencias:** spec 03 (migración a Expo Router / NativeTabs), spec 05 (`useTheme`/colores). Toca `app/(tabs)/_layout.tsx`.
 > **Fecha:** 2026-08-25
 > **Objetivo:** Cambiar el ícono SF Symbol del tab "Mis Rastreos" para que use un par outline/fill (`tray.full`/`tray.full.fill`) según el estado activo, igual que ya hace el tab "Perfil". El tab "Buscar" se evaluó para el mismo tratamiento pero se descartó (ver "Decisiones tomadas y descartadas").
@@ -26,11 +26,11 @@
 
 ## Criterios de aceptación
 
-- [ ] En iOS, el tab "Mis Rastreos" inactivo muestra `tray.full` (outline) y activo muestra `tray.full.fill` (relleno).
-- [ ] En iOS, el tab "Buscar" muestra `magnifyingglass` fijo en ambos estados (sin variante fill), solo cambia el color activo/inactivo.
-- [ ] El tab "Perfil" no cambia visualmente (sigue `person`/`person.fill`).
-- [ ] En Android, los tres tabs siguen mostrando un solo icono fijo (`list`, `search`, `person`), sin distinción outline/fill.
-- [ ] Los labels "Mis Rastreos", "Buscar" y "Perfil" no cambian.
+- [x] En iOS, el tab "Mis Rastreos" inactivo muestra `tray.full` (outline) y activo muestra `tray.full.fill` (relleno).
+- [x] En iOS, el tab "Buscar" muestra `magnifyingglass` fijo en ambos estados (sin variante fill), solo cambia el color activo/inactivo.
+- [x] El tab "Perfil" no cambia visualmente (sigue `person`/`person.fill`).
+- [x] En Android, los tres tabs siguen mostrando un solo icono fijo (`list`, `search`, `person`), sin distinción outline/fill.
+- [x] Los labels "Mis Rastreos", "Buscar" y "Perfil" no cambian.
 
 ## Decisiones tomadas y descartadas
 
