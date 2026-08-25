@@ -39,7 +39,8 @@ que sigue en `list`, que ya no combina visualmente con el nuevo significado de "
 - [ ] En iOS no hay ningún cambio visual (este spec no toca `sf`).
 - [ ] El label "Mis Rastreos" no cambia.
 
-## Decisiones pendientes
+## Decisiones tomadas
 
-- Confirmar el nombre exacto del Material Icon a usar (sugerido: `inbox`, por parecido visual con
-  `tray.full` de iOS). Alternativas a evaluar si `inbox` no convence: `inventory_2`, `archive`.
+- **Icono confirmado: `inbox`.** Se comparó con `inventory_2` y `archive` (ambos leen como caja
+  cerrada de cartón, no como bandeja). `inbox` es una bandeja vista de perfil con una ranura
+  horizontal, la forma más parecida a `tray.full` de iOS.
