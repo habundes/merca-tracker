@@ -61,7 +61,7 @@ export default function TabsLayout() {
         <NativeTabs.Trigger.Label>Mis Rastreos</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="search">
-        <NativeTabs.Trigger.Icon sf="magnifyingglass" md="search" />
+        <NativeTabs.Trigger.Icon sf={{ default: 'magnifyingglass', selected: 'magnifyingglass.circle.fill' }} md="search" />
         <NativeTabs.Trigger.Label>Buscar</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="profile">
