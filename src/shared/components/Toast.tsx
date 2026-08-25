@@ -6,15 +6,24 @@ import { useTheme } from '@/shared/context/ThemeContext';
 export interface ToastProps {
   message: string;
   duration?: number; // ms visible antes de auto-ocultarse
+  bottomOffset?: number; // distancia desde el borde inferior (para librar tab bars, etc.)
   onHide: () => void;
 }
 
 const DEFAULT_DURATION = 2000;
+const DEFAULT_BOTTOM_OFFSET = 32;
 const FADE_MS = 200;
 
 // Toast presentacional: aparece con fade-in, se mantiene `duration` ms y hace
 // fade-out; al terminar llama `onHide`. Adaptativo (Surface) y temático.
-export function Toast({ message, duration = DEFAULT_DURATION, onHide }: ToastProps) {
+// El posicionamiento vertical lo controla el llamador vía `bottomOffset` — el
+// Toast no asume que exista una tab bar.
+export function Toast({
+  message,
+  duration = DEFAULT_DURATION,
+  bottomOffset = DEFAULT_BOTTOM_OFFSET,
+  onHide,
+}: ToastProps) {
   const { colors } = useTheme();
   const opacity = useRef(new Animated.Value(0)).current;
   // Evita re-disparar el timer si el padre pasa un `onHide` nuevo en cada render.
@@ -44,7 +53,10 @@ export function Toast({ message, duration = DEFAULT_DURATION, onHide }: ToastPro
   }, [message, duration, opacity]);
 
   return (
-    <Animated.View pointerEvents="none" style={[styles.wrapper, { opacity }]}>
+    <Animated.View
+      pointerEvents="none"
+      style={[styles.wrapper, { opacity, bottom: bottomOffset }]}
+    >
       <Surface style={[styles.pill, { borderColor: colors.border }]}>
         <Text style={[styles.text, { color: colors.text }]} numberOfLines={2}>
           {message}
@@ -59,7 +71,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 0,
     right: 0,
-    bottom: 32,
     alignItems: 'center',
     paddingHorizontal: 20,
   },
