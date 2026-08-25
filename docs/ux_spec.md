@@ -32,16 +32,17 @@
 
 ### Why users should prefer this app over Mercadolibre
 
-| Mercadolibre App/Web | This App |
-|---------------------|---------|
-| No price change alerts | ✅ Instant push notifications |
-| Must manually revisit product | ✅ Price history visible at a glance |
-| Tedious navigation to find price | ✅ All info on one card |
-| No price trend indicator | ✅ 📉 📈 ➡️ at a glance |
-| Multiple taps to get to product | ✅ Swipe for instant actions |
-| No check history | ✅ Last 5 checks inline on card |
+| Mercadolibre App/Web             | This App                             |
+| -------------------------------- | ------------------------------------ |
+| No price change alerts           | ✅ Instant push notifications        |
+| Must manually revisit product    | ✅ Price history visible at a glance |
+| Tedious navigation to find price | ✅ All info on one card              |
+| No price trend indicator         | ✅ 📉 📈 ➡️ at a glance              |
+| Multiple taps to get to product  | ✅ Swipe for instant actions         |
+| No check history                 | ✅ Last 5 checks inline on card      |
 
 ### Core UX Principles
+
 - **Zero unnecessary taps** — most actions reachable in 1-2 gestures
 - **Price is always prominent** — large, readable, with change indicator
 - **History visible without navigating** — expand card inline
@@ -72,11 +73,11 @@ iOS y Android (mismo orden y layout):
 
 Iconos (Ionicons, cross-platform — no SF Symbols ni Material Symbols nativos):
 
-| Tab | activo (filled) | inactivo (outline) |
-|-----|-----------------|--------------------|
-| Rastrear (`track`)  | `list`   | `list-outline`   |
-| Buscar (`search`)   | `search` | `search-outline` |
-| Perfil (`profile`)  | `person` | `person-outline` |
+| Tab                | activo (filled) | inactivo (outline) |
+| ------------------ | --------------- | ------------------ |
+| Rastrear (`track`) | `list`          | `list-outline`     |
+| Buscar (`search`)  | `search`        | `search-outline`   |
+| Perfil (`profile`) | `person`        | `person-outline`   |
 
 Estado activo: **icono filled + tint** (`colors.accent`, del tema). Sin indicator pill.
 
@@ -113,6 +114,7 @@ app/
 ```
 
 Notas:
+
 - `initialRouteName: 'search'` en `(tabs)/_layout.tsx` → **Search** es la pantalla al abrir.
 - `app/index.tsx` redirige a `/search` para arranques que caen en la raíz.
 - Cada `.tsx` de pantalla re-exporta el screen desde `src/features/{track,search,profile}/presentation/screens/`.
@@ -229,41 +231,41 @@ Default (empty):
 
 URL pasted (keyboard not open yet):
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
 
 
 After 1 second → keyboard opens automatically:
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
 [Keyboard open — user taps Enter/Enviar]
 
 
 User taps Enter → keyboard closes → validation error:
 ┌────────────────────────────────┐
-│ https://amazon.com/...         │ ✕ │
+│ https://amazon.com/...         │ ✕ │ >
 └────────────────────────────────┘
   ⚠️ Solo URLs de Mercadolibre México.
 
 
 User taps Enter → keyboard closes → loading:
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │  ← input disabled
+│ https://articulo.mercadolib... │ ✕ │ >  ← input, ✕ y > deshabilitados
 └────────────────────────────────┘
   ⏳ Verificando producto...
 
 
 Product unavailable:
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
   ❌ Este producto ya no está disponible en Mercadolibre.
 
 
 Already tracking:
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
   ⚠️ Ya estás rastreando este producto.
 
@@ -272,7 +274,7 @@ Tracklist full (input disabled):
 ┌────────────────────────────────┐
 │ 🔗 Pega URL de Mercadolibre   │  ← disabled, grayed out
 └────────────────────────────────┘
-  ⚠️ Lista llena (5/5). Ve a Tracklist para eliminar un producto.
+  ⚠️ Lista llena (5/5). Elimina un producto para agregar otro.
 
 
 ✅ Success → auto-navigate to Tracklist tab:
@@ -282,6 +284,19 @@ Tracklist full (input disabled):
   ✅ iPhone 15 Pro agregado!
 → App switches to Tracklist tab, new product at top, expanded
 ```
+
+### URLs dummy de prueba
+
+Mientras no exista el backend real (Decodo), el chequeo de producto es simulado
+(`checkProductFake`). La disponibilidad se decide por convención sobre la URL: una
+URL válida de Mercadolibre México que **termine en `MLM-0`** se considera no
+disponible; cualquier otra, disponible.
+
+| Caso             | URL de ejemplo                                        | Resultado                              |
+| ---------------- | ----------------------------------------------------- | -------------------------------------- |
+| No disponible    | `https://articulo.mercadolibre.com.mx/MLM-0`          | ❌ "…ya no está disponible…"            |
+| Disponible       | `https://articulo.mercadolibre.com.mx/MLM-1234567890` | ✅ se agrega y navega a Rastrear         |
+| Formato inválido | `https://amazon.com/x`                                | ⚠️ "Solo URLs de Mercadolibre México." |
 
 ---
 
@@ -318,6 +333,7 @@ When arriving from Search (new product added):
 ```
 
 ### Status Bar Variations
+
 ```
 Free tier, no products:
 │ 📋 Sin productos · Agrega hasta 5     │
@@ -459,6 +475,7 @@ Full swipe left → triggers "Eliminar" with confirmation:
 ```
 
 **Swipe Left Actions:**
+
 - 🔄 **Check Ahora** (blue) — triggers manual price check immediately
 - 🗑 **Eliminar** (red) — removes product with confirmation dialog
 
@@ -480,6 +497,7 @@ Full swipe right → opens Configure Mode screen directly
 ```
 
 **Swipe Right Actions:**
+
 - ⚙️ **Configurar** (gray) — opens Configure Mode screen
 
 ---
@@ -516,6 +534,7 @@ This prevents accidental swipes while reading history.
 ## Configure Mode Screen
 
 Accessed via:
+
 - Swipe right on card
 - "Configurar" button inside expanded card
 
@@ -621,20 +640,20 @@ Default (empty):
 
 User pastes URL (no keyboard yet):
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
 
 
 After 1 second debounce → keyboard opens automatically:
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
 [Teclado del dispositivo abre — usuario toca Enter/Enviar]
 
 
 User taps Enter → keyboard closes → validation error:
 ┌────────────────────────────────┐
-│ https://amazon.com/...         │ ✕ │
+│ https://amazon.com/...         │ ✕ │ >
 └────────────────────────────────┘
   ⚠️ Solo URLs de Mercadolibre México.
   [Producto NO agregado]
@@ -642,15 +661,15 @@ User taps Enter → keyboard closes → validation error:
 
 User taps Enter → keyboard closes → Loading (Decodo):
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
   ⏳ Verificando producto...
-  [Input desactivado mientras carga]
+  [Input, ✕ y > desactivados mientras carga]
 
 
 Product unavailable:
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
   ❌ Este producto ya no está disponible en Mercadolibre.
   [Producto NO agregado]
@@ -658,7 +677,7 @@ Product unavailable:
 
 Already tracking:
 ┌────────────────────────────────┐
-│ https://articulo.mercadolib... │ ✕ │
+│ https://articulo.mercadolib... │ ✕ │ >
 └────────────────────────────────┘
   ⚠️ Ya estás rastreando este producto.
   [Producto NO agregado]
@@ -710,24 +729,24 @@ const handleSubmit = () => {
   ref={inputRef}
   value={inputValue}
   onChangeText={handleInputChange}
-  onSubmitEditing={handleSubmit}   // ← Enter / Send key triggers submit
-  returnKeyType="send"             // ← Shows "Enviar" on keyboard
-  blurOnSubmit={true}              // ← Keyboard closes on submit
-  placeholder="Pega URL de Mercadolibre"
+  onSubmitEditing={handleSubmit} // ← Enter / Send key triggers submit
+  returnKeyType='send' // ← Shows "Enviar" on keyboard
+  blurOnSubmit={true} // ← Keyboard closes on submit
+  placeholder='Pega URL de Mercadolibre'
   editable={!isLoading && !isTracklistFull}
-/>
+/>;
 ```
 
 ---
 
 ### Message Styles
 
-| Type | Icon | Color | Duration |
-|------|------|-------|----------|
-| Error | ❌ | Red `#FF3B30` (iOS) / `#F44336` (Android) | Until user edits input |
-| Warning | ⚠️ | Orange `#FF9500` (iOS) / `#FF9800` (Android) | Until user edits input |
-| Loading | ⏳ | Gray `#8E8E93` (iOS) / `#9E9E9E` (Android) | While Decodo loads |
-| Success | ✅ | Green `#34C759` (iOS) / `#4CAF50` (Android) | 2 seconds then fades out |
+| Type    | Icon | Color                                        | Duration                 |
+| ------- | ---- | -------------------------------------------- | ------------------------ |
+| Error   | ❌   | Red `#FF3B30` (iOS) / `#F44336` (Android)    | Until user edits input   |
+| Warning | ⚠️   | Orange `#FF9500` (iOS) / `#FF9800` (Android) | Until user edits input   |
+| Loading | ⏳   | Gray `#8E8E93` (iOS) / `#9E9E9E` (Android)   | While Decodo loads       |
+| Success | ✅   | Green `#34C759` (iOS) / `#4CAF50` (Android)  | 2 seconds then fades out |
 
 ---
 
@@ -785,15 +804,15 @@ Deep link: mltracker://product/:product_id
 
 ### Notification Types & Copy (Spanish)
 
-| Scenario | Título | Cuerpo |
-|----------|--------|--------|
-| Price dropped | `iPhone 15 Pro 📉` | `Precio: $899 → $749 (-$150)` |
-| Price increased | `iPhone 15 Pro 📈` | `Precio: $749 → $899 (+$150)` |
-| Wish price reached | `🎯 ¡Precio deseado alcanzado!` | `iPhone 15 Pro ahora $749. Abre la app para continuar.` |
-| Product unavailable | `⚠️ Producto no disponible` | `iPhone 15 Pro ya no está en Mercadolibre. Elimínalo de tu lista.` |
-| Payment failed (monthly) | `⚠️ Pago fallido` | `Actualiza tu método de pago en las próximas 12 horas para mantener Premium.` |
-| Payment failed (annual) | `⚠️ Pago fallido` | `Actualiza tu método de pago en las próximas 24 horas para mantener Premium.` |
-| Premium expired | `📉 Premium terminado` | `Tu cuenta volvió a Free. 5 productos visibles. Suscríbete para restaurar todo.` |
+| Scenario                 | Título                          | Cuerpo                                                                           |
+| ------------------------ | ------------------------------- | -------------------------------------------------------------------------------- |
+| Price dropped            | `iPhone 15 Pro 📉`              | `Precio: $899 → $749 (-$150)`                                                    |
+| Price increased          | `iPhone 15 Pro 📈`              | `Precio: $749 → $899 (+$150)`                                                    |
+| Wish price reached       | `🎯 ¡Precio deseado alcanzado!` | `iPhone 15 Pro ahora $749. Abre la app para continuar.`                          |
+| Product unavailable      | `⚠️ Producto no disponible`     | `iPhone 15 Pro ya no está en Mercadolibre. Elimínalo de tu lista.`               |
+| Payment failed (monthly) | `⚠️ Pago fallido`               | `Actualiza tu método de pago en las próximas 12 horas para mantener Premium.`    |
+| Payment failed (annual)  | `⚠️ Pago fallido`               | `Actualiza tu método de pago en las próximas 24 horas para mantener Premium.`    |
+| Premium expired          | `📉 Premium terminado`          | `Tu cuenta volvió a Free. 5 productos visibles. Suscríbete para restaurar todo.` |
 
 ---
 
@@ -899,16 +918,16 @@ Haptics (VibrationEffect):
 
 ### Feature Comparison Table
 
-| Feature | iOS (Liquid Glass) | Android (Material 3) |
-|---------|-------------------|---------------------|
-| Tab bar | UITabBar (glass) | NavigationBar (MD3) |
-| Input field | Glass field | OutlinedTextField |
-| Cards | Glass material | ElevatedCard |
-| Active tab | Filled icon + tint | Icon + indicator pill |
-| Modals | Bottom sheet (glass) | BottomSheet (MD3) |
-| Feedback | Glass pill | FilledChip / Snackbar |
-| Dark mode | Automatic (system) | Dynamic color (MD3) |
-| Haptics | UIImpactFeedback | VibrationEffect |
+| Feature     | iOS (Liquid Glass)   | Android (Material 3)  |
+| ----------- | -------------------- | --------------------- |
+| Tab bar     | UITabBar (glass)     | NavigationBar (MD3)   |
+| Input field | Glass field          | OutlinedTextField     |
+| Cards       | Glass material       | ElevatedCard          |
+| Active tab  | Filled icon + tint   | Icon + indicator pill |
+| Modals      | Bottom sheet (glass) | BottomSheet (MD3)     |
+| Feedback    | Glass pill           | FilledChip / Snackbar |
+| Dark mode   | Automatic (system)   | Dynamic color (MD3)   |
+| Haptics     | UIImpactFeedback     | VibrationEffect       |
 
 ---
 
@@ -1018,6 +1037,7 @@ In expanded card:
 Ads are designed to feel native and non-intrusive while maximizing revenue.
 
 ### Banner Ad
+
 ```
 Position: Fixed bottom of screen, above safe area
 Height: 50px (standard AdMob banner)
@@ -1034,6 +1054,7 @@ iOS:                          Android:
 ```
 
 ### Native Ad (In-Feed)
+
 ```
 Appears every 3rd item in tracklist (only when 3+ products tracked)
 Styled as a product card with "Patrocinado" label
@@ -1051,6 +1072,7 @@ Tapping opens external link
 ```
 
 ### Interstitial Ad
+
 ```
 Trigger: Opening a product's Configure Mode screen
 Frequency: Max once every 3 Configure opens (not every time)
@@ -1072,6 +1094,7 @@ Interstitial NOT shown when:
 ```
 
 ### Reward Ad
+
 ```
 Trigger: User hits 2/2 daily manual check limit
 Shown inside expanded card as optional button
@@ -1097,17 +1120,17 @@ Resets at midnight UTC
 
 ## Interaction Summary
 
-| Action | Gesture | Result |
-|--------|---------|--------|
-| See price history | Tap card | Card expands inline |
-| Close history | Tap card again | Card collapses |
-| Manual check | Swipe left → 🔄 | Check runs immediately |
-| Delete product | Swipe left → 🗑 | Confirmation then delete |
-| Configure mode | Swipe right → ⚙️ | Configure screen opens |
+| Action                | Gesture                  | Result                      |
+| --------------------- | ------------------------ | --------------------------- |
+| See price history     | Tap card                 | Card expands inline         |
+| Close history         | Tap card again           | Card collapses              |
+| Manual check          | Swipe left → 🔄          | Check runs immediately      |
+| Delete product        | Swipe left → 🗑          | Confirmation then delete    |
+| Configure mode        | Swipe right → ⚙️         | Configure screen opens      |
 | Quick check from card | Expanded → [Check Ahora] | Check runs, history updates |
-| Configure from card | Expanded → [Configurar] | Configure screen opens |
-| Add product | Paste URL in top bar | Auto-validates + adds |
-| Reward ad | Expanded → [Ver ad] | Ad plays → +1 check |
+| Configure from card   | Expanded → [Configurar]  | Configure screen opens      |
+| Add product           | Paste URL in top bar     | Auto-validates + adds       |
+| Reward ad             | Expanded → [Ver ad]      | Ad plays → +1 check         |
 
 ---
 
@@ -1394,17 +1417,18 @@ Onboarding complete — tooltips never shown again
 
 ## Performance Requirements
 
-| Action | Target Time |
-|--------|------------|
-| App cold start | < 2 seconds |
-| Tracklist load (cached) | < 100ms |
-| Card expand animation | 250ms |
-| Swipe reveal | 0ms (follows finger) |
-| Manual check response | < 3 seconds |
-| New product validation | < 1 second (frontend) |
-| New product add (Decodo) | < 5 seconds |
+| Action                   | Target Time           |
+| ------------------------ | --------------------- |
+| App cold start           | < 2 seconds           |
+| Tracklist load (cached)  | < 100ms               |
+| Card expand animation    | 250ms                 |
+| Swipe reveal             | 0ms (follows finger)  |
+| Manual check response    | < 3 seconds           |
+| New product validation   | < 1 second (frontend) |
+| New product add (Decodo) | < 5 seconds           |
 
 **Caching strategy:**
+
 - Tracklist data: cached in AsyncStorage on every fetch
 - Price history per product: cached on expand
 - Images: cached via FastImage

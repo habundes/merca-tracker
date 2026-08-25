@@ -6,17 +6,31 @@ import {
   Pressable,
   StyleSheet,
   Alert,
+  Platform,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useSearch } from '@/shared/context/SearchContext';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { useThemedStyles } from '@/shared/hooks/useThemedStyles';
 import { Card } from '@/shared/components/adaptive';
+import { Toast } from '@/shared/components/Toast';
+
+// En iOS el safe-area inset inferior YA incluye la tab bar flotante (Liquid
+// Glass), así que basta sumarle un pequeño margen para separarla. En Android la
+// barra es sólida y el contenido ya queda por encima, así que va un margen fijo.
+const IOS_TOAST_GAP = 12;
+const ANDROID_TOAST_MARGIN = 32;
 
 export default function TrackMain() {
-  const { history, clearHistory, removeSearch } = useSearch();
+  const { history, clearHistory, removeSearch, lastAdded, setLastAdded } = useSearch();
   const { colors } = useTheme();
+  const insets = useSafeAreaInsets();
+  const toastBottomOffset =
+    Platform.OS === 'ios'
+      ? insets.bottom + IOS_TOAST_GAP
+      : ANDROID_TOAST_MARGIN;
 
   const styles = useThemedStyles((colors) => StyleSheet.create({
     container: {
@@ -183,6 +197,15 @@ export default function TrackMain() {
               </Link.Menu>
             </Link>
           )}
+        />
+      )}
+
+      {lastAdded != null && (
+        <Toast
+          message={`«${lastAdded}`}
+          suffix="» agregado!"
+          bottomOffset={toastBottomOffset}
+          onHide={() => setLastAdded(null)}
         />
       )}
     </View>
