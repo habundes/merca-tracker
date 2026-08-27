@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { MAX_TRACKED } from '@/features/search/domain';
+import { DUMMY_TRACK_HISTORY } from '@/features/track/dummyHistory';
 
 type SearchContextType = {
   history: string[];
@@ -14,7 +15,7 @@ type SearchContextType = {
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
 
 export function SearchProvider({ children }: { children: React.ReactNode }) {
-  const [history, setHistory] = useState<string[]>([]);
+  const [history, setHistory] = useState<string[]>(DUMMY_TRACK_HISTORY);
   const [lastAdded, setLastAdded] = useState<string | null>(null);
 
   const addSearch = useCallback((url: string) => {
