@@ -39,16 +39,11 @@ export default function TrackMain() {
     },
     header: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-end',
       alignItems: 'center',
       paddingHorizontal: 20,
       paddingTop: 20,
       paddingBottom: 12,
-    },
-    title: {
-      fontSize: 20,
-      fontWeight: '700',
-      color: colors.text,
     },
     headerActions: {
       flexDirection: 'row',
@@ -139,7 +134,6 @@ export default function TrackMain() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Mis rastreos</Text>
         <View style={styles.headerActions}>
           <Link href="/track/config" asChild>
             <TouchableOpacity>
