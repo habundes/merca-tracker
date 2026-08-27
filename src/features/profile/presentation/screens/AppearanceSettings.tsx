@@ -18,13 +18,6 @@ export default function AppearanceSettings() {
       paddingHorizontal: 20,
       paddingTop: 24,
     },
-    sectionTitle: {
-      fontSize: 13,
-      fontWeight: '600',
-      color: colors.textMuted,
-      textTransform: 'uppercase',
-      marginBottom: 10,
-    },
     segment: {
       flexDirection: 'row',
       borderWidth: 1,
@@ -54,7 +47,6 @@ export default function AppearanceSettings() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>Apariencia</Text>
       <View style={styles.segment}>
         {THEME_OPTIONS.map((opt) => (
           <TouchableOpacity
