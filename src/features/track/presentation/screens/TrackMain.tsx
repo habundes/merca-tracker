@@ -17,13 +17,6 @@ import { useThemedStyles } from '@/shared/hooks/useThemedStyles';
 import { Card } from '@/shared/components/adaptive';
 import { Toast } from '@/shared/components/Toast';
 import { SwipeableTrackRow } from '@/features/track/presentation/components/SwipeableTrackRow';
-import { DUMMY_TRACK_ITEMS } from '@/features/track/dummyHistory';
-
-// La lista guarda URLs; el nombre del artículo vive en los datos dummy. Mapeamos
-// URL → título para mostrar el nombre completo; si no hay match, usamos la URL.
-const titleByUrl = new Map(
-  DUMMY_TRACK_ITEMS.map((item) => [item.url, item.title]),
-);
 
 // En iOS el safe-area inset inferior YA incluye la tab bar flotante (Liquid
 // Glass), así que basta sumarle un pequeño margen para separarla. En Android la
@@ -167,7 +160,7 @@ export default function TrackMain() {
           data={history}
           keyExtractor={(item, index) => `${item}-${index}`}
           contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
             <SwipeableTrackRow>
               <Link
                 href={{
@@ -181,11 +174,19 @@ export default function TrackMain() {
                     style={styles.item}
                     android_ripple={{ color: colors.outline }}
                   >
+                    <View style={styles.indexBadge}>
+                      <Text style={styles.indexText}>{index + 1}</Text>
+                    </View>
                     <View style={styles.itemContent}>
-                      <Text style={styles.itemTitle}>
-                        {titleByUrl.get(item) ?? item}
+                      <Text style={styles.itemUrl} numberOfLines={1}>
+                        {item}
                       </Text>
                     </View>
+                    <Ionicons
+                      name='open-outline'
+                      size={16}
+                      color={colors.tabInactive}
+                    />
                   </Pressable>
                 </Link.Trigger>
                 {/* Vista previa (peek) y menú contextual — iOS; en Android solo navega. */}
