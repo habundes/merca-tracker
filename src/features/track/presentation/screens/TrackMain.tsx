@@ -181,7 +181,7 @@ export default function TrackMain() {
           keyExtractor={(item, index) => `${item}-${index}`}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
-            <SwipeableTrackRow>
+            <SwipeableTrackRow onDelete={() => handleDeleteItem(item)}>
               <Link
                 href={{
                   pathname: '/track/[itemId]',
