@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ReanimatedSwipeable, {
   type SwipeableMethods,
@@ -36,7 +36,6 @@ export function SwipeableTrackRow({ children }: SwipeableTrackRowProps) {
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 18,
-        gap: 4,
       },
       checkAction: {
         backgroundColor: colors.accent,
@@ -46,11 +45,6 @@ export function SwipeableTrackRow({ children }: SwipeableTrackRowProps) {
       },
       configAction: {
         backgroundColor: colors.textMuted,
-      },
-      actionText: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: ON_ACCENT,
       },
     })
   );
@@ -67,14 +61,12 @@ export function SwipeableTrackRow({ children }: SwipeableTrackRowProps) {
         onPress={() => swipeableMethods.close()}
       >
         <Ionicons name="refresh" size={22} color={ON_ACCENT} />
-        <Text style={styles.actionText}>Check Ahora</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.action, styles.deleteAction]}
         onPress={() => swipeableMethods.close()}
       >
         <Ionicons name="trash" size={22} color={ON_ACCENT} />
-        <Text style={styles.actionText}>Eliminar</Text>
       </TouchableOpacity>
     </View>
   );
@@ -91,7 +83,6 @@ export function SwipeableTrackRow({ children }: SwipeableTrackRowProps) {
         onPress={() => swipeableMethods.close()}
       >
         <Ionicons name="settings-outline" size={22} color={ON_ACCENT} />
-        <Text style={styles.actionText}>Configurar</Text>
       </TouchableOpacity>
     </View>
   );
