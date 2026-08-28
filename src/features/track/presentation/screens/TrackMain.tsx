@@ -79,6 +79,10 @@ export default function TrackMain() {
         borderRadius: 10,
         paddingHorizontal: 14,
         paddingVertical: 14,
+        // Altura mínima consistente: en Android (pantalla más ancha) los títulos
+        // suelen caber en una línea; con esto la fila luce igual de espaciosa que
+        // en iOS, donde el título envuelve a dos líneas.
+        minHeight: 64,
         borderWidth: 1,
         borderColor: colors.border,
         gap: 12,
@@ -91,6 +95,9 @@ export default function TrackMain() {
         fontSize: 15,
         fontWeight: '600',
         color: colors.text,
+        // lineHeight explícito para que el espaciado entre líneas del título
+        // multilínea sea idéntico en iOS y Android.
+        lineHeight: 20,
       },
       empty: {
         flex: 1,
