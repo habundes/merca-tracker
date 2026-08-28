@@ -16,12 +16,12 @@ import { useThemedStyles } from '@/shared/hooks/useThemedStyles';
 import { Card } from '@/shared/components/adaptive';
 import { Toast } from '@/shared/components/Toast';
 import { confirmDestructiveAction } from '@/shared/utils/confirmDialog';
-import { DUMMY_TRACK_ITEMS } from '@/features/track/dummyHistory';
+import { DUMMY_TRACK_DETAILS } from '@/features/track/data/datasources/dummyTrackDataSource';
 import { SwipeableTrackRow } from '@/features/track/presentation/components/SwipeableTrackRow';
 
 // La lista guarda URLs; el nombre del artículo vive en los datos dummy. Mapeamos
 // URL → título para mostrar el nombre completo; si no hay match, usamos la URL.
-const titleByUrl = new Map(DUMMY_TRACK_ITEMS.map((item) => [item.url, item.title]));
+const titleByUrl = new Map(DUMMY_TRACK_DETAILS.map((d) => [d.url, d.title]));
 
 // En iOS el safe-area inset inferior YA incluye la tab bar flotante (Liquid
 // Glass), así que basta sumarle un pequeño margen para separarla. En Android la
