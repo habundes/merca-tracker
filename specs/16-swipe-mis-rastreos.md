@@ -1,6 +1,6 @@
 # SPEC 16 — Swipe en Mis Rastreos (revelar acciones)
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Dependencias:** spec 04 (feature `track` / pantalla `TrackMain`), spec 13 (store
 > del tracklist en `SearchContext`; dejó "swipe, estados de card" fuera). Toca
 > `package.json`, `app/_layout.tsx`, `src/features/track/presentation/screens/TrackMain.tsx`,
@@ -99,19 +99,19 @@ react-native-reanimated react-native-worklets expo-haptics`. SDK 57 fija
 
 ## Criterios de aceptación
 
-- [ ] `package.json` incluye `react-native-gesture-handler`, `react-native-reanimated`,
+- [x] `package.json` incluye `react-native-gesture-handler`, `react-native-reanimated`,
       `react-native-worklets` y `expo-haptics` en versiones de SDK 57.
-- [ ] `<GestureHandlerRootView style={{flex:1}}>` envuelve la raíz en `app/_layout.tsx`.
-- [ ] Swipe izquierda en una fila revela a la derecha **[🔄 Check Ahora]** (azul) y
+- [x] `<GestureHandlerRootView style={{flex:1}}>` envuelve la raíz en `app/_layout.tsx`.
+- [x] Swipe izquierda en una fila revela a la derecha **[🔄 Check Ahora]** (azul) y
       **[🗑 Eliminar]** (rojo).
-- [ ] Swipe derecha revela a la izquierda **[⚙️ Configurar]** (gris).
-- [ ] Tocar cualquiera de los 3 botones **solo cierra** el swipe: no borra, no
+- [x] Swipe derecha revela a la izquierda **[⚙️ Configurar]** (gris).
+- [x] Tocar cualquiera de los 3 botones **solo cierra** el swipe: no borra, no
       verifica, no navega.
-- [ ] No hay auto-acción por swipe completo (60%); solo se revela.
-- [ ] El tap normal de la fila sigue navegando al Detalle (sin cambios).
-- [ ] Se dispara un haptic ligero al abrir el swipe.
-- [ ] La app compila y corre en iOS y Android (dev client, New Architecture).
-- [ ] Como última tarea, `docs/ux_spec.md` (Swipe Actions) queda actualizado con lo
+- [x] No hay auto-acción por swipe completo (60%); solo se revela.
+- [x] El tap normal de la fila sigue navegando al Detalle (sin cambios).
+- [x] Se dispara un haptic ligero al abrir el swipe.
+- [x] La app compila y corre en iOS y Android (dev client, New Architecture).
+- [x] Como última tarea, `docs/ux_spec.md` (Swipe Actions) queda actualizado con lo
       implementado, sobre la lista y omitiendo la card de producto.
 
 ## Decisiones tomadas y descartadas

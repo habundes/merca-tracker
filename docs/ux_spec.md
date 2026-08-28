@@ -455,9 +455,9 @@ Expanded → Collapsed:
 
 Swipe gestures on the **rows of the tracklist ("Mis Rastreos")**. Current
 implementation (spec 16) applies the gesture to the existing **URL list rows** —
-not the product card. Revealed buttons are **visual only**: tapping any of them
-just closes the swipe (no action, no navigation). Wiring the real actions is
-left to future specs.
+not the product card. Revealed buttons are **icon-only** (no text label) and
+**visual only**: tapping any of them just closes the swipe (no action, no
+navigation). Wiring the real actions is left to future specs.
 
 ---
 
@@ -468,18 +468,18 @@ Swipe left on a row:
 
 ┌────────────────────────────────────────┐
 │ 1  https://techstore.mx/iphone-15-pro  │░░░░░░░░░░│
-│                                         │ 🔄      🗑 │
+│                                         │ 🔄     🗑 │
 └────────────────────────────────────────┘░░░░░░░░░░│
-                                          Check  Eliminar
                                           (blue) (red)
+                                          icon-only, no label
 
 No full-swipe trigger: only partial reveal. Tapping a button closes the swipe.
 ```
 
-**Swipe Left Actions:**
+**Swipe Left Actions:** (icon-only, no text label)
 
-- 🔄 **Check Ahora** (blue, `colors.accent`) — visual only; closes the swipe
-- 🗑 **Eliminar** (red, `colors.danger`) — visual only; closes the swipe
+- 🔄 (`refresh`, blue, `colors.accent`) — "Check Ahora"; visual only, closes the swipe
+- 🗑 (`trash`, red, `colors.danger`) — "Eliminar"; visual only, closes the swipe
 
 ---
 
@@ -492,15 +492,15 @@ Swipe right on a row:
 │░░░░░░░│ 1  https://techstore.mx/iphone… │
 │ ⚙️    │                                 │
 └────────────────────────────────────────┘
- Config
  (gray)
+ icon-only, no label
 
 No full-swipe trigger: only partial reveal. Tapping the button closes the swipe.
 ```
 
-**Swipe Right Actions:**
+**Swipe Right Actions:** (icon-only, no text label)
 
-- ⚙️ **Configurar** (gray, `colors.textMuted`) — visual only; closes the swipe
+- ⚙️ (`settings-outline`, gray, `colors.textMuted`) — "Configurar"; visual only, closes the swipe
 
 ---
 
