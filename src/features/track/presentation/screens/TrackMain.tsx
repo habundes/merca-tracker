@@ -79,10 +79,10 @@ export default function TrackMain() {
         borderRadius: 10,
         paddingHorizontal: 14,
         paddingVertical: 14,
-        // Altura mínima consistente: en Android (pantalla más ancha) los títulos
-        // suelen caber en una línea; con esto la fila luce igual de espaciosa que
-        // en iOS, donde el título envuelve a dos líneas.
-        minHeight: 64,
+        // Alto mínimo para dos líneas de título (2 × lineHeight 20 +
+        // paddingVertical 14 × 2 = 68). Igual en iOS y Android; el título que
+        // exceda dos líneas se recorta con "…" (numberOfLines={2}).
+        minHeight: 68,
         borderWidth: 1,
         borderColor: colors.border,
         gap: 12,
@@ -187,7 +187,11 @@ export default function TrackMain() {
                     android_ripple={{ color: colors.outline }}
                   >
                     <View style={styles.itemContent}>
-                      <Text style={styles.itemTitle}>
+                      <Text
+                        style={styles.itemTitle}
+                        numberOfLines={2}
+                        ellipsizeMode='tail'
+                      >
                         {titleByUrl.get(item) ?? item}
                       </Text>
                     </View>
