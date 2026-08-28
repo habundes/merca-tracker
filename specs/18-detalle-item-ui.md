@@ -1,6 +1,6 @@
 # SPEC 18 — Pantalla Detalle del item (UI maqueteada, clean architecture)
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Dependencias:** spec 04 (feature `track`, pantalla `ItemDetail` y ruta dinámica
 > `/track/[itemId]`), spec 02 (convención clean-arch feature-first:
 > `domain/{entities,usecases,repositories}`, `data/{datasources,models,repositories}`,
