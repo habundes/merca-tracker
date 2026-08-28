@@ -1,6 +1,6 @@
 # SPEC 17 — Eliminar rastreo desde swipe (con confirmación)
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Dependencias:** spec 16 (`SwipeableTrackRow` y su botón 🗑 Eliminar, hoy inerte),
 > spec 13 (store del tracklist en `SearchContext`: `removeSearch`, `clearHistory`),
 > spec 04 (feature `track` / pantalla `TrackMain`). Toca
