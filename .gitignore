@@ -40,4 +40,6 @@ yarn-error.*
 /ios
 /android
 
-pnpm*
+# pnpm (commit pnpm-lock.yaml; ignore caches/logs only)
+.pnpm-store/
+pnpm-debug.log*

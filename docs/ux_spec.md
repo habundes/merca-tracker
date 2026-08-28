@@ -453,52 +453,54 @@ Expanded → Collapsed:
 
 ## Swipe Actions
 
-Swipe gestures for fast access without expanding the card.
+Swipe gestures on the **rows of the tracklist ("Mis Rastreos")**. Current
+implementation (spec 16) applies the gesture to the existing **URL list rows** —
+not the product card. Revealed buttons are **icon-only** (no text label) and
+**visual only**: tapping any of them just closes the swipe (no action, no
+navigation). Wiring the real actions is left to future specs.
 
 ---
 
-### Swipe Left → Reveal Destructive + Check Actions
+### Swipe Left → Reveal Check + Destructive Actions
 
 ```
-Swipe left on card:
+Swipe left on a row:
 
 ┌────────────────────────────────────────┐
-│ 🖼 iPhone 15 Pro  $749 📉              │░░░░░░░░░░│
-│    TechStore MX   próx: 22hrs         │ 🔄      🗑 │
+│ 1  https://techstore.mx/iphone-15-pro  │░░░░░░░░░░│
+│                                         │ 🔄     🗑 │
 └────────────────────────────────────────┘░░░░░░░░░░│
-                                          Check  Eliminar
                                           (blue) (red)
+                                          icon-only, no label
 
-Full swipe left → triggers "Eliminar" with confirmation:
-  "¿Eliminar iPhone 15 Pro del tracklist?"
-  [Cancelar] [Eliminar]
+No full-swipe trigger: only partial reveal. Tapping a button closes the swipe.
 ```
 
-**Swipe Left Actions:**
+**Swipe Left Actions:** (icon-only, no text label)
 
-- 🔄 **Check Ahora** (blue) — triggers manual price check immediately
-- 🗑 **Eliminar** (red) — removes product with confirmation dialog
+- 🔄 (`refresh`, blue, `colors.accent`) — "Check Ahora"; visual only, closes the swipe
+- 🗑 (`trash`, red, `colors.danger`) — "Eliminar"; visual only, closes the swipe
 
 ---
 
 ### Swipe Right → Reveal Configure Action
 
 ```
-Swipe right on card:
+Swipe right on a row:
 
 ┌────────────────────────────────────────┐
-│░░░░░░░│  🖼 iPhone 15 Pro  $749 📉     │
-│ ⚙️    │    TechStore MX   próx: 22hrs  │
+│░░░░░░░│ 1  https://techstore.mx/iphone… │
+│ ⚙️    │                                 │
 └────────────────────────────────────────┘
- Config
  (gray)
+ icon-only, no label
 
-Full swipe right → opens Configure Mode screen directly
+No full-swipe trigger: only partial reveal. Tapping the button closes the swipe.
 ```
 
-**Swipe Right Actions:**
+**Swipe Right Actions:** (icon-only, no text label)
 
-- ⚙️ **Configurar** (gray) — opens Configure Mode screen
+- ⚙️ (`settings-outline`, gray, `colors.textMuted`) — "Configurar"; visual only, closes the swipe
 
 ---
 
@@ -506,16 +508,17 @@ Full swipe right → opens Configure Mode screen directly
 
 ```
 Threshold to reveal:     40px
-Threshold for full swipe: 60% of card width
-Haptic feedback:         light tap when threshold reached
+Full-swipe trigger:      not implemented (partial reveal only)
+Haptic feedback:         light tap when threshold reached (onSwipeableWillOpen)
 
-iOS: Uses SwipeableRow / Reanimated 2
-Android: Uses Swipeable from react-native-gesture-handler
+Implementation: ReanimatedSwipeable (react-native-gesture-handler + Reanimated),
+                friction=2, leftThreshold=rightThreshold=40.
 
-Swipe disabled when:
-  - Card is expanded (tap to collapse first)
-  - Product is unavailable (⚠️ state)
+The normal row tap keeps navigating to Detail (unchanged).
 ```
+
+> Card-expanded / product-unavailable disable conditions do not apply yet: those
+> states don't exist in the code. Revisit when the product card is built.
 
 ---
 
