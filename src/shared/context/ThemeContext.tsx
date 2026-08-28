@@ -82,6 +82,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     (Appearance.getColorScheme() as ColorScheme) ?? 'light'
   );
 
+  const effectiveScheme: ColorScheme = mode === 'system' ? systemScheme : mode;
+  const colors = effectiveScheme === 'dark' ? darkColors : lightColors;
+
   useEffect(() => {
     AsyncStorage.getItem(STORAGE_KEY)
       .then((stored) => {
@@ -105,28 +108,32 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.remove();
   }, [mode]);
 
-  // Fuerza la apariencia nativa al modo elegido en la app. Solo iOS: sin esto,
-  // la barra de NativeTabs y los colores DynamicColorIOS resuelven contra el
-  // esquema del sistema y parpadean a claro al cambiar de tab en modo oscuro.
-  // En Android NO se aplica: su AppearanceModule.setColorScheme exige un valor
-  // no-null (revienta con `null`) y su barra usa color explícito, no el trait.
+  // Fuerza la apariencia nativa al esquema elegido en la app.
+  // - iOS: sin esto, la barra de NativeTabs y los colores DynamicColorIOS
+  //   resuelven contra el esquema del sistema y parpadean a claro al cambiar de
+  //   tab en modo oscuro. `null` = seguir al sistema (mode 'system').
+  // - Android: `Appearance.setColorScheme` mapea a
+  //   `AppCompatDelegate.setDefaultNightMode`, lo único que re-tinta los
+  //   diálogos nativos AppCompat (`Alert.alert`) al tema de la app. Se pasa
+  //   siempre el `effectiveScheme` concreto ('light'/'dark'): en Android `null`
+  //   revienta, y usar el esquema efectivo hace que 'system' siga al SO.
   useEffect(() => {
-    if (Platform.OS !== 'ios') return;
-    // `null` resetea al esquema del sistema; el tipo de RN 0.86 no lo incluye
-    // pese a soportarlo en runtime (iOS), de ahí el cast al tipo del parámetro.
-    const scheme = (mode === 'system' ? null : mode) as Parameters<
-      typeof Appearance.setColorScheme
-    >[0];
-    Appearance.setColorScheme(scheme);
-  }, [mode]);
+    if (Platform.OS === 'ios') {
+      // `null` resetea al esquema del sistema; el tipo de RN 0.86 no lo incluye
+      // pese a soportarlo en runtime (iOS), de ahí el cast al tipo del parámetro.
+      const scheme = (mode === 'system' ? null : mode) as Parameters<
+        typeof Appearance.setColorScheme
+      >[0];
+      Appearance.setColorScheme(scheme);
+    } else if (Platform.OS === 'android') {
+      Appearance.setColorScheme(effectiveScheme);
+    }
+  }, [mode, effectiveScheme]);
 
   const setMode = (newMode: ThemeMode) => {
     setModeState(newMode);
     AsyncStorage.setItem(STORAGE_KEY, newMode).catch(() => {});
   };
-
-  const effectiveScheme: ColorScheme = mode === 'system' ? systemScheme : mode;
-  const colors = effectiveScheme === 'dark' ? darkColors : lightColors;
 
   const value = useMemo<ThemeContextValue>(
     () => ({ mode, effectiveScheme, colors, setMode, isHydrated }),
