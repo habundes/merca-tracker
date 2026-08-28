@@ -133,6 +133,16 @@ export default function TrackMain() {
     });
   };
 
+  const handleDeleteItem = (item: string) => {
+    const name = titleByUrl.get(item) ?? item;
+    confirmDestructiveAction({
+      title: 'Eliminar rastreo',
+      message: `¿Eliminar «${name}»?`,
+      confirmLabel: 'Eliminar',
+      onConfirm: () => removeSearch(item),
+    });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
