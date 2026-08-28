@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   Pressable,
   StyleSheet,
-  Alert,
   Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,6 +15,7 @@ import { useTheme } from '@/shared/context/ThemeContext';
 import { useThemedStyles } from '@/shared/hooks/useThemedStyles';
 import { Card } from '@/shared/components/adaptive';
 import { Toast } from '@/shared/components/Toast';
+import { confirmDestructiveAction } from '@/shared/utils/confirmDialog';
 import { DUMMY_TRACK_ITEMS } from '@/features/track/dummyHistory';
 import { SwipeableTrackRow } from '@/features/track/presentation/components/SwipeableTrackRow';
 
@@ -125,14 +125,12 @@ export default function TrackMain() {
   );
 
   const handleClearHistory = () => {
-    Alert.alert(
-      'Limpiar rastreos',
-      '¿Estás seguro que deseas limpiar tu historial de rastreos?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { text: 'Limpiar', style: 'destructive', onPress: clearHistory },
-      ],
-    );
+    confirmDestructiveAction({
+      title: 'Limpiar rastreos',
+      message: '¿Estás seguro que deseas limpiar tu historial de rastreos?',
+      confirmLabel: 'Limpiar',
+      onConfirm: clearHistory,
+    });
   };
 
   return (
