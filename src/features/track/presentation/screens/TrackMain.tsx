@@ -16,7 +16,12 @@ import { useTheme } from '@/shared/context/ThemeContext';
 import { useThemedStyles } from '@/shared/hooks/useThemedStyles';
 import { Card } from '@/shared/components/adaptive';
 import { Toast } from '@/shared/components/Toast';
+import { DUMMY_TRACK_ITEMS } from '@/features/track/dummyHistory';
 import { SwipeableTrackRow } from '@/features/track/presentation/components/SwipeableTrackRow';
+
+// La lista guarda URLs; el nombre del artículo vive en los datos dummy. Mapeamos
+// URL → título para mostrar el nombre completo; si no hay match, usamos la URL.
+const titleByUrl = new Map(DUMMY_TRACK_ITEMS.map((item) => [item.url, item.title]));
 
 // En iOS el safe-area inset inferior YA incluye la tab bar flotante (Liquid
 // Glass), así que basta sumarle un pequeño margen para separarla. En Android la
@@ -25,7 +30,8 @@ const IOS_TOAST_GAP = 12;
 const ANDROID_TOAST_MARGIN = 32;
 
 export default function TrackMain() {
-  const { history, clearHistory, removeSearch, lastAdded, setLastAdded } = useSearch();
+  const { history, clearHistory, removeSearch, lastAdded, setLastAdded } =
+    useSearch();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const toastBottomOffset =
@@ -33,93 +39,90 @@ export default function TrackMain() {
       ? insets.bottom + IOS_TOAST_GAP
       : ANDROID_TOAST_MARGIN;
 
-  const styles = useThemedStyles((colors) => StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.bg,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'flex-end',
-      alignItems: 'center',
-      paddingHorizontal: 20,
-      paddingTop: 20,
-      paddingBottom: 12,
-    },
-    headerActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 16,
-    },
-    configText: {
-      fontSize: 14,
-      color: colors.accent,
-      fontWeight: '600',
-    },
-    clearText: {
-      fontSize: 14,
-      color: colors.danger,
-      fontWeight: '600',
-    },
-    list: {
-      paddingHorizontal: 16,
-      gap: 8,
-    },
-    item: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: colors.bgSecondary,
-      borderRadius: 10,
-      paddingHorizontal: 14,
-      paddingVertical: 14,
-      borderWidth: 1,
-      borderColor: colors.border,
-      gap: 12,
-      overflow: 'hidden',
-    },
-    indexBadge: {
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      backgroundColor: colors.bgTertiary,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    indexText: {
-      fontSize: 12,
-      fontWeight: '700',
-      color: colors.accent,
-    },
-    itemContent: {
-      flex: 1,
-    },
-    itemUrl: {
-      fontSize: 14,
-      color: colors.textMuted,
-    },
-    empty: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-    },
-    emptyGlass: {
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      paddingHorizontal: 32,
-      paddingVertical: 32,
-    },
-    emptyText: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: colors.textMuted,
-    },
-    emptySubText: {
-      fontSize: 13,
-      color: colors.textMuted,
-    },
-  }));
+  const styles = useThemedStyles((colors) =>
+    StyleSheet.create({
+      container: {
+        flex: 1,
+        backgroundColor: colors.bg,
+      },
+      header: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 12,
+      },
+      headerActions: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 16,
+      },
+      configText: {
+        fontSize: 14,
+        color: colors.accent,
+        fontWeight: '600',
+      },
+      clearText: {
+        fontSize: 14,
+        color: colors.danger,
+        fontWeight: '600',
+      },
+      list: {
+        paddingHorizontal: 16,
+        gap: 8,
+      },
+      item: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: colors.bgSecondary,
+        borderRadius: 10,
+        paddingHorizontal: 14,
+        paddingVertical: 14,
+        // Alto mínimo para dos líneas de título (2 × lineHeight 20 +
+        // paddingVertical 14 × 2 = 68). Igual en iOS y Android; el título que
+        // exceda dos líneas se recorta con "…" (numberOfLines={2}).
+        minHeight: 68,
+        borderWidth: 1,
+        borderColor: colors.border,
+        gap: 12,
+        overflow: 'hidden',
+      },
+      itemContent: {
+        flex: 1,
+      },
+      itemTitle: {
+        fontSize: 15,
+        fontWeight: '600',
+        color: colors.text,
+        // lineHeight explícito para que el espaciado entre líneas del título
+        // multilínea sea idéntico en iOS y Android.
+        lineHeight: 20,
+      },
+      empty: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+      },
+      emptyGlass: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+        paddingHorizontal: 32,
+        paddingVertical: 32,
+      },
+      emptyText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.textMuted,
+      },
+      emptySubText: {
+        fontSize: 13,
+        color: colors.textMuted,
+      },
+    }),
+  );
 
   const handleClearHistory = () => {
     Alert.alert(
@@ -128,7 +131,7 @@ export default function TrackMain() {
       [
         { text: 'Cancelar', style: 'cancel' },
         { text: 'Limpiar', style: 'destructive', onPress: clearHistory },
-      ]
+      ],
     );
   };
 
@@ -136,7 +139,7 @@ export default function TrackMain() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerActions}>
-          <Link href="/track/config" asChild>
+          <Link href='/track/config' asChild>
             <TouchableOpacity>
               <Text style={styles.configText}>Configurar</Text>
             </TouchableOpacity>
@@ -153,9 +156,15 @@ export default function TrackMain() {
         <View style={styles.empty}>
           {/* Demo temporal Liquid Glass — spec 01-liquid-glass-components */}
           <Card style={styles.emptyGlass}>
-            <Ionicons name="search-outline" size={48} color={colors.textMuted} />
+            <Ionicons
+              name='search-outline'
+              size={48}
+              color={colors.textMuted}
+            />
             <Text style={styles.emptyText}>Sin rastreos aún</Text>
-            <Text style={styles.emptySubText}>Las URLs rastreadas aparecerán aquí</Text>
+            <Text style={styles.emptySubText}>
+              Las URLs rastreadas aparecerán aquí
+            </Text>
           </Card>
         </View>
       ) : (
@@ -163,28 +172,36 @@ export default function TrackMain() {
           data={history}
           keyExtractor={(item, index) => `${item}-${index}`}
           contentContainerStyle={styles.list}
-          renderItem={({ item, index }) => (
+          renderItem={({ item }) => (
             <SwipeableTrackRow>
               <Link
-                href={{ pathname: '/track/[itemId]', params: { itemId: encodeURIComponent(item) } }}
+                href={{
+                  pathname: '/track/[itemId]',
+                  params: { itemId: encodeURIComponent(item) },
+                }}
                 asChild
               >
                 <Link.Trigger>
-                  <Pressable style={styles.item} android_ripple={{ color: colors.outline }}>
-                    <View style={styles.indexBadge}>
-                      <Text style={styles.indexText}>{index + 1}</Text>
-                    </View>
+                  <Pressable
+                    style={styles.item}
+                    android_ripple={{ color: colors.outline }}
+                  >
                     <View style={styles.itemContent}>
-                      <Text style={styles.itemUrl} numberOfLines={1}>{item}</Text>
+                      <Text
+                        style={styles.itemTitle}
+                        numberOfLines={2}
+                        ellipsizeMode='tail'
+                      >
+                        {titleByUrl.get(item) ?? item}
+                      </Text>
                     </View>
-                    <Ionicons name="open-outline" size={16} color={colors.tabInactive} />
                   </Pressable>
                 </Link.Trigger>
                 {/* Vista previa (peek) y menú contextual — iOS; en Android solo navega. */}
                 <Link.Preview />
                 <Link.Menu>
                   <Link.MenuAction
-                    icon="trash"
+                    icon='trash'
                     destructive
                     onPress={() => removeSearch(item)}
                   >
@@ -200,7 +217,7 @@ export default function TrackMain() {
       {lastAdded != null && (
         <Toast
           message={`«${lastAdded}`}
-          suffix="» agregado!"
+          suffix='» agregado!'
           bottomOffset={toastBottomOffset}
           onHide={() => setLastAdded(null)}
         />

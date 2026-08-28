@@ -42,9 +42,16 @@ export function SwipeableTrackRow({ children }: SwipeableTrackRowProps) {
       },
       deleteAction: {
         backgroundColor: colors.danger,
+        // Redondea las esquinas exteriores (derecha) para igualar el radio de
+        // la fila (item.borderRadius = 10) y que no asome color al cerrar.
+        borderTopRightRadius: 10,
+        borderBottomRightRadius: 10,
       },
       configAction: {
         backgroundColor: colors.textMuted,
+        // Redondea las esquinas exteriores (izquierda) igual que la fila.
+        borderTopLeftRadius: 10,
+        borderBottomLeftRadius: 10,
       },
     })
   );
