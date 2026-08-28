@@ -13,6 +13,7 @@ const REVEAL_THRESHOLD = 40;
 
 type SwipeableTrackRowProps = {
   children: React.ReactNode;
+  onDelete: () => void;
 };
 
 /**
@@ -21,11 +22,16 @@ type SwipeableTrackRowProps = {
  * - Swipe izquierda → revela a la derecha: 🔄 Check Ahora (azul) + 🗑 Eliminar (rojo).
  * - Swipe derecha → revela a la izquierda: ⚙️ Configurar (gris).
  *
- * Los botones son **solo visuales**: al tocarse únicamente cierran el swipe
+ * El botón 🗑 Eliminar cierra el swipe y dispara `onDelete` (confirmación +
+ * borrado, cableado desde `TrackMain`; spec 17). Los botones 🔄 Check Ahora y
+ * ⚙️ Configurar siguen **solo visuales**: al tocarse únicamente cierran el swipe
  * (`swipeableMethods.close()`); no ejecutan acción ni navegación. El tap normal
  * de la fila (su contenido) conserva su comportamiento original.
  */
-export function SwipeableTrackRow({ children }: SwipeableTrackRowProps) {
+export function SwipeableTrackRow({
+  children,
+  onDelete,
+}: SwipeableTrackRowProps) {
   const styles = useThemedStyles((colors) =>
     StyleSheet.create({
       actionsContainer: {
@@ -71,7 +77,10 @@ export function SwipeableTrackRow({ children }: SwipeableTrackRowProps) {
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.action, styles.deleteAction]}
-        onPress={() => swipeableMethods.close()}
+        onPress={() => {
+          swipeableMethods.close();
+          onDelete();
+        }}
       >
         <Ionicons name="trash" size={22} color={ON_ACCENT} />
       </TouchableOpacity>
