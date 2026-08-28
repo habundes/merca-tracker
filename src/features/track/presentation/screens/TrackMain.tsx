@@ -211,7 +211,7 @@ export default function TrackMain() {
                   <Link.MenuAction
                     icon='trash'
                     destructive
-                    onPress={() => removeSearch(item)}
+                    onPress={() => handleDeleteItem(item)}
                   >
                     Eliminar del historial
                   </Link.MenuAction>
