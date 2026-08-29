@@ -14,6 +14,7 @@ export type ThemeColors = {
   border: string;
   accent: string;
   danger: string;
+  success: string;
   tabInactive: string;
   // Tokens MD3 (aditivos, Android). No afectan glass/iOS.
   surface: string;
@@ -41,6 +42,7 @@ export const lightColors: ThemeColors = {
   border: '#e5e7eb',
   accent: '#2563eb',
   danger: '#dc2626',
+  success: '#16a34a',
   tabInactive: '#aaaaaa',
   surface: '#fef7ff',
   surfaceVariant: '#e7e0ec',
@@ -59,6 +61,7 @@ export const darkColors: ThemeColors = {
   border: '#38383a',
   accent: '#0a84ff',
   danger: '#ff453a',
+  success: '#30d158',
   tabInactive: '#8e8e93',
   surface: '#1c1b1f',
   surfaceVariant: '#49454f',

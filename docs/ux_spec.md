@@ -294,8 +294,8 @@ disponible; cualquier otra, disponible.
 
 | Caso             | URL de ejemplo                                        | Resultado                              |
 | ---------------- | ----------------------------------------------------- | -------------------------------------- |
-| No disponible    | `https://articulo.mercadolibre.com.mx/MLM-0`          | ❌ "…ya no está disponible…"            |
-| Disponible       | `https://articulo.mercadolibre.com.mx/MLM-1234567890` | ✅ se agrega y navega a Rastrear         |
+| No disponible    | `https://articulo.mercadolibre.com.mx/MLM-0`          | ❌ "…ya no está disponible…"           |
+| Disponible       | `https://articulo.mercadolibre.com.mx/MLM-1234567890` | ✅ se agrega y navega a Rastrear       |
 | Formato inválido | `https://amazon.com/x`                                | ⚠️ "Solo URLs de Mercadolibre México." |
 
 ---
@@ -307,29 +307,56 @@ No URL input here — that lives in the Search screen.
 
 ### Layout Overview
 
+> **Estado actual de implementación** (`TrackMain.tsx`): lista simple de filas
+> de texto (URL o título), sin cards expandibles, sin status bar, sin imagen,
+> precio ni historial inline, y sin ad banner/native. Card expandible, status
+> bar y ads descritos en el resto de este documento son el diseño objetivo,
+> aún no construido.
+
 ```
-iOS:
+iOS / Android (igual layout, sin diferencias de plataforma):
 ┌──────────────────────────────┐
-│ Tracklist           👤 ⚙️    │  ← Header
-├──────────────────────────────┤
-│ 📋 Rastreando 3/5 · 1/2 🔄  │  ← Status bar
+│                  Configurar  │  ← Header: solo acciones, alineadas a la derecha.
+│                      Limpiar │    "Limpiar" solo visible si hay rastreos (history.length > 0)
 ├──────────────────────────────┤
 │                              │
-│  [Card 1 — newest, expanded] │  ← Most recently added, pre-expanded on arrival
-│  [Card 2 — collapsed]        │
-│  [Ad — Native]               │  ← Every 3rd item
-│  [Card 3 — collapsed]        │
+│  [Fila 1 — título, 2 líneas] │  ← swipeable (SwipeableTrackRow)
+│  [Fila 2 — título, 2 líneas] │
+│  [Fila 3 — título, 2 líneas] │
 │                              │
-├──────────────────────────────┤
-│ 📢 [AdMob Banner]            │  ← Fixed bottom banner (free)
 └──────────────────────────────┘
 
-Products ordered by: created_at DESC (newest at top of stack)
+Sin status bar, sin banner de ads, sin ads nativos in-feed.
 
-When arriving from Search (new product added):
-  - Scroll position resets to top automatically
-  - New product card is at top, pre-expanded
-  - Rest of cards collapsed below
+Cada fila:
+  - Contenido: solo texto (título si hay match en dummy data, si no la URL cruda)
+  - numberOfLines={2}, ellipsizeMode='tail'
+  - Tap → navega a Detalle (`/track/[itemId]`)
+  - iOS: Link.Preview (peek) + Link.Menu con "Eliminar del historial" (destructivo)
+  - Swipe izquierda → revela 🔄 (visual) + 🗑 Eliminar (con confirmación, spec 17)
+  - Swipe derecha → revela ⚙️ (visual, sin acción aún)
+
+Fuente de datos: `history` de `SearchContext` (in-memory, no persistido a DB aún).
+Orden: el de inserción en el array `history` (no hay created_at DESC todavía).
+
+Al agregar un producto desde Search:
+  - Toast "«nombre» agregado!" aparece sobre la lista (auto-hide)
+  - No hay auto-scroll a top ni pre-expansión de card (no existen cards aún)
+```
+
+### Empty State (implementado)
+
+```
+┌──────────────────────────────┐
+│                              │
+│        🔍 (search-outline)   │
+│      Sin rastreos aún        │
+│  Las URLs rastreadas         │
+│  aparecerán aquí             │
+│                              │
+└──────────────────────────────┘
+
+Renderizado dentro de un Card (Glass/MD3 adaptive), centrado en pantalla.
 ```
 
 ### Status Bar Variations
@@ -383,7 +410,7 @@ Price change indicator variants:
 
 ---
 
-### Expanded Card
+### Item Detail
 
 Tapping the card reveals full history + actions inline — **no screen navigation needed**.
 
@@ -428,25 +455,6 @@ Wish price paused state:
   Modo: Wish Price (alcanzado)
 
   [Nuevo precio deseado]  [Eliminar]
-```
-
----
-
-### Card Transition Animation
-
-```
-Collapsed → Expanded:
-  Duration: 250ms
-  Easing: ease-out
-  Height: animates from ~80px to full content height
-  History items: fade in with 50ms stagger
-  Divider: slides in
-
-Expanded → Collapsed:
-  Duration: 200ms
-  Easing: ease-in
-  Height: animates back to ~80px
-  History: fade out instantly
 ```
 
 ---
