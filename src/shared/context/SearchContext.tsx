@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { MAX_TRACKED } from '@/features/search/domain';
-import { DUMMY_TRACK_HISTORY } from '@/features/track/dummyHistory';
+import { DUMMY_TRACK_HISTORY } from '@/features/track/data/datasources/dummyTrackDataSource';
 
 type SearchContextType = {
   history: string[];
