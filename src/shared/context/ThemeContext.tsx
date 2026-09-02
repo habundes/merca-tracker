@@ -23,6 +23,9 @@ export type ThemeColors = {
   primaryContainer: string;
   onPrimaryContainer: string;
   elevationTint: string;
+  // Fondo semi-transparente (rgba) de la barra de tabs en Android (spec 19).
+  // Solo lo consume app/(tabs)/_layout.tsx; iOS usa DynamicColorIOS.
+  tabBarBackground: string;
 };
 
 export type ThemeContextValue = {
@@ -50,6 +53,7 @@ export const lightColors: ThemeColors = {
   primaryContainer: '#eaddff',
   onPrimaryContainer: '#21005d',
   elevationTint: '#6750a4',
+  tabBarBackground: 'rgba(249,250,251,0.92)', // bgSecondary @ 92%
 };
 
 export const darkColors: ThemeColors = {
@@ -69,6 +73,7 @@ export const darkColors: ThemeColors = {
   primaryContainer: '#4f378b',
   onPrimaryContainer: '#eaddff',
   elevationTint: '#d0bcff',
+  tabBarBackground: 'rgba(28,27,31,0.92)', // surface #1c1b1f @ 92%
 };
 
 export const ON_ACCENT = '#ffffff';

@@ -8,6 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { TAB_BAR_HEIGHT } from '@/shared/constants/layout';
 import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useSearch } from '@/shared/context/SearchContext';
@@ -71,6 +72,9 @@ export default function TrackMain() {
       list: {
         paddingHorizontal: 16,
         gap: 8,
+        // Deja pasar el contenido por detrás de la barra translúcida sin ocultar
+        // el último ítem (Android; 0 en iOS). Spec 19.
+        paddingBottom: TAB_BAR_HEIGHT,
       },
       item: {
         flexDirection: 'row',
