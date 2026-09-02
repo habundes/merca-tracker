@@ -22,8 +22,8 @@ export default function TabsLayout() {
   const backgroundColor = isIOS
     ? DynamicColorIOS({ light: lightColors.bgSecondary, dark: darkColors.bgSecondary })
     : isHydrated
-      ? colors.surface
-      : lightColors.surface;
+      ? colors.tabBarBackground
+      : lightColors.tabBarBackground;
   // Tab activo con color de texto (blanco en oscuro, casi negro en claro —
   // "blanco" sobre barra oscura, sin desaparecer en modo claro) e inactivo en
   // gris tenue. En iOS via DynamicColorIOS para adaptación nativa sin parpadeo.
