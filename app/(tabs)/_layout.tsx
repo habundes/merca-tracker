@@ -9,6 +9,7 @@ export const unstable_settings = {
 };
 
 const isIOS = Platform.OS === 'ios';
+const isAndroid = Platform.OS === 'android';
 
 export default function TabsLayout() {
   const { colors, isHydrated } = useTheme();
@@ -56,15 +57,15 @@ export default function TabsLayout() {
       // Evita el lavanda del tema Material por defecto. Ignorado en iOS.
       disableIndicator
     >
-      <NativeTabs.Trigger name="track">
+      <NativeTabs.Trigger name="track" disableAutomaticContentInsets={isAndroid}>
         <NativeTabs.Trigger.Icon sf={{ default: 'tray.full', selected: 'tray.full.fill' }} md="inbox" />
         <NativeTabs.Trigger.Label>Mis Rastreos</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="search">
+      <NativeTabs.Trigger name="search" disableAutomaticContentInsets={isAndroid}>
         <NativeTabs.Trigger.Icon sf="magnifyingglass" md="search" />
         <NativeTabs.Trigger.Label>Buscar</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="profile">
+      <NativeTabs.Trigger name="profile" disableAutomaticContentInsets={isAndroid}>
         <NativeTabs.Trigger.Icon sf={{ default: 'person', selected: 'person.fill' }} md="person" />
         <NativeTabs.Trigger.Label>Perfil</NativeTabs.Trigger.Label>
       </NativeTabs.Trigger>
