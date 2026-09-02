@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { useFocusEffect } from 'expo-router';
 import { useTheme } from '@/shared/context/ThemeContext';
+import { TAB_BAR_HEIGHT } from '@/shared/constants/layout';
 import {
   SearchFeedback,
   SearchHelp,
@@ -30,6 +31,9 @@ export default function SearchScreen() {
           backgroundColor: colors.bg,
           paddingHorizontal: 20,
           justifyContent: 'center',
+          // Re-centra el contenido por encima de la barra translúcida (Android; 0
+          // en iOS), ya que el contenido ahora se extiende bajo la barra. Spec 19.
+          paddingBottom: TAB_BAR_HEIGHT,
         },
         feedbackSlot: {
           marginTop: 12,

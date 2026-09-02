@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useTheme, ON_ACCENT } from '@/shared/context/ThemeContext';
 import { useThemedStyles } from '@/shared/hooks/useThemedStyles';
+import { TAB_BAR_HEIGHT } from '@/shared/constants/layout';
 
 type Mode = 'login' | 'signup';
 
@@ -35,6 +36,8 @@ export default function ProfileMain() {
       justifyContent: 'center',
       paddingHorizontal: 28,
       paddingVertical: 40,
+      // Clearance para la barra translúcida (Android; 0 en iOS). Spec 19.
+      paddingBottom: 40 + TAB_BAR_HEIGHT,
     },
     title: {
       fontSize: 22,
