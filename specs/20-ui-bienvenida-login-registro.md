@@ -25,7 +25,12 @@
 >   sin AsyncStorage).
 > - `app/_layout.tsx` — monta `<AuthProvider>` dentro de `ThemeProvider`.
 > - `src/features/profile/presentation/screens/ProfileMain.tsx` — se le quita el formulario inline;
->   sin sesión muestra una tarjeta CTA hacia `/welcome`; "Cerrar sesión" gana confirmación.
+>   sin sesión muestra una tarjeta CTA hacia `/welcome` (y **nada** de Configuración); "Cerrar
+>   sesión" gana confirmación.
+> - `src/shared/context/ThemeContext.tsx` — add-on posterior a la aprobación: el tema pasa a ser
+>   parte de la cuenta (`canChangeTheme`); sin sesión manda el esquema del SO.
+> - `src/features/profile/presentation/screens/AppearanceSettings.tsx` — control inactivo + aviso
+>   cuando no hay sesión.
 > - `docs/ux_spec.md` — se reescribe la sección `Auth Flow` para que el doc y este spec no se
 >   contradigan (la bienvenida lleva los sociales; los formularios ya no los repiten).
 > - `CLAUDE.md` — corregir la afirmación de que existen `MaterialButton`/`MaterialHeader`/
@@ -53,6 +58,11 @@
   login hecho en otra pantalla. Se pierde al cerrar la app — es intencional.
 - **Limpieza de `ProfileMain`**: fuera el formulario inline y el `type Mode`; queda tarjeta CTA
   (sin sesión) y la vista con sesión actual + confirmación al cerrar sesión.
+- **Tema ligado a la sesión** (add-on posterior a la aprobación, pedido del usuario tras verlo en
+  device): sin sesión el tema **no se puede elegir ni guardar** y la app sigue el esquema del SO;
+  con sesión aplica y persiste el modo elegido. `ThemeContext` expone `canChangeTheme`, `setMode`
+  es no-op sin sesión, y la pantalla Apariencia queda inactiva con un aviso. El enlace a
+  Apariencia **desaparece** de Perfil sin sesión.
 - **Componente `AuthButton`** local al feature, con variantes `filled` / `outline` / `social` /
   `link`, construido con `Pressable` (`android_ripple` en Android) sobre los tokens del tema.
 - **Copy en español** tomado de `docs/ux_spec.md` (errores, confirmación de logout).
@@ -389,8 +399,8 @@ Rama `spec-20-ui-bienvenida-login-registro` (autocreada, `AutoCreateBranch: true
 
 6. **Limpieza de `ProfileMain` (mismo paso, no posterior).** Eliminar `type Mode`, los `TextInput`,
    `showPassword`, `handleLogin`/`handleSignup` y el estado `loggedIn` local; leer `useAuth()`. Sin
-   sesión: `Card` con "Aún no has iniciado sesión" + `AuthButton` → `/welcome` (el enlace a
-   Apariencia sigue disponible). Con sesión: vista actual con `session.displayName`/`session.email` y
+   sesión: `Card` con "Aún no has iniciado sesión" + `AuthButton` → `/welcome`, sin sección de
+   Configuración. Con sesión: vista actual con `session.displayName`/`session.email` y
    "Cerrar sesión" vía `confirmDestructiveAction`. Verificar que no quede ningún `TextInput` en el
    archivo.
 
@@ -426,6 +436,12 @@ Rama `spec-20-ui-bienvenida-login-registro` (autocreada, `AutoCreateBranch: true
 - [ ] `ProfileMain.tsx` ya no contiene ningún `TextInput` ni `type Mode`; el único acceso al login es
       su tarjeta CTA.
 - [ ] El campo "Nombre completo" ya no existe en ningún flujo.
+- [ ] Perfil sin sesión **no** muestra la sección Configuración (ni el enlace a Apariencia); con
+      sesión sí muestra los tres enlaces.
+- [ ] Sin sesión la app usa el **tema del SO** aunque haya un modo guardado, y `setMode` no cambia
+      nada; al iniciar sesión vuelve a aplicar el modo guardado y al cambiarlo persiste.
+- [ ] La pantalla Apariencia, sin sesión, muestra "Sistema" seleccionado, el control inactivo y el
+      aviso "Inicia sesión para elegir el tema…".
 - [ ] Abrir la bienvenida con la app en oscuro **no** produce destello claro (fallback `isHydrated`),
       y las 3 pantallas se ven correctas en claro y oscuro, iOS y Android.
 - [ ] Con el teclado abierto, el CTA y el mensaje de error siguen alcanzables por scroll en ambas
@@ -473,6 +489,16 @@ Rama `spec-20-ui-bienvenida-login-registro` (autocreada, `AutoCreateBranch: true
   limpio y evita volver con gesto a una pantalla de auth ya usada.
 - **Ionicons como hero** en vez de `assets/icon.png` o `expo-image` con SF Symbols: no hay asset de
   logo in-app y `expo-image` no está instalado (añadirlo exigiría rebuild del dev client).
+- **Tema ligado a la sesión** (add-on posterior a la aprobación, pedido del usuario tras verlo en
+  device): la opción de Apariencia salía en Perfil sin sesión, y si el tema se configura dentro de
+  la cuenta, sin sesión no tiene sentido ni elegirlo ni guardarlo. Se descartó la alternativa de
+  "solo las pantallas de `(auth)` siguen al sistema" (dejaba la incoherencia de un tema forzado en
+  los tabs sin sesión) y la de "dejarlo como estaba". Implica que `AuthProvider` pase a envolver a
+  `ThemeProvider` en `app/_layout.tsx`, porque `ThemeContext` ahora consulta la sesión.
+- **Esquema del SO capturado al cargar el módulo** (`initialSystemScheme`) en vez de re-leer
+  `Appearance.getColorScheme()` al volver al modo sistema: spec 05 fuerza la apariencia nativa con
+  `Appearance.setColorScheme`, así que tras forzar un modo la API devuelve el valor forzado. Se
+  parte del valor real de arranque y el listener corrige cuando el SO reporta un cambio.
 
 ## Riesgos identificados
 
@@ -486,3 +512,5 @@ Rama `spec-20-ui-bienvenida-login-registro` (autocreada, `AutoCreateBranch: true
 | R6  | Este stub divergiendo del Clerk que documentan `docs/`.                                                     | Frontera explícita: `AuthRepository` (puerto) + `FakeAuthDataSource` (única implementación); presentation solo conoce el puerto, así que el spec de Clerk sustituye el data source sin tocar pantallas ni hooks.                   |
 | R7  | Regresión en rutas existentes al añadir un grupo raíz.                                                      | El grupo es aditivo: `app/index.tsx`, el anchor `search` y los deep links a `/profile/*` no se tocan; solo `app/_layout.tsx` cambia para montar `<AuthProvider>`. Criterio: los 3 tabs y las 3 rutas de Perfil siguen funcionando. |
 | R8  | Tentación de instalar Clerk/OAuth "de una vez" y romper el alcance (rebuild de dev client, config plugins). | Criterio de aceptación: `package.json` y `pnpm-lock.yaml` sin cambios. Cualquier proveedor real es otro spec.                                                                                                                      |
+| R9  | Tras forzar un modo, `Appearance` ya no expone el esquema real del SO (spec 05), así que al cerrar sesión el tema "del sistema" podría quedarse con el último valor forzado. | `initialSystemScheme` leído al cargar el módulo (antes de cualquier forzado) + listener activo solo mientras se sigue al sistema, para no contaminar el valor. Hueco conocido y aceptado: si el SO cambia de tema mientras hay un modo forzado, el valor se corrige al siguiente cambio del SO o al reiniciar la app. |
+| R10 | Invertir el orden de providers (`AuthProvider` por fuera de `ThemeProvider`) rompe algún consumidor de tema. | `AuthContext` no depende del tema, así que la inversión no crea ciclos; verificado con `tsc --noEmit` y arrancando la app. El criterio de los 3 tabs + rutas de Perfil cubre la regresión. |

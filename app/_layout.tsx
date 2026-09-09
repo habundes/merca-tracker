@@ -21,13 +21,15 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
-        <AuthProvider>
+      {/* AuthProvider va por fuera: ThemeProvider consulta la sesión para decidir
+          si aplica el modo guardado o sigue al sistema (spec 20). */}
+      <AuthProvider>
+        <ThemeProvider>
           <SearchProvider>
             <RootNavigator />
           </SearchProvider>
-        </AuthProvider>
-      </ThemeProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </GestureHandlerRootView>
   );
 }

@@ -49,18 +49,6 @@ export default function ProfileMain() {
             onPress={() => router.push('/welcome')}
           />
         </Card>
-
-        <View style={styles.configSection}>
-          <Text style={styles.configSectionTitle}>Configuración</Text>
-          <Link href="/profile/appearance" asChild>
-            <Link.Trigger>
-              <TouchableOpacity style={styles.configBtn}>
-                <Text style={styles.configText}>Apariencia</Text>
-              </TouchableOpacity>
-            </Link.Trigger>
-            <Link.Preview />
-          </Link>
-        </View>
       </ScrollView>
     );
   }
