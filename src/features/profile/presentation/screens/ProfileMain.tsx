@@ -23,12 +23,9 @@ export default function ProfileMain() {
       title: '¿Cerrar sesión?',
       message: '¿Seguro que quieres cerrar la sesión?',
       confirmLabel: 'Cerrar sesión',
-      onConfirm: () => {
-        signOut();
-        // Sale de los tabs sin dejar el historial de la sesión anterior.
-        if (router.canDismiss()) router.dismissAll();
-        router.replace('/welcome');
-      },
+      // Sin navegación imperativa: al quedarse sin sesión, el gate de
+      // `app/(tabs)/_layout.tsx` redirige solo a la bienvenida.
+      onConfirm: signOut,
     });
   };
 

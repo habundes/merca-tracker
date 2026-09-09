@@ -11,8 +11,10 @@
 > propio de tres pantallas —**Bienvenida**, **Crear cuenta**, **Iniciar sesión**— con botones
 > sociales (Google, y Apple solo en iOS), validación, estados de carga y errores con el copy en
 > español de `docs/ux_spec.md`. **Solo UI**: la autenticación es un _stub_ con retardo artificial
-> (al estilo de `checkProductFake.ts`), **sin dependencias nativas nuevas, sin backend, sin
-> proveedor real (Clerk) y sin sesión persistida**.
+> (al estilo de `checkProductFake.ts`), **sin dependencias nativas nuevas, sin backend y sin
+> proveedor real (Clerk)**. Add-ons posteriores a la aprobación (pedidos por el usuario tras verlo
+> en device, ver Decisiones): el tema pasa a depender de la sesión, y la sesión del stub se persiste
+> en AsyncStorage con gate de rutas (sin sesión: solo la bienvenida, sin tabs).
 >
 > **Archivos que toca:**
 >
@@ -21,9 +23,13 @@
 > - `app/(auth)/welcome.tsx`, `app/(auth)/signup.tsx`, `app/(auth)/login.tsx` (nuevos) —
 >   re-export de una línea de las pantallas en `src/features/auth/presentation/screens/`.
 > - `src/features/auth/**` (nuevo) — dominio, data (stub), hook y pantallas (árbol completo abajo).
-> - `src/shared/context/AuthContext.tsx` (nuevo) — sesión **en memoria** (espeja `SearchContext`;
->   sin AsyncStorage).
-> - `app/_layout.tsx` — monta `<AuthProvider>` dentro de `ThemeProvider`.
+> - `src/shared/context/AuthContext.tsx` (nuevo) — sesión del stub; **persistida en AsyncStorage**
+>   con `isHydrated` (add-on posterior a la aprobación, ver Decisiones).
+> - `app/_layout.tsx` — monta `<AuthProvider>` **envolviendo** a `ThemeProvider` (el tema consulta
+>   la sesión).
+> - `app/index.tsx` — gate de sesión: `Redirect` a `/search` con sesión, a `/welcome` sin ella
+>   (add-on posterior a la aprobación).
+> - `app/(tabs)/_layout.tsx` — gate: sin sesión los tabs no se montan (`Redirect` a `/welcome`).
 > - `src/features/profile/presentation/screens/ProfileMain.tsx` — se le quita el formulario inline;
 >   sin sesión muestra una tarjeta CTA hacia `/welcome` (y **nada** de Configuración); "Cerrar
 >   sesión" gana confirmación.
@@ -54,8 +60,13 @@
   (domain / data / presentation).
 - **Stub de autenticación** (`FakeAuthDataSource`) con retardo artificial y disparadores
   deterministas para poder revisar **todos** los estados de error sin backend.
-- **`AuthContext` en memoria** (`session`, `signIn`, `signOut`) para que `ProfileMain` refleje el
-  login hecho en otra pantalla. Se pierde al cerrar la app — es intencional.
+- **`AuthContext`** (`session`, `isAuthenticated`, `isHydrated`, `signIn`, `signOut`) para que
+  `ProfileMain` refleje el login hecho en otra pantalla. **Persistido en AsyncStorage** (add-on
+  posterior a la aprobación): se guarda solo la sesión falsa (correo, proveedor, nombre mostrado),
+  nunca contraseñas ni tokens.
+- **Gate de sesión** (add-on posterior a la aprobación): sin sesión la app entra por `/welcome` y
+  **no monta los tabs** — ni al arrancar, ni por deep link, ni al cerrar sesión. Con sesión,
+  arranque directo a Buscar. Así los rastreos quedan atados a una cuenta.
 - **Limpieza de `ProfileMain`**: fuera el formulario inline y el `type Mode`; queda tarjeta CTA
   (sin sesión) y la vista con sesión actual + confirmación al cerrar sesión.
 - **Tema ligado a la sesión** (add-on posterior a la aprobación, pedido del usuario tras verlo en
@@ -73,10 +84,9 @@
 - **Clerk y cualquier proveedor real**: `@clerk/clerk-expo`, OAuth funcional de Google/Apple,
   `expo-auth-session`, `expo-apple-authentication`, `expo-secure-store`. **Cero dependencias
   nuevas** (no se corre `npx expo install`); los botones sociales resuelven contra el stub.
-- **Persistencia de sesión** (AsyncStorage/SecureStore) y refresh de tokens.
-- **Gate de rutas / redirección por sesión**: `app/index.tsx` sigue siendo
-  `<Redirect href="/search" />`. Nadie queda bloqueado fuera de los tabs (specs 02 y 03 tomaron
-  esa decisión y aquí no se revierte).
+- **Refresh de tokens y almacenamiento seguro** (`expo-secure-store`): la sesión persistida es la
+  falsa, sin tokens. (La persistencia y el gate de rutas estaban fuera de alcance y entraron como
+  add-ons posteriores a la aprobación — ver Decisiones.)
 - **Recuperación de contraseña y verificación de email**: el enlace "¿Olvidaste tu contraseña?"
   existe visualmente pero no navega a ninguna pantalla (muestra `Toast` "Próximamente").
 - **Pantallas de Términos de uso / Política de privacidad**: no existen documentos ni URLs; el pie
@@ -411,6 +421,14 @@ Rama `spec-20-ui-bienvenida-login-registro` (autocreada, `AutoCreateBranch: true
 8. **Verificación.** `npx tsc --noEmit` verde; recorrido manual completo (ver Criterios) en dev client
    iOS y emulador Android, en claro y oscuro.
 
+9. **Add-ons posteriores a la aprobación** (pedidos por el usuario tras verlo en device):
+   - **Tema ligado a la sesión.** `ThemeContext` expone `canChangeTheme`; sin sesión manda el
+     esquema del SO y `setMode` es no-op; Apariencia queda inactiva con aviso y su enlace desaparece
+     de Perfil sin sesión. Requiere invertir providers (`AuthProvider` por fuera).
+   - **Sesión persistida + gate de rutas.** `AuthContext` guarda/lee la sesión en AsyncStorage con
+     `isHydrated`; `app/index.tsx` redirige según sesión y `app/(tabs)/_layout.tsx` bloquea el
+     montaje de los tabs sin ella. El logout deja de navegar a mano: basta `signOut()`.
+
 ## Criterios de aceptación
 
 - [ ] Existe el grupo `app/(auth)/` con `welcome`, `signup` y `login`; los tres archivos de ruta son
@@ -442,6 +460,14 @@ Rama `spec-20-ui-bienvenida-login-registro` (autocreada, `AutoCreateBranch: true
       nada; al iniciar sesión vuelve a aplicar el modo guardado y al cambiarlo persiste.
 - [ ] La pantalla Apariencia, sin sesión, muestra "Sistema" seleccionado, el control inactivo y el
       aviso "Inicia sesión para elegir el tema…".
+- [ ] **Sin sesión no se ven los tabs**: arranque en frío abre la bienvenida; un deep link a
+      `/search`, `/track` o `/profile` redirige a `/welcome`.
+- [ ] **Con sesión el arranque va directo a Buscar**, sin pasar por la bienvenida ni parpadearla
+      (la sesión se restaura de AsyncStorage antes de decidir el destino).
+- [ ] Cerrar sesión deja la app en la bienvenida **sin tabs**, igual que un arranque sin sesión (el
+      comportamiento del arranque y del logout coincide).
+- [ ] La sesión sobrevive cerrar y reabrir la app; tras cerrar sesión no vuelve a aparecer.
+- [ ] En AsyncStorage solo se guarda correo, proveedor y nombre mostrado — ninguna contraseña.
 - [ ] Abrir la bienvenida con la app en oscuro **no** produce destello claro (fallback `isHydrated`),
       y las 3 pantallas se ven correctas en claro y oscuro, iOS y Android.
 - [ ] Con el teclado abierto, el CTA y el mensaje de error siguen alcanzables por scroll en ambas
@@ -495,6 +521,18 @@ Rama `spec-20-ui-bienvenida-login-registro` (autocreada, `AutoCreateBranch: true
   "solo las pantallas de `(auth)` siguen al sistema" (dejaba la incoherencia de un tema forzado en
   los tabs sin sesión) y la de "dejarlo como estaba". Implica que `AuthProvider` pase a envolver a
   `ThemeProvider` en `app/_layout.tsx`, porque `ThemeContext` ahora consulta la sesión.
+- **Gate de sesión + sesión persistida** (add-on posterior a la aprobación, pedido del usuario tras
+  ver la incoherencia en device: el arranque sin sesión mostraba Buscar con tabs, pero el logout
+  llevaba a la bienvenida sin tabs). Revierte la decisión de specs 02/03 de no proteger rutas,
+  porque los rastreos deben quedar atados a una cuenta. Va acompañado de persistencia en
+  AsyncStorage: con la sesión solo en memoria, el gate obligaría a iniciar sesión en cada arranque.
+  Descartado "solo gate sin persistencia" (login en cada arranque) y "dejarlo sin gate".
+- **El gate vive en `app/index.tsx` + `app/(tabs)/_layout.tsx`**, no en cada pantalla: el layout de
+  tabs es el único punto por el que pasan las tres pestañas, así que cubre arranque, deep links y
+  logout con una sola comprobación. Por eso el logout ya no navega a mano — `signOut()` basta.
+- **AsyncStorage (no SecureStore) para la sesión del stub**: no hay tokens ni contraseñas que
+  proteger, y `expo-secure-store` implicaría dependencia nativa nueva (fuera de alcance). Cuando
+  llegue el proveedor real, sus tokens van en SecureStore.
 - **Esquema del SO capturado al cargar el módulo** (`initialSystemScheme`) en vez de re-leer
   `Appearance.getColorScheme()` al volver al modo sistema: spec 05 fuerza la apariencia nativa con
   `Appearance.setColorScheme`, así que tras forzar un modo la API devuelve el valor forzado. Se
@@ -514,3 +552,6 @@ Rama `spec-20-ui-bienvenida-login-registro` (autocreada, `AutoCreateBranch: true
 | R8  | Tentación de instalar Clerk/OAuth "de una vez" y romper el alcance (rebuild de dev client, config plugins). | Criterio de aceptación: `package.json` y `pnpm-lock.yaml` sin cambios. Cualquier proveedor real es otro spec.                                                                                                                      |
 | R9  | Tras forzar un modo, `Appearance` ya no expone el esquema real del SO (spec 05), así que al cerrar sesión el tema "del sistema" podría quedarse con el último valor forzado. | `initialSystemScheme` leído al cargar el módulo (antes de cualquier forzado) + listener activo solo mientras se sigue al sistema, para no contaminar el valor. Hueco conocido y aceptado: si el SO cambia de tema mientras hay un modo forzado, el valor se corrige al siguiente cambio del SO o al reiniciar la app. |
 | R10 | Invertir el orden de providers (`AuthProvider` por fuera de `ThemeProvider`) rompe algún consumidor de tema. | `AuthContext` no depende del tema, así que la inversión no crea ciclos; verificado con `tsc --noEmit` y arrancando la app. El criterio de los 3 tabs + rutas de Perfil cubre la regresión. |
+| R11 | El gate deja al usuario fuera de la app si la lectura de AsyncStorage falla o se cuelga. | `isHydrated` se pone en `true` en el `finally` (mismo patrón que `ThemeContext`): un rechazo deja la app en "sin sesión" (bienvenida), nunca en pantalla de carga. |
+| R12 | Bucle o parpadeo de redirección entre `/` , `(tabs)` y `/welcome` mientras se hidrata la sesión. | `app/index.tsx` pinta un fondo del tema hasta que `isHydrated`, y el gate de `(tabs)` solo actúa `if (isSessionHydrated && !isAuthenticated)`: ningún redirect ocurre con estado indeterminado. |
+| R13 | Sesión persistida corrupta o de una versión anterior del stub rompe el arranque. | `parseStoredSession` valida forma y proveedor; si no cuadra, limpia la llave y arranca sin sesión. |
