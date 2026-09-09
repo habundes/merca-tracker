@@ -1,6 +1,7 @@
 import { Stack, ThemeProvider as NavigationThemeProvider, DarkTheme, DefaultTheme } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { AuthProvider } from '@/shared/context/AuthContext';
 import { SearchProvider } from '@/shared/context/SearchContext';
 import { ThemeProvider, useTheme } from '@/shared/context/ThemeContext';
 
@@ -21,9 +22,11 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider>
-        <SearchProvider>
-          <RootNavigator />
-        </SearchProvider>
+        <AuthProvider>
+          <SearchProvider>
+            <RootNavigator />
+          </SearchProvider>
+        </AuthProvider>
       </ThemeProvider>
     </GestureHandlerRootView>
   );
