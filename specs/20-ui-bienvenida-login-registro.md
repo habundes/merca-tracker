@@ -432,8 +432,10 @@ Rama `spec-20-ui-bienvenida-login-registro` (autocreada, `AutoCreateBranch: true
       plataformas.
 - [ ] El pie de Términos/Privacidad respeta el safe area inferior (no queda bajo la barra de gestos) y
       muestra `Toast` "Próximamente"; igual "¿Olvidaste tu contraseña?".
-- [ ] Ninguna pantalla ni hook importa `fakeAuthDataSource` directamente: solo el puerto
-      `AuthRepository` (frontera para el futuro spec de Clerk).
+- [ ] Ninguna pantalla importa `fakeAuthDataSource`: el stub entra por el parámetro `repo` de
+      `useAuthForm`, que por defecto lo inyecta detrás del puerto `AuthRepository` (mismo patrón que
+      `useProductSearch(repo = fakeProductRepository)`). El puerto es la frontera para el futuro
+      spec de Clerk.
 - [ ] Ninguna pantalla nueva importa `glass/` ni `md3/` directo (solo `adaptive/`).
 - [ ] Todos los botones tienen `accessibilityRole`/`accessibilityLabel`, estado deshabilitado
       accesible y objetivo ≥ 44 pt; los errores son `selectable`.
