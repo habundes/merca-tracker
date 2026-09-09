@@ -160,6 +160,55 @@ Annual:      $44.99/year ($3.75/month — 25% savings)
 
 ---
 
+## Option D: Per-Item Unlock (à la carte)
+
+```
+Free + Ads:      $0
+Premium:         $5.99/month or $49.99/year
+Per-Item Unlock: $2.99 one-time per product  (NEW — coexists with the above)
+```
+
+A **one-time purchase** that unlocks premium behavior for **one specific tracked product**, without a subscription. Aimed at free users who want automatic tracking on just one or two items and won't commit to Premium.
+
+### What it unlocks (for that product only)
+
+| Capability | Free product | Per-item-unlocked product |
+|-----------|--------------|---------------------------|
+| Auto-check (Interval / Wish Price) | ❌ counts against 2 slots | ✅ always on, **no slot used** |
+| Intervals | 12, 24 hrs | 6, 12, 24 hrs (default 12) |
+| Counts against 5-product cap | ✅ yes | ❌ **no (bypass)** |
+| Manual checks | 2/day | Unlimited (that product) |
+| Check history | Last 5 | All |
+
+**Bypass total:** an unlocked product does not consume the free 5-product cap nor either of the 2 auto-check slots — it behaves as premium in isolation while the rest of the account stays free.
+
+### Payment rail — IAP, not Stripe
+
+Apple/Google require in-app purchases (StoreKit / Play Billing) for unlocking in-app digital features; billing a digital unlock via Stripe risks App Store rejection. And the fixed Stripe $0.30/txn fee eats ~33% of a $0.99 charge. → per-item unlocks route through **IAP** (≈ MXN $59 tier). Subscriptions stay on Stripe *for now* (latent iOS-IAP debt noted in `backend_technical.md`).
+
+### Why one-time (and its guardrails)
+
+A one-time price for a feature with an ongoing per-check cost only works if it clears that cost over a realistic item lifetime — see *Per-Item Economics & Amortization* below. Two guardrails keep abandoned items from running at a loss:
+1. **Default interval 12 h** (6 h / 24 h still selectable) — bounds Decodo cost.
+2. **Active-session tracking (heartbeat):** the app updates `last_active_at` on open; after **14 days** without opening the app the backend sends a push (*"abre la app para seguir rastreando…"*, quick action "Seguir rastreando"), and if **~3 more days** pass with no open/confirm the product's auto-check **pauses** (`unlock_paused_at`; not deleted, not refunded), resuming automatically on return.
+
+### Availability risk (no refund — D7)
+
+The unlock does **not** guarantee how long the product stays listed on Mercadolibre. If the listing is finalized/removed days later, the unlock is considered consumed: auto-check stops, the entitlement stays, **no refund**. This risk **must be disclosed in the paywall before purchase**. (Distinct from a buyer-initiated Apple/Google refund, which does revoke the entitlement.)
+
+### Pros
+- ✅ Converts free users who won't subscribe (impulse micro-purchase)
+- ✅ New revenue stream without touching the subscription
+- ✅ Natural upgrade nudge — 2–3 unlocks ≈ one month of Premium
+- ✅ Self-funding per the cost analysis
+
+### Cons
+- ❌ Requires net-new IAP infrastructure (StoreKit/Play, receipt verify, store webhooks)
+- ❌ One-time-forever needs the dormancy/heartbeat guardrail to cap cost
+- ❌ Some cannibalization risk vs Premium for light users
+
+---
+
 ---
 
 ## Pricing & Revenue
@@ -172,6 +221,8 @@ Annual:      $44.99/year ($3.75/month — 25% savings)
 | Products | 5 max | 20 max |
 | Auto-check slots | 2 max | 20 (all products) |
 | Ads | Banner + Interstitial + Native + Reward | None |
+
+**À-la-carte option — Per-Item Unlock:** $2.99 one-time per product (via IAP) activates premium behavior on that product only (auto-check, 6/12/24 hr intervals, unlimited manual checks, full history), and does **not** count against the 5-product cap or the 2 auto-check slots. Coexists with both tiers above. See *Option D* and *Per-Item Economics & Amortization*.
 
 ---
 
@@ -203,7 +254,7 @@ Variable cost: Decodo (per check)
 1,200 × 30 days = 36,000 checks/month
 
 Decodo cost: 36,000 × $0.002 = $72/month
-Total costs @ 1,000 users: $72 + $32 = $104/month
+Total costs @ 1,000 users: $72 + $45 = $117/month
 ```
 
 #### Ad Revenue Per User (Aggressive — 4 Formats)
@@ -224,13 +275,49 @@ Fill rate Mexico (40%):        $1.56 × 40% = $0.624/user/month
 #### Break-Even Point
 
 ```
-Monthly costs = $32 (fixed) + $0.072/user (Decodo)
+Monthly costs = $45 (fixed) + $0.072/user (Decodo)
 Monthly revenue = $0.624/user (ads)
 
 Break-even: $45 / ($0.624 - $0.072) = 45 / 0.552 = ~82 users
 ```
 
 **Break-even: ~82 free users** ✅
+
+---
+
+### Per-Item Economics & Amortization
+
+The per-item unlock is a one-time charge against an **ongoing** per-check cost, so it must clear that cost over a realistic item lifetime and stay fair vs the subscription's implied per-product value.
+
+**Canonical basis:** $5.99/mo ÷ 20 products = **$0.30/product/month** subscription-implied value · Decodo **$0.002/check** · fixed infra **$45/mo**.
+
+**Monthly service cost of a per-item auto-check (Decodo only):**
+
+| Interval | Checks/day | Checks/mo | Decodo cost/mo |
+|----------|-----------|-----------|----------------|
+| 24 h | 1 | 30 | $0.060 |
+| 12 h (default) | 2 | 60 | $0.120 |
+| 6 h | 4 | 120 | $0.240 |
+
+**Payment rail net (why $0.99 fails):**
+
+| Price | Stripe (2.9% + $0.30) | IAP 15% (Small Business) |
+|-------|-----------------------|--------------------------|
+| $0.99 | $0.66 (−33%) | $0.84 |
+| $1.99 | $1.63 (−18%) | $1.69 |
+| $2.99 | $2.60 (−13%) | $2.54 |
+
+Stripe is not an option here anyway (App Store rules + fixed-fee erosion) — the net column that matters is **IAP**.
+
+**Recommended: $2.99 one-time via IAP (net ≈ $2.54).** Payback vs the two cost anchors:
+
+| Interval | Decodo/mo | Runway on $2.54 (variable break-even) | = months of $0.30 fair value |
+|----------|-----------|----------------------------------------|------------------------------|
+| 24 h | $0.06 | 42 mo | 8.5 mo |
+| 12 h (default) | $0.12 | 21 mo | 8.5 mo |
+| 6 h (worst) | $0.24 | ~11 mo | 8.5 mo |
+
+$2.99 clears the variable cost even at worst-case 6 h for **~11 months** (longer than a typical 2–6-month tracked-item lifetime) and equals **8.5 months** of the $0.30/product fair value — funding fixed cost + margin, not just Decodo. The **default 12 h interval** and **active-session pause** (Option D guardrails) cap the tail of abandoned items. Per-item purchases are **self-funding cost units**: each one covers its own scrape cost with margin.
 
 #### Free-Only Revenue Projections (Pessimistic)
 
@@ -375,7 +462,10 @@ premium_access_until reached
    ↓
 Hourly job detects expiry
    ↓
-1. Stop ALL auto-checks immediately
+(Per-item-unlocked products are EXEMPT — skipped in all steps below: they keep
+ their auto-checks running and stay visible regardless of subscription state)
+   ↓
+1. Stop ALL auto-checks immediately (except per-item-unlocked products)
 2. Determine how many products to keep visible:
    - Math.min(total_products, 5)
    - Example: 20 products → keep 5, hide 15
@@ -500,6 +590,12 @@ IF grace expires → Downgrade (same as subscription ends flow)
 - [ ] All payment notification scenarios
 - [ ] Reward check endpoint (GAP-04) — `RewardCheckProductUseCase`
 - [ ] `wish_price` server-side validation (GAP-12) — `CheckMode` value object
+- [ ] **Per-item unlock (IAP):** StoreKit / Play Billing integration (RevenueCat or react-native-iap) — `iap-purchase.gateway.js`
+- [ ] **Per-item unlock:** `UnlockProductUseCase` → POST /products/:id/unlock (receipt verify → `premium_unlocked = true`)
+- [ ] **Per-item unlock:** App Store Server Notifications / Google RTDN handler (refund → revoke) — `handle-iap-notification.use-case.js`
+- [ ] **Per-item unlock:** exclude `premium_unlocked` products from tracklist-cap, auto-slot, and downgrade rules
+- [ ] **Per-item unlock:** active-session heartbeat + dormancy auto-pause job (`last_active_at`, `unlock_paused_at`)
+- [ ] **Per-item unlock:** restore-purchases endpoint + paywall availability-risk disclosure (D7)
 
 ### Week 6: Polish & Launch
 - [ ] End-to-end testing

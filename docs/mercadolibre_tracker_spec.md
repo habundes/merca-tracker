@@ -42,6 +42,7 @@ A mobile app where users:
 ### Monetization
 - **Free + Ads:** Users get the core experience with Google AdMob ads
 - **Premium:** $3.99/month or $39.99/year for automatic checks and alerts
+- **Per-Item Unlock (à la carte):** $2.99 one-time per product (via IAP) — unlocks automatic checks + alerts on that product only, bypassing the free watchlist cap. Coexists with Free and Premium. See `pricing_models.md → Option D` (canonical model + cost analysis).
 
 ### Key Constraints
 - Mexico only for MVP (Mercadolibre .com.mx)
@@ -63,6 +64,8 @@ A mobile app where users:
 | **Push Notifications** | ❌ No | ✅ Yes |
 | **Ads** | ✅ Yes | ❌ No (ad-free) |
 | **Cost** | Free | $3.99/month or $39.99/year |
+
+> **Per-Item Unlock:** any single watchlist product can be unlocked for **$2.99 one-time** (IAP) → automatic checks (12/24/48 hr) + price alerts on that product, **not** counted against the free 20-item cap, and it survives a downgrade (never deleted). See `pricing_models.md → Option D`.
 
 ### Detailed Features
 
@@ -343,6 +346,7 @@ CREATE TABLE users (
   stripe_price_id VARCHAR,                   -- Track monthly vs annual (price_xxxxx_month or price_xxxxx_year)
   premium_access_until TIMESTAMP,            -- When premium access expires (for annual plans)
   watchlist_count INT DEFAULT 0,
+  last_active_at TIMESTAMP,                   -- Heartbeat for per-item unlock dormancy pause
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   
@@ -373,6 +377,12 @@ CREATE TABLE user_products (
   seller_id VARCHAR,
   availability VARCHAR,                     -- 'available', 'out_of_stock'
   added_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- IMPORTANT: track when added for free tier logic
+
+  -- Per-Item Unlock (à la carte one-time IAP purchase — bypasses 20-item cap, survives downgrade)
+  premium_unlocked BOOLEAN DEFAULT FALSE,
+  unlock_purchase_id INT,                    -- FK → item_purchases.purchase_id
+  unlock_paused_at TIMESTAMP,                -- auto-check paused by dormancy (null = active)
+
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   
   UNIQUE(user_id, product_id)                -- One user can't track same product twice
@@ -463,6 +473,26 @@ CREATE INDEX idx_stripe_events_user_id ON stripe_events(user_id);
 CREATE INDEX idx_stripe_events_type ON stripe_events(event_type);
 ```
 
+### Item_Purchases Table (Per-Item Unlock Entitlements — IAP)
+```sql
+CREATE TABLE item_purchases (
+  purchase_id SERIAL PRIMARY KEY,
+  user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  tracking_id INT REFERENCES user_products(tracking_id) ON DELETE SET NULL,  -- null if product later deleted
+  platform VARCHAR NOT NULL,                        -- 'apple' | 'google'
+  platform_product_id VARCHAR NOT NULL,             -- store SKU (e.g. 'per_item_unlock')
+  platform_transaction_id VARCHAR UNIQUE NOT NULL,  -- idempotency (like stripe_events.event_id)
+  amount DECIMAL(10, 2),
+  currency VARCHAR DEFAULT 'MXN',
+  status VARCHAR DEFAULT 'active',                  -- 'active' | 'refunded'
+  purchased_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_item_purchases_user_id ON item_purchases(user_id);
+```
+
+**Note:** a per-item-unlocked product also gets a `user_product_configs` row (auto-check + alerts), but is **exempt** from the downgrade cleanup that deletes configs and trims the watchlist to 20.
+
 ### Key Relationships
 ```
 users (1) ──→ (M) user_products (watchlist)
@@ -477,6 +507,7 @@ users (1) ──→ (M) manual_checks (rate limiting)
 - **Price history retention:** Keep last 7 days only (monthly cleanup job)
 - **Alert triggers:** Only for premium users with alert_enabled=true
 - **Frozen watchlist:** When user cancels, they can manage only last 20 items
+- **Per-item unlock:** `premium_unlocked` products bypass the 20-item cap, keep their configs on downgrade, and are never deleted by the downgrade trim (see Payments → downgrade job)
 
 ---
 
@@ -706,6 +737,7 @@ Stripe handles all payment processing. Your backend:
 **Prices:**
 - Monthly: $3.99 USD per month (Price ID: `price_xxxxx_month`)
 - Annual: $39.99 USD per year (Price ID: `price_xxxxx_year`)
+- Per-Item Unlock: $2.99 USD one-time per product → **IAP** (StoreKit / Play Billing), NOT Stripe — Apple/Google require IAP for in-app digital unlocks, and the fixed Stripe $0.30/txn fee erodes a micro-charge. See `backend_technical.md → Payments — IAP vs Stripe`.
 
 #### 4. Install Stripe SDK
 
@@ -769,6 +801,19 @@ Response:
   "portal_url": "https://billing.stripe.com/..."
 }
 ```
+
+#### POST /api/user/products/:product_id/unlock  (Per-Item Unlock — IAP)
+```
+Verify a StoreKit / Play Billing purchase and unlock automatic checks + alerts
+for ONE product (bypasses the 20-item cap). Uses IAP, not Stripe.
+
+Request:  { "platform": "apple" | "google", "receipt": "<receipt / purchase token>" }
+Response: { "success": true, "data": { "premium_unlocked": true, "purchase_id": 55 } }
+```
+
+Related IAP endpoints: `POST /api/user/restore-purchases` (Apple-required), `GET /api/user/purchases`,
+`POST /api/user/heartbeat` (dormancy), and store webhooks `POST /webhooks/apple` (App Store Server
+Notifications) + `POST /webhooks/google` (Play RTDN) for refund/revoke → `premium_unlocked = false`.
 
 ### Webhook Handler
 
@@ -913,14 +958,18 @@ cron.schedule('0 1 * * *', async () => {
       }
     });
     
-    // Delete all scheduled checks (stops auto-checks)
+    // Delete scheduled checks (stops auto-checks) — EXCEPT per-item-unlocked products
+    const unlockedIds = (await db.userProducts.findMany({
+      where: { user_id: user.id, premium_unlocked: true },
+      select: { product_id: true }
+    })).map(p => p.product_id);
     await db.userProductConfigs.deleteMany({
-      where: { user_id: user.id }
+      where: { user_id: user.id, product_id: { notIn: unlockedIds } }
     });
     
-    // Keep only last 20 items by added_date DESC
+    // Keep only last 20 items by added_date DESC — per-item-unlocked products are EXEMPT (never trimmed)
     const allItems = await db.userProducts.findMany({
-      where: { user_id: user.id },
+      where: { user_id: user.id, premium_unlocked: false },
       orderBy: { added_date: 'desc' }
     });
     
@@ -1430,6 +1479,9 @@ if (result.success) {
 - **Free + Ads:** $0 (with ads)
 - **Premium:** $39.99/year (saves ~17%)
 
+### Per-Item Unlock (à la carte)
+- **$2.99 one-time per product** (via IAP, not Stripe) — automatic checks + alerts on that product only, bypasses the free 20-item cap and survives downgrade. See `pricing_models.md → Option D` for the cost analysis behind this price (Decodo per-check cost, IAP fees, amortization).
+
 ### Cost Breakdown (At Scale)
 
 #### Operating Costs per 100 Premium Users
@@ -1512,7 +1564,8 @@ Once you hit 1000 premium users:
    - Cannot paste more items
    - Message: "Watchlist full (20/20). Upgrade or delete items."
    ↓
-10. To use alerts/auto-checks: tap "Upgrade" → Stripe checkout
+10. To unlock auto-checks/alerts on ONE product: tap "Unlock this product" → IAP ($2.99 one-time; doesn't count against the 20 cap)
+    OR to unlock everything: tap "Upgrade" → Stripe checkout
 ```
 
 ### Premium User Flow

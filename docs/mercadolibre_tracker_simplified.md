@@ -46,6 +46,7 @@ A focused mobile app where users:
 ### Monetization
 - **Free + Ads:** Track 5 products (max 2 with auto-checks active), 2 manual checks/day per product, 12/24hr intervals, wish price 24hrs only, Google AdMob (Banner + Interstitial + Native + Reward ads)
 - **Premium:** Track 20 products, unlimited manual checks, 6/12/24hr intervals, wish price 6/12/24hrs, ad-free
+- **Per-Item Unlock (à la carte):** $2.99 one-time per product (via IAP) — unlocks premium behavior on that product only (auto-check, 6/12/24hr intervals, unlimited manual checks, full history). Bypasses the 5-product cap and the 2 auto-check slots. Coexists with Free and Premium. See `pricing_models.md → Option D`.
 
 ---
 
@@ -63,6 +64,8 @@ A focused mobile app where users:
 | **Check History** | Last 5 checks | All checks |
 | **Cost** | Free | $5.99/month or $49.99/year |
 
+> **Per-Item Unlock:** any single product can be unlocked for **$2.99 one-time** (IAP) → premium behavior on that product (auto-check, 6/12/24 hr, unlimited manual checks, all history), **not** counted against the 5-product cap or the 2 auto-check slots, and it survives a subscription downgrade.
+
 ### Subscription Behavior on Downgrade
 
 When premium ends (canceled or expired):
@@ -73,6 +76,7 @@ When premium ends (canceled or expired):
 - ✅ Checks cleared for those visible products (fresh start on free tier)
 - ✅ Hidden products + all their checks stay in DB untouched
 - ✅ Re-subscribe → ALL products and checks restored instantly
+- ✅ Per-item-unlocked products are **exempt** — they stay visible and keep their auto-checks running (never hidden, never stopped by downgrade)
 
 ### Grace Period (Payment Failure Only)
 Grace periods apply ONLY when payment fails (`past_due`):
@@ -126,6 +130,9 @@ FREE TIER AUTO-CHECK SLOT LIMIT:
   The other 3 products are limited to Manual mode only
   To activate a 3rd auto-check, user must deactivate one of the 2 active slots
 
+  PER-ITEM-UNLOCKED products do NOT count toward these 2 slots and are never
+  limited to Manual — auto-check is always available on them.
+
 PREMIUM:
   All 20 products can have auto-checks active simultaneously
 
@@ -140,6 +147,10 @@ Checking stops ONLY when:
   - Payment fails + grace period exceeded
   - Product deleted from tracklist
   - Product becomes unavailable on Mercadolibre
+
+  (Per-item-unlocked products IGNORE "subscription ends" and "payment fails" —
+   they stop only on: manual disable, delete, product unavailable, or the
+   14+3 day dormancy auto-pause.)
 ```
 
 ---
@@ -263,6 +274,7 @@ Checking stops ONLY when:
 - `manual_check_log` — rate limiting for manual checks
 - `notification_tokens` — FCM tokens per user/device
 - `stripe_events` — audit log for idempotency
+- `item_purchases` — per-item unlock entitlements (IAP: Apple/Google), idempotency via `platform_transaction_id`
 
 ### Key Fields
 - `is_visible` — controls downgrade display (never deletes data)
@@ -270,6 +282,9 @@ Checking stops ONLY when:
 - `active_auto_checks` — slot counter (max 2 for free)
 - `premium_access_until` — used by hourly downgrade job
 - `added_date` — used to determine last 5 visible on downgrade
+- `premium_unlocked` — per-item IAP unlock (bypasses 5-cap + 2 slots, exempt from downgrade)
+- `unlock_paused_at` — per-item auto-check paused by dormancy (14+3 day inactivity)
+- `last_active_at` (users) — heartbeat driving the per-item dormancy pause
 
 ---
 ## URL Validation
@@ -353,9 +368,15 @@ Authorization: Bearer <JWT_FROM_CLERK>
 | `GET` | `/api/user/subscription` | Get subscription status | Required |
 | `POST` | `/api/user/checkout-session` | Create Stripe checkout | Required |
 | `GET` | `/api/user/stripe-portal` | Get Stripe portal link | Required |
+| `POST` | `/api/user/products/:id/unlock` | Per-item unlock (verify IAP receipt) | Required |
+| `POST` | `/api/user/restore-purchases` | Restore IAP entitlements | Required |
+| `GET` | `/api/user/purchases` | List per-item purchases | Required |
+| `POST` | `/api/user/heartbeat` | App-foreground heartbeat (per-item dormancy) | Required |
 | `POST` | `/api/user/notification-token` | Save FCM token | Required |
 | `POST` | `/webhooks/clerk` | Clerk user events | Webhook |
 | `POST` | `/webhooks/stripe` | Stripe payment events | Webhook |
+| `POST` | `/webhooks/apple` | App Store Server Notifications (IAP refund/revoke) | Webhook |
+| `POST` | `/webhooks/google` | Play RTDN (IAP refund/revoke) | Webhook |
 
 ### Error Response Format
 ```json
@@ -397,8 +418,9 @@ Subscribe to in Clerk Dashboard: `user.created`, `user.deleted`
 > 🔧 Full webhook handler, downgrade job, cancellation code → `backend_technical.md → Payments`
 
 ### Products & Prices
-- Monthly: **$3.99/month** → `STRIPE_PRICE_MONTHLY`
-- Annual: **$35.88/year** ($2.99/month — 25% savings) → `STRIPE_PRICE_ANNUAL`
+- Monthly: **$5.99/month** → `STRIPE_PRICE_MONTHLY`
+- Annual: **$49.99/year** ($4.16/month — 30% savings) → `STRIPE_PRICE_ANNUAL`
+- Per-Item Unlock: **$2.99 one-time** per product → **IAP** (`IAP_PRODUCT_ID`), NOT Stripe — see `backend_technical.md → Payments — IAP vs Stripe`
 
 ### Webhook Events to Handle
 | Event | Action |
@@ -566,6 +588,7 @@ pnpm add svix express-rate-limit helmet cors @sentry/node
 - Free + Ads: $0 (Banner + Interstitial + Native + Reward ads)
 - Premium Monthly: $5.99/month
 - Premium Annual: $49.99/year ($4.16/month — 30% savings)
+- Per-Item Unlock: $2.99 one-time per product (IAP) — premium on that product, bypasses free caps
 
 ### Free Tier Limits
 - 5 products max

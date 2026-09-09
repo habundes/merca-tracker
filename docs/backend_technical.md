@@ -35,12 +35,12 @@
 
 ### Backend
 ```bash
-pnpm add express prisma @clerk/clerk-sdk-node svix stripe firebase-admin axios node-cron dotenv winston express-rate-limit helmet cors @sentry/node
+pnpm add express prisma @clerk/clerk-sdk-node svix stripe firebase-admin axios node-cron dotenv winston express-rate-limit helmet cors @sentry/node @apple/app-store-server-library google-auth-library
 ```
 
 ### Mobile
 ```bash
-pnpm add @clerk/clerk-expo expo-secure-store @stripe/react-native-stripe-sdk expo-notifications firebase expo-ads-admob expo-linking
+pnpm add @clerk/clerk-expo expo-secure-store @stripe/react-native-stripe-sdk expo-notifications firebase expo-ads-admob expo-linking react-native-iap
 ```
 
 ---
@@ -64,6 +64,7 @@ CREATE TABLE users (
   premium_access_until TIMESTAMP,            -- When premium access expires
   tracklist_count INT DEFAULT 0,
   active_auto_checks INT DEFAULT 0,           -- Track active interval/wish_price slots (max 2 for free)
+  last_active_at TIMESTAMP,                    -- Heartbeat: updated when app foregrounds (per-item unlock dormancy)
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -101,6 +102,11 @@ CREATE TABLE user_products (
   -- Status
   is_available BOOLEAN DEFAULT TRUE,          -- false if product unavailable on ML
 
+  -- Per-Item Unlock (à la carte one-time IAP purchase — bypasses free caps for THIS product)
+  premium_unlocked BOOLEAN DEFAULT FALSE,     -- true = premium behavior on this product (auto-check, 6/12/24h, no cap/slot)
+  unlock_purchase_id INT,                     -- FK → item_purchases.purchase_id (null if not unlocked)
+  unlock_paused_at TIMESTAMP,                 -- set when auto-check paused by dormancy (null = active)
+
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
@@ -112,12 +118,19 @@ CREATE INDEX idx_user_products_next_check ON user_products(next_check_at);
 CREATE INDEX idx_user_products_check_enabled ON user_products(check_enabled);
 CREATE INDEX idx_user_products_created_at ON user_products(user_id, created_at DESC);
 CREATE INDEX idx_user_products_is_visible ON user_products(user_id, is_visible);
+CREATE INDEX idx_user_products_premium_unlocked ON user_products(user_id, premium_unlocked);
 ```
 
 **Key field: `is_visible`**
 - `true` → shown in tracklist
 - `false` → hidden (product stays in DB, checks stay in DB)
 - When user re-subscribes → all set back to `true`
+
+**Key field: `premium_unlocked`** (Per-Item Unlock — see `pricing_models.md → Option D`)
+- `true` → product unlocked by a one-time IAP purchase → premium behavior on this product only
+- Always visible, always keeps auto-checks — **exempt** from the downgrade job (never hidden, never stopped)
+- Does **not** count against the free 5-product cap or the 2 auto-check slots
+- `unlock_paused_at` set → auto-check paused by dormancy (14+3 day inactivity); resumes on next `last_active_at` update
 
 ### Price_History Table
 ```sql
@@ -186,6 +199,30 @@ CREATE TABLE stripe_events (
 
 CREATE INDEX idx_stripe_events_user_id ON stripe_events(user_id);
 ```
+
+### Item_Purchases Table (Per-Item Unlock Entitlements — IAP)
+```sql
+CREATE TABLE item_purchases (
+  purchase_id SERIAL PRIMARY KEY,
+  user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  product_id INT REFERENCES user_products(product_id) ON DELETE SET NULL,  -- unlocked item (null if product later deleted)
+  platform VARCHAR NOT NULL,                        -- 'apple' | 'google'
+  platform_product_id VARCHAR NOT NULL,             -- store SKU (e.g. 'per_item_unlock')
+  platform_transaction_id VARCHAR UNIQUE NOT NULL,  -- idempotency (mirrors stripe_events.event_id)
+  original_transaction_id VARCHAR,                  -- for refund/revoke correlation
+  amount DECIMAL(10, 2),
+  currency VARCHAR DEFAULT 'MXN',
+  status VARCHAR DEFAULT 'active',                  -- 'active' | 'refunded'
+  purchased_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_item_purchases_user_id ON item_purchases(user_id);
+CREATE INDEX idx_item_purchases_product_id ON item_purchases(product_id);
+```
+
+**Key field: `platform_transaction_id`** (UNIQUE) — idempotency guard for store notifications, same role as `stripe_events.event_id`.
+Note: `product_id` is nullable — if the user deletes an unlocked product (D5), the entitlement is consumed but the purchase row is retained for audit / refund correlation.
 
 ---
 
@@ -544,6 +581,62 @@ Response:
 
 ---
 
+### Per-Item Unlock Endpoints (IAP)
+
+> ⚠️ Per-item unlocks use StoreKit / Play Billing (IAP), **not** Stripe. See *Payments — IAP vs Stripe*.
+
+#### POST /api/user/products/:product_id/unlock
+```json
+Request (verify a store purchase and unlock the product):
+{ "platform": "apple", "receipt": "<base64 receipt / purchase token>" }
+
+Response (Success):
+{ "success": true, "data": { "product_id": 123, "premium_unlocked": true, "purchase_id": 55 } }
+
+Response (Receipt Invalid):
+{ "success": false, "error": "invalid_receipt", "message": "No se pudo verificar la compra." }
+
+Response (Already Unlocked):
+{ "success": false, "error": "already_unlocked", "message": "Este producto ya está desbloqueado." }
+```
+
+#### POST /api/user/restore-purchases
+```json
+Response: (re-links active entitlements to the Clerk user — Apple-required)
+{ "success": true, "data": { "restored": 2 } }
+```
+
+#### GET /api/user/purchases
+```json
+Response:
+{
+  "success": true,
+  "data": [
+    { "purchase_id": 55, "product_id": 123, "platform": "apple", "status": "active", "purchased_at": "2026-09-01T10:00:00Z" }
+  ]
+}
+```
+
+#### POST /api/user/heartbeat
+```json
+Response: (called when the app foregrounds — updates users.last_active_at; resumes any dormancy-paused unlocks)
+{ "success": true }
+```
+
+### IAP Store Webhooks
+
+- `POST /webhooks/apple` — App Store Server Notifications V2
+- `POST /webhooks/google` — Play RTDN (Pub/Sub)
+
+```
+Handle REFUND / REVOKE / CONSUMPTION_REQUEST:
+  - On refund/revoke → item_purchases.status = 'refunded',
+    user_products.premium_unlocked = false (product reverts to free behavior)
+  - Idempotency via platform_transaction_id (same pattern as stripe_events)
+```
+
+---
+
 ---
 
 ## Environment Variables
@@ -567,6 +660,13 @@ STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 STRIPE_PRICE_MONTHLY=price_...
 STRIPE_PRICE_ANNUAL=price_...
+
+# In-App Purchases (per-item unlock — StoreKit / Play Billing)
+IAP_PRODUCT_ID=per_item_unlock
+APPLE_IAP_SHARED_SECRET=...
+APPLE_APP_STORE_ISSUER_ID=...
+APPLE_APP_STORE_KEY_ID=...
+GOOGLE_PLAY_SERVICE_ACCOUNT_JSON=...
 
 # Firebase
 FIREBASE_PROJECT_ID=...
@@ -825,6 +925,8 @@ export function validateMercadolibreUrl(input) {
 
 ## Payments — Stripe Implementation
 
+> 💳 **IAP vs Stripe:** Stripe handles the **subscription** only. The **per-item unlock** (`pricing_models.md → Option D`) MUST use StoreKit / Play Billing (IAP) — Apple/Google require IAP for in-app digital unlocks, and the fixed Stripe $0.30/txn fee erodes a micro-charge. See *Item_Purchases Table*, *Per-Item Unlock Endpoints*, and *IAP Store Webhooks* above. Note: iOS also technically requires IAP for auto-renewable subscriptions — migrating the subscription off Stripe is latent debt, out of scope for the per-item change.
+
 ### Webhook Handler
 ```javascript
 app.post('/webhooks/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
@@ -902,13 +1004,14 @@ cron.schedule('0 * * * *', async () => {
 
   for (const user of expiredUsers) {
     try {
-      const allProducts = await db.userProducts.findMany({ where: { user_id: user.id }, orderBy: { created_at: 'desc' } });
+      // Per-item-unlocked products are EXEMPT: excluded from partitioning, hiding, and check-clearing
+      const allProducts = await db.userProducts.findMany({ where: { user_id: user.id, premium_unlocked: false }, orderBy: { created_at: 'desc' } });
       const keepCount = Math.min(allProducts.length, 5);
       const productsToShow = allProducts.slice(0, keepCount);
       const productsToHide = allProducts.slice(keepCount);
 
-      // 1. Stop all auto-checks
-      await db.userProducts.updateMany({ where: { user_id: user.id }, data: { check_enabled: false, check_mode: 'manual', check_interval: null, wish_price: null, next_check_at: null } });
+      // 1. Stop all auto-checks (except per-item-unlocked products)
+      await db.userProducts.updateMany({ where: { user_id: user.id, premium_unlocked: false }, data: { check_enabled: false, check_mode: 'manual', check_interval: null, wish_price: null, next_check_at: null } });
 
       // 2. Hide products beyond last 5
       if (productsToHide.length > 0)
@@ -1018,6 +1121,7 @@ cron.schedule('0 * * * *', async () => {
         const result = await scrapeProduct(product.url);
 
         if (!result.success || !result.is_available) {
+          // Product delisted on ML. If premium_unlocked: the unlock is consumed — stop checks, keep entitlement, NO refund (D7).
           await db.userProducts.update({ where: { product_id: product.product_id }, data: { check_enabled: false, is_available: false } });
           await notifyUser(product.user_id, '⚠️ Producto no disponible', `${product.title} ya no está disponible en Mercadolibre.`);
           continue;
@@ -1052,8 +1156,8 @@ cron.schedule('0 * * * *', async () => {
           }
         }
 
-        // Trim history for free users (keep last 5)
-        if (product.user.subscription_tier === 'free') {
+        // Trim history for free users (keep last 5) — per-item-unlocked products keep ALL history (premium behavior)
+        if (product.user.subscription_tier === 'free' && !product.premium_unlocked) {
           const allChecks = await db.priceHistory.findMany({ where: { product_id: product.product_id }, orderBy: { checked_at: 'desc' } });
           if (allChecks.length > 5)
             await db.priceHistory.deleteMany({ where: { history_id: { in: allChecks.slice(5).map(c => c.history_id) } } });
@@ -1074,6 +1178,38 @@ cron.schedule('0 * * * *', async () => {
   }
 });
 ```
+
+### Per-Item Dormancy Pause Job (Hourly)
+
+Guards against abandoned one-time unlocks scraping forever (see `pricing_models.md → Option D`). Window: 14 days inactive → warn, +3 days → pause. Neither deletes data nor refunds.
+
+```javascript
+cron.schedule('30 * * * *', async () => {
+  const now = new Date();
+  const warnAfter  = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000); // 14 days inactive → warn
+  const pauseAfter = new Date(now.getTime() - 17 * 24 * 60 * 60 * 1000); // +3 more days → pause
+
+  // 1. Warn users inactive ≥14d (but <17d) who still have active unlocked auto-checks
+  const toWarn = await db.userProducts.findMany({
+    where: { premium_unlocked: true, check_enabled: true, unlock_paused_at: null,
+             user: { last_active_at: { lt: warnAfter, gte: pauseAfter } } }
+  });
+  for (const p of toWarn)
+    await notifyUser(p.user_id, '¿Sigues rastreando?',
+      `Abre la app para seguir rastreando ${p.title}. Se pausará en unos días.`); // push action "Seguir rastreando" → POST /heartbeat
+
+  // 2. Pause unlocked auto-checks for users inactive ≥17d (no delete, no refund)
+  const toPause = await db.userProducts.findMany({
+    where: { premium_unlocked: true, check_enabled: true, unlock_paused_at: null,
+             user: { last_active_at: { lt: pauseAfter } } }
+  });
+  for (const p of toPause)
+    await db.userProducts.update({ where: { product_id: p.product_id },
+      data: { check_enabled: false, unlock_paused_at: now } });
+});
+```
+
+On the next `POST /api/user/heartbeat` (app foreground), any product with `premium_unlocked = true` and `unlock_paused_at` set is resumed: `check_enabled = true`, `unlock_paused_at = null`, `next_check_at` rescheduled.
 
 ---
 
@@ -1125,7 +1261,7 @@ export const manualCheck = async (req, res) => {
   if (!product) return res.status(404).json({ error: 'not_found' });
 
   // Rate limit: free = 2/day (+ 1 reward if watched ad)
-  if (user.subscription_tier === 'free') {
+  if (user.subscription_tier === 'free' && !product.premium_unlocked) {
     const today = new Date(); today.setHours(0, 0, 0, 0);
     const checksToday = await db.manualCheckLog.count({ where: { user_id: userId, product_id: parseInt(product_id), checked_at: { gte: today } } });
     if (checksToday >= 2) {
@@ -1151,13 +1287,13 @@ export const manualCheck = async (req, res) => {
   await db.userProducts.update({ where: { product_id: parseInt(product_id) }, data: { current_price: newPrice, last_known_price: oldPrice } });
 
   // Trim to last 5 for free users
-  if (user.subscription_tier === 'free') {
+  if (user.subscription_tier === 'free' && !product.premium_unlocked) {
     const allChecks = await db.priceHistory.findMany({ where: { product_id: parseInt(product_id) }, orderBy: { checked_at: 'desc' } });
     if (allChecks.length > 5)
       await db.priceHistory.deleteMany({ where: { history_id: { in: allChecks.slice(5).map(c => c.history_id) } } });
   }
 
-  const checksRemainingToday = user.subscription_tier === 'free'
+  const checksRemainingToday = (user.subscription_tier === 'free' && !product.premium_unlocked)
     ? 2 - (await db.manualCheckLog.count({ where: { user_id: userId, product_id: parseInt(product_id), checked_at: { gte: (() => { const d = new Date(); d.setHours(0,0,0,0); return d; })() } } }))
     : null;
 
@@ -1267,6 +1403,9 @@ All implementation logic in this file (Authentication, Payments, Notifications, 
 | Manual Check Handler | `application/use-cases/products/manual-check-product.use-case.js` |
 | Auto-check slot enforcement | `domain/rules/auto-check-slot.rules.js` |
 | `wish_price` validation | `domain/value-objects/check-mode.vo.js` |
+| Per-Item Unlock (verify + entitle) | `application/use-cases/products/unlock-product.use-case.js` + `infrastructure/gateways/iap-purchase.gateway.js` |
+| IAP Store Webhooks (Apple/Google) | `presentation/http/webhooks/iap-webhook.controller.js` + `application/use-cases/webhooks/handle-iap-notification.use-case.js` |
+| Per-Item Dormancy Pause Job | `application/use-cases/jobs/run-per-item-dormancy-pause.use-case.js` |
 
 ---
 

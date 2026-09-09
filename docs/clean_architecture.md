@@ -105,6 +105,7 @@ backend/
 │   │   ├── value-objects/
 │   │   │   ├── check-mode.vo.js          // 'manual' | 'interval' | 'wish_price'
 │   │   │   ├── subscription-tier.vo.js   // 'free' | 'premium'
+│   │   │   ├── item-entitlement.vo.js    // per-item unlock: effective tier for one product
 │   │   │   └── money.vo.js               // price handling, avoids float bugs
 │   │   ├── errors/
 │   │   │   ├── domain-error.js
@@ -112,9 +113,9 @@ backend/
 │   │   │   ├── tracklist-full-error.js
 │   │   │   └── invalid-wish-price-error.js
 │   │   └── rules/
-│   │       ├── auto-check-slot.rules.js   // max 2 slots for free tier
-│   │       ├── tracklist-limit.rules.js   // 5 free / 20 premium
-│   │       └── downgrade.rules.js         // keep last 5, clear visible checks
+│   │       ├── auto-check-slot.rules.js   // max 2 slots for free tier (per-item-unlocked excluded)
+│   │       ├── tracklist-limit.rules.js   // 5 free / 20 premium (per-item-unlocked excluded)
+│   │       └── downgrade.rules.js         // keep last 5, clear visible checks (unlocked exempt)
 │   │
 │   ├── application/
 │   │   ├── use-cases/
@@ -124,6 +125,7 @@ backend/
 │   │   │   │   ├── set-check-mode.use-case.js
 │   │   │   │   ├── manual-check-product.use-case.js
 │   │   │   │   ├── reward-check-product.use-case.js   // GAP-04
+│   │   │   │   ├── unlock-product.use-case.js          // per-item IAP unlock
 │   │   │   │   ├── get-product.use-case.js             // GAP-21
 │   │   │   │   └── get-tracklist.use-case.js
 │   │   │   ├── subscriptions/
@@ -135,10 +137,12 @@ backend/
 │   │   │   │   ├── handle-clerk-user-deleted.use-case.js
 │   │   │   │   ├── handle-stripe-checkout-completed.use-case.js
 │   │   │   │   ├── handle-stripe-subscription-deleted.use-case.js
-│   │   │   │   └── handle-stripe-subscription-updated.use-case.js
+│   │   │   │   ├── handle-stripe-subscription-updated.use-case.js
+│   │   │   │   └── handle-iap-notification.use-case.js       // per-item refund/revoke
 │   │   │   └── jobs/
 │   │   │       ├── run-hourly-price-check.use-case.js
-│   │   │       └── run-downgrade-expired-users.use-case.js
+│   │   │       ├── run-downgrade-expired-users.use-case.js
+│   │   │       └── run-per-item-dormancy-pause.use-case.js   // heartbeat pause (14+3 días)
 │   │   │
 │   │   └── ports/                          // interfaces — Infrastructure implements these
 │   │       ├── product-repository.port.js
@@ -148,6 +152,8 @@ backend/
 │   │       ├── notification-token-repository.port.js
 │   │       ├── scraper-gateway.port.js       // Decodo
 │   │       ├── payment-gateway.port.js       // Stripe
+│   │       ├── purchase-gateway.port.js      // StoreKit / Play Billing (IAP receipt verify)
+│   │       ├── item-purchase-repository.port.js
 │   │       ├── auth-gateway.port.js          // Clerk
 │   │       └── notification-gateway.port.js  // Firebase
 │   │
@@ -165,6 +171,7 @@ backend/
 │   │   ├── gateways/
 │   │   │   ├── decodo-scraper.gateway.js
 │   │   │   ├── stripe-payment.gateway.js
+│   │   │   ├── iap-purchase.gateway.js        // StoreKit / Play Billing (RevenueCat or react-native-iap)
 │   │   │   ├── clerk-auth.gateway.js
 │   │   │   └── firebase-notification.gateway.js
 │   │   ├── security/
@@ -189,7 +196,8 @@ backend/
 │       │   │   └── error-handler.middleware.js
 │       │   └── webhooks/
 │       │       ├── clerk-webhook.controller.js
-│       │       └── stripe-webhook.controller.js
+│       │       ├── stripe-webhook.controller.js
+│       │       └── iap-webhook.controller.js         // App Store Server Notifications / Play RTDN
 │       └── server.js                          // Express app + DI wiring
 │
 ├── di-container.js                            // Dependency Injection setup
@@ -212,7 +220,8 @@ export class Product {
   constructor({
     productId, userId, mercadolibreId, url, title,
     currentPrice, lastKnownPrice, checkMode, checkInterval,
-    wishPrice, checkEnabled, isVisible, isAvailable
+    wishPrice, checkEnabled, isVisible, isAvailable,
+    premiumUnlocked = false, unlockPausedAt = null
   }) {
     this.productId = productId;
     this.userId = userId;
@@ -227,6 +236,8 @@ export class Product {
     this.checkEnabled = checkEnabled;
     this.isVisible = isVisible;
     this.isAvailable = isAvailable;
+    this.premiumUnlocked = premiumUnlocked;   // per-item one-time IAP unlock
+    this.unlockPausedAt = unlockPausedAt;     // dormancy pause (null = active)
   }
 
   // Domain logic lives ON the entity, not scattered in route handlers
@@ -248,6 +259,16 @@ export class Product {
   markUnavailable() {
     this.checkEnabled = false;
     this.isAvailable = false;
+  }
+
+  isPremiumUnlocked() {
+    return this.premiumUnlocked === true;
+  }
+
+  // Effective tier for THIS product: a per-item-unlocked product behaves as
+  // premium regardless of the account's subscription tier.
+  effectiveTier(userSubscriptionTier) {
+    return this.premiumUnlocked ? 'premium' : userSubscriptionTier;
   }
 
   switchToManualMode() {
@@ -277,6 +298,8 @@ export class CheckMode {
     return VALID_MODES.includes(mode);
   }
 
+  // Pass the EFFECTIVE tier — product.effectiveTier(user.subscriptionTier) —
+  // so a per-item-unlocked product may pick 6h even on a free account.
   static isValidInterval(interval, subscriptionTier) {
     const allowed = subscriptionTier === 'premium' ? PREMIUM_INTERVALS : FREE_INTERVALS;
     return allowed.includes(interval);
@@ -299,7 +322,8 @@ import { AutoSlotsFullError } from '../errors/auto-slots-full-error.js';
 
 const FREE_TIER_AUTO_SLOTS_LIMIT = 2;
 
-export function assertCanActivateAutoCheck({ subscriptionTier, currentActiveAutoChecks, isNewSlot }) {
+export function assertCanActivateAutoCheck({ subscriptionTier, currentActiveAutoChecks, isNewSlot, isPremiumUnlocked = false }) {
+  if (isPremiumUnlocked) return;             // Per-item unlock: no slot consumed (bypass)
   if (subscriptionTier !== 'free') return;   // Premium: unlimited slots
   if (!isNewSlot) return;                     // Switching interval ↔ wish_price doesn't use a new slot
 
@@ -315,10 +339,15 @@ export function assertCanActivateAutoCheck({ subscriptionTier, currentActiveAuto
 // domain/rules/downgrade.rules.js
 
 export function partitionProductsForDowngrade(productsOrderedByNewest) {
-  const keepCount = Math.min(productsOrderedByNewest.length, 5);
+  // Per-item-unlocked products are exempt: never hidden, never stopped, and
+  // excluded from the "keep last 5" count.
+  const exempt   = productsOrderedByNewest.filter(p => p.isPremiumUnlocked());
+  const eligible = productsOrderedByNewest.filter(p => !p.isPremiumUnlocked());
+  const keepCount = Math.min(eligible.length, 5);
   return {
-    toKeepVisible: productsOrderedByNewest.slice(0, keepCount),
-    toHide: productsOrderedByNewest.slice(keepCount)
+    exempt,                                 // stay visible + keep auto-checks
+    toKeepVisible: eligible.slice(0, keepCount),
+    toHide: eligible.slice(keepCount)
   };
 }
 ```
@@ -399,6 +428,7 @@ export class AddProductUseCase {
 
     const user = await this.userRepository.findById(userId);
     const limit = user.subscriptionTier === 'premium' ? 20 : 5;
+    // Per-item-unlocked products don't consume the cap → repo excludes premium_unlocked = true
     const visibleCount = await this.productRepository.countVisibleByUser(userId);
 
     if (visibleCount >= limit) {
@@ -463,8 +493,11 @@ export class SetCheckModeUseCase {
     const user = await this.userRepository.findById(userId);
 
     if (CheckMode.isAutoMode(checkMode)) {
-      if (!CheckMode.isValidInterval(checkInterval, user.subscriptionTier)) {
-        throw new InvalidIntervalError(user.subscriptionTier);
+      // Per-item-unlocked products behave as premium for interval + slot rules
+      const effectiveTier = product.effectiveTier(user.subscriptionTier);
+
+      if (!CheckMode.isValidInterval(checkInterval, effectiveTier)) {
+        throw new InvalidIntervalError(effectiveTier);
       }
 
       if (checkMode === CheckMode.WISH_PRICE) {
@@ -477,7 +510,8 @@ export class SetCheckModeUseCase {
       assertCanActivateAutoCheck({
         subscriptionTier: user.subscriptionTier,
         currentActiveAutoChecks: activeSlots,
-        isNewSlot
+        isNewSlot,
+        isPremiumUnlocked: product.isPremiumUnlocked()
       });
 
       product.checkMode = checkMode;
@@ -604,7 +638,8 @@ export class PrismaProductRepository extends ProductRepository {
   }
 
   async countVisibleByUser(userId) {
-    return prisma.userProducts.count({ where: { user_id: userId, is_visible: true } });
+    // Exclude per-item-unlocked products — they don't count against the free cap
+    return prisma.userProducts.count({ where: { user_id: userId, is_visible: true, premium_unlocked: false } });
   }
 
   async countActiveAutoChecksByUser(userId) {
@@ -637,7 +672,8 @@ export class PrismaProductRepository extends ProductRepository {
       url: row.url, title: row.title, currentPrice: row.current_price,
       lastKnownPrice: row.last_known_price, checkMode: row.check_mode,
       checkInterval: row.check_interval, wishPrice: row.wish_price,
-      checkEnabled: row.check_enabled, isVisible: row.is_visible, isAvailable: row.is_available
+      checkEnabled: row.check_enabled, isVisible: row.is_visible, isAvailable: row.is_available,
+      premiumUnlocked: row.premium_unlocked, unlockPausedAt: row.unlock_paused_at
     });
   }
 
@@ -646,7 +682,8 @@ export class PrismaProductRepository extends ProductRepository {
       user_id: product.userId, mercadolibre_id: product.mercadolibreId, url: product.url,
       title: product.title, current_price: product.currentPrice, last_known_price: product.lastKnownPrice,
       check_mode: product.checkMode, check_interval: product.checkInterval, wish_price: product.wishPrice,
-      check_enabled: product.checkEnabled, is_visible: product.isVisible, is_available: product.isAvailable
+      check_enabled: product.checkEnabled, is_visible: product.isVisible, is_available: product.isAvailable,
+      premium_unlocked: product.premiumUnlocked, unlock_paused_at: product.unlockPausedAt
     };
   }
 }
@@ -833,6 +870,7 @@ import { PrismaUserRepository } from './infrastructure/persistence/repositories/
 import { PrismaNotificationTokenRepository } from './infrastructure/persistence/repositories/prisma-notification-token.repository.js';
 import { DecodoScraperGateway } from './infrastructure/gateways/decodo-scraper.gateway.js';
 import { StripePaymentGateway } from './infrastructure/gateways/stripe-payment.gateway.js';
+import { IapPurchaseGateway } from './infrastructure/gateways/iap-purchase.gateway.js';
 import { ClerkAuthGateway } from './infrastructure/gateways/clerk-auth.gateway.js';
 import { FirebaseNotificationGateway } from './infrastructure/gateways/firebase-notification.gateway.js';
 import { UrlValidator } from './infrastructure/security/url-validator.js';
@@ -850,6 +888,7 @@ export function buildContainer(env) {
   const notificationTokenRepository = new PrismaNotificationTokenRepository();
   const scraperGateway = new DecodoScraperGateway(env.DECODO_API_KEY, env.DECODO_API_URL);
   const paymentGateway = new StripePaymentGateway(env.STRIPE_SECRET_KEY);
+  const purchaseGateway = new IapPurchaseGateway(env);   // StoreKit / Play Billing (per-item unlock)
   const authGateway = new ClerkAuthGateway(env.CLERK_SECRET_KEY);
   const notificationGateway = new FirebaseNotificationGateway(notificationTokenRepository);
   const urlValidator = new UrlValidator();
@@ -925,6 +964,10 @@ Every piece of logic documented in `backend_technical.md` maps to a specific lay
 | `wish_price` validation (GAP-12) | `domain/value-objects/check-mode.vo.js` validation called from use case | Domain |
 | Security middleware (helmet, cors, rate-limit) | `presentation/http/middleware/` | Presentation |
 | Database schema (Prisma) | `infrastructure/persistence/prisma/schema.prisma` (unchanged) | Infrastructure |
+| Per-item unlock (verify + entitle) | `application/use-cases/products/unlock-product.use-case.js` + `infrastructure/gateways/iap-purchase.gateway.js` | Application + Infrastructure |
+| IAP store webhooks (Apple/Google) | `presentation/http/webhooks/iap-webhook.controller.js` + `application/use-cases/webhooks/handle-iap-notification.use-case.js` | Presentation + Application |
+| Per-item cap/slot/downgrade exemption | `domain/rules/{tracklist-limit,auto-check-slot,downgrade}.rules.js` (exclude `premium_unlocked`) | Domain |
+| Per-item dormancy pause job | `application/use-cases/jobs/run-per-item-dormancy-pause.use-case.js` | Application |
 
 **Pending gaps (GAP-04, GAP-16, GAP-17, GAP-20, GAP-21) slot into this structure as:**
 - GAP-04 (reward check) → `application/use-cases/products/reward-check-product.use-case.js`
