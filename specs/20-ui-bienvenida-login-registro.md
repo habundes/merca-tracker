@@ -401,10 +401,11 @@ Rama `spec-20-ui-bienvenida-login-registro` (autocreada, `AutoCreateBranch: true
    `signup`/`login` con header, `title` en español, back mínimo y
    `stackScreenOptions(colors, isHydrated)`), los tres re-exports de una línea y las tres pantallas.
    Navegación fijada:
-   - Entrada: `router.push('/welcome')` desde Perfil.
-   - Éxito: `signIn(session)` → `router.dismissAll()` → `router.replace('/search')`.
-   - Logout: `confirmDestructiveAction` → `signOut()` → `router.dismissAll()` →
-     `router.replace('/welcome')`.
+   - Entrada: `router.push('/welcome')` desde Perfil (con el gate del add-on, la entrada normal es
+     directamente `app/index.tsx`).
+   - Éxito: `signIn(session)` y nada más — el gate de `app/(auth)/_layout.tsx` cambia el grupo por
+     los tabs (ver Decisiones: se sustituyó `dismissAll()` + `replace()`).
+   - Logout: `confirmDestructiveAction` → `signOut()`; redirige el gate de `app/(tabs)/_layout.tsx`.
    - "Ya tengo cuenta" / pies: `router.push('/login')` / `router.push('/signup')`.
 
 6. **Limpieza de `ProfileMain` (mismo paso, no posterior).** Eliminar `type Mode`, los `TextInput`,
@@ -511,7 +512,16 @@ Rama `spec-20-ui-bienvenida-login-registro` (autocreada, `AutoCreateBranch: true
   de alcance.
 - **Sociales resuelven contra el stub** en vez de mostrar siempre "No se pudo conectar": permite
   recorrer el camino feliz desde la bienvenida; el error se revisa con `FORCE_PROVIDER_ERROR`.
-- **`dismissAll()` + `replace()`** para salir del grupo de auth en vez de `back()`: deja el historial
+- **Gates declarativos en los dos `_layout.tsx` en vez de navegación imperativa** (corrección
+  posterior, tras ver en Android un parpadeo blanco al iniciar sesión): `dismissAll()` volvía a
+  `app/index.tsx` —primera pantalla del stack raíz— y ese frame intermedio, sobre el fondo de ventana
+  blanco de Android, era el destello. Ahora `(auth)/_layout.tsx` redirige a `/search` cuando hay
+  sesión y `(tabs)/_layout.tsx` a `/welcome` cuando no la hay; el login y el logout solo tocan el
+  contexto. Se acompaña de `contentStyle` en el `Stack` raíz y de
+  `SystemUI.setBackgroundColorAsync(colors.bg)` (con `expo-system-ui`, ya instalado) para que el
+  fondo nativo nunca sea blanco en modo oscuro.
+- ~~**`dismissAll()` + `replace()`** para salir del grupo de auth en vez de `back()`~~ (sustituido
+  por lo anterior): dejaba el historial
   limpio y evita volver con gesto a una pantalla de auth ya usada.
 - **Ionicons como hero** en vez de `assets/icon.png` o `expo-image` con SF Symbols: no hay asset de
   logo in-app y `expo-image` no está instalado (añadirlo exigiría rebuild del dev client).
@@ -544,7 +554,7 @@ Rama `spec-20-ui-bienvenida-login-registro` (autocreada, `AutoCreateBranch: true
 | --- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | R1  | Dos UIs de login coexistiendo si `ProfileMain` no se limpia en el mismo cambio.                             | El paso 6 va junto con las pantallas nuevas; criterio explícito: cero `TextInput` en `ProfileMain.tsx`.                                                                                                                            |
 | R2  | Destello de tema claro al abrir el grupo nuevo antes de hidratar `ThemeContext`.                            | `(auth)/_layout.tsx` usa `stackScreenOptions(colors, isHydrated)` (mismo fallback a `lightColors` que `(tabs)/profile` y `(tabs)/search`) y cada pantalla pinta `colors.bg` en su raíz.                                            |
-| R3  | Historial inconsistente entre grupos hermanos: volver con gesto a una pantalla de auth ya usada.            | Navegación fijada en el paso 5: `push` para entrar, `dismissAll()` + `replace()` al autenticar y al cerrar sesión; criterio de aceptación que lo verifica en ambas plataformas.                                                    |
+| R3  | Historial inconsistente entre grupos hermanos: volver con gesto a una pantalla de auth ya usada.            | Gates declarativos en `(auth)/_layout.tsx` y `(tabs)/_layout.tsx`: el grupo entero se cambia según haya sesión, así que no queda historial de vuelta al formulario ni frames intermedios; criterio de aceptación que lo verifica en ambas plataformas.                                                    |
 | R4  | El teclado tapa el CTA o el error en pantallas cortas.                                                      | CTA **dentro** del `ScrollView` (nunca fijo al fondo) + `KeyboardAvoidingView` (`padding`, iOS) + `keyboardShouldPersistTaps="handled"`; Android en `resize`.                                                                      |
 | R5  | El pie de Términos/Privacidad queda bajo la barra de gestos (el grupo no tiene header ni tab bar).          | Padding inferior `useSafeAreaInsets().bottom + 16`; no se usa `TAB_BAR_HEIGHT` porque `(auth)` no tiene tab bar.                                                                                                                   |
 | R6  | Este stub divergiendo del Clerk que documentan `docs/`.                                                     | Frontera explícita: `AuthRepository` (puerto) + `FakeAuthDataSource` (única implementación); presentation solo conoce el puerto, así que el spec de Clerk sustituye el data source sin tocar pantallas ni hooks.                   |

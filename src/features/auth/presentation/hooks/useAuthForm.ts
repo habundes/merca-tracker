@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { useRouter } from 'expo-router';
 import { useAuth } from '@/shared/context/AuthContext';
 import {
   AUTH_ERROR_MESSAGES,
@@ -39,7 +38,6 @@ export function useAuthForm(
   repo: AuthRepository = fakeAuthDataSource,
 ): UseAuthForm {
   const { signIn } = useAuth();
-  const router = useRouter();
 
   const [email, setEmailState] = useState('');
   const [password, setPasswordState] = useState('');
@@ -69,13 +67,10 @@ export function useAuthForm(
 
   const toggleShowPassword = useCallback(() => setShowPassword(prev => !prev), []);
 
-  // Sale del grupo `(auth)` sin dejar historial: nada de volver con gesto al
-  // formulario ya usado. `canDismiss` evita llamar a `dismissAll` sin stack.
-  const goToApp = useCallback(() => {
-    if (router.canDismiss()) router.dismissAll();
-    router.replace('/search');
-  }, [router]);
-
+  // Sin navegación imperativa tras el login: al haber sesión, el gate de
+  // `app/(auth)/_layout.tsx` cambia el grupo entero por los tabs. Evita el frame
+  // intermedio de `app/index.tsx` (parpadeo blanco en Android) y deja el
+  // historial limpio sin `dismissAll()`.
   const runProviderCall = useCallback(
     async (call: () => Promise<AuthSession>) => {
       setError(null);
@@ -83,7 +78,6 @@ export function useAuthForm(
       try {
         const session = await call();
         signIn(session);
-        goToApp();
       } catch (thrown) {
         setError(
           isAuthError(thrown) ? thrown.message : AUTH_ERROR_MESSAGES['provider-failed'],
@@ -92,7 +86,7 @@ export function useAuthForm(
         setIsSubmitting(false);
       }
     },
-    [signIn, goToApp],
+    [signIn],
   );
 
   const submit = useCallback(async () => {

@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import * as SystemUI from 'expo-system-ui';
 import { Appearance, Platform } from 'react-native';
 import { useAuth } from './AuthContext';
 
@@ -145,6 +146,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   //   diálogos nativos AppCompat (`Alert.alert`) al tema de la app. Se pasa
   //   siempre el `effectiveScheme` concreto ('light'/'dark'): en Android `null`
   //   revienta, y usar el esquema efectivo hace que 'system' siga al SO.
+  // Fondo de la ventana nativa. Sin esto, cualquier hueco durante una transición
+  // (p. ej. al cambiar del grupo `(auth)` a los tabs) muestra el blanco por
+  // defecto de Android aunque la app esté en oscuro.
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync(colors.bg).catch(() => {});
+  }, [colors.bg]);
+
   useEffect(() => {
     if (Platform.OS === 'ios') {
       // `null` resetea al esquema del sistema; el tipo de RN 0.86 no lo incluye

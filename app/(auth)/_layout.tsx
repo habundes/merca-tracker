@@ -1,4 +1,5 @@
-import { Stack } from 'expo-router';
+import { Redirect, Stack } from 'expo-router';
+import { useAuth } from '@/shared/context/AuthContext';
 import { useTheme } from '@/shared/context/ThemeContext';
 import { stackScreenOptions } from '@/shared/navigation/stack-screen-options';
 
@@ -7,6 +8,15 @@ import { stackScreenOptions } from '@/shared/navigation/stack-screen-options';
 // aporta el fallback de tema pre-hidratación (evita el destello claro).
 export default function AuthLayout() {
   const { colors, isHydrated } = useTheme();
+  const { isAuthenticated } = useAuth();
+
+  // Espejo del gate de `(tabs)`: al haber sesión, el grupo entero se cambia por
+  // los tabs de forma declarativa. Así no hace falta navegar a mano tras el login
+  // (un `dismissAll()` pasaba por `app/index.tsx` y ese frame intermedio era el
+  // parpadeo blanco en Android), y no queda historial de vuelta al formulario.
+  if (isAuthenticated) {
+    return <Redirect href="/search" />;
+  }
 
   return (
     <Stack
