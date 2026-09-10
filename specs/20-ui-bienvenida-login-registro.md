@@ -1,6 +1,6 @@
 # SPEC 20 — UI de bienvenida, iniciar sesión y crear cuenta (solo UI, stub)
 
-> **Estado:** Aprobado
+> **Estado:** Implementado
 > **Dependencias:** spec 02 / spec 03 (dejaron el login como pantalla no protegida dentro de
 > `profile/index` y aplazaron "auth real" a un spec futuro — este es ese spec, en su versión de
 > **UI únicamente**), spec 05 (`ThemeContext`/`useTheme`, tokens claro/oscuro, `isHydrated`),
@@ -431,60 +431,60 @@ Rama `spec-20-ui-bienvenida-login-registro` (autocreada, `AutoCreateBranch: true
 
 ## Criterios de aceptación
 
-- [ ] Existe el grupo `app/(auth)/` con `welcome`, `signup` y `login`; los tres archivos de ruta son
+- [x] Existe el grupo `app/(auth)/` con `welcome`, `signup` y `login`; los tres archivos de ruta son
       re-exports de una línea y las pantallas viven en `src/features/auth/presentation/screens/`.
-- [ ] La bienvenida muestra hero, nombre, tagline, "Continuar con Google", "Continuar con correo",
+- [x] La bienvenida muestra hero, nombre, tagline, "Continuar con Google", "Continuar con correo",
       "Ya tengo cuenta" y el pie de Términos/Privacidad; **"Continuar con Apple" solo aparece en
       iOS**.
-- [ ] "Continuar con correo" abre **Crear cuenta**; "Ya tengo cuenta" abre **Iniciar sesión**; los
+- [x] "Continuar con correo" abre **Crear cuenta**; "Ya tengo cuenta" abre **Iniciar sesión**; los
       pies de cada formulario cruzan entre ambas.
-- [ ] Validación local antes de llamar al stub: campos vacíos, correo inválido, contraseña < 8,
+- [x] Validación local antes de llamar al stub: campos vacíos, correo inválido, contraseña < 8,
       confirmación distinta — cada uno con su copy de la tabla y sin llamar al repositorio.
-- [ ] Los cuatro errores de proveedor se ven con el copy **verbatim** de `docs/ux_spec.md`, usando
+- [x] Los cuatro errores de proveedor se ven con el copy **verbatim** de `docs/ux_spec.md`, usando
       los disparadores documentados (`noexiste@demo.mx`, contraseña `incorrecta`, `existe@demo.mx`,
       `FORCE_PROVIDER_ERROR`).
-- [ ] Durante el envío el CTA queda deshabilitado con indicador de carga y no se puede enviar dos
+- [x] Durante el envío el CTA queda deshabilitado con indicador de carga y no se puede enviar dos
       veces.
-- [ ] Un registro/login válido lleva a **Buscar**, y Perfil muestra la sesión (`displayName` +
+- [x] Un registro/login válido lleva a **Buscar**, y Perfil muestra la sesión (`displayName` +
       correo) sin reiniciar la app.
-- [ ] Tras autenticar, el gesto/botón atrás **no** regresa a la bienvenida ni al formulario (iOS y
+- [x] Tras autenticar, el gesto/botón atrás **no** regresa a la bienvenida ni al formulario (iOS y
       Android).
-- [ ] "Cerrar sesión" pide confirmación (`¿Cerrar sesión?` / [Cancelar] [Cerrar sesión]) y al
+- [x] "Cerrar sesión" pide confirmación (`¿Cerrar sesión?` / [Cancelar] [Cerrar sesión]) y al
       confirmar deja la app en la bienvenida.
-- [ ] `ProfileMain.tsx` ya no contiene ningún `TextInput` ni `type Mode`; el único acceso al login es
+- [x] `ProfileMain.tsx` ya no contiene ningún `TextInput` ni `type Mode`; el único acceso al login es
       su tarjeta CTA.
-- [ ] El campo "Nombre completo" ya no existe en ningún flujo.
-- [ ] Perfil sin sesión **no** muestra la sección Configuración (ni el enlace a Apariencia); con
+- [x] El campo "Nombre completo" ya no existe en ningún flujo.
+- [x] Perfil sin sesión **no** muestra la sección Configuración (ni el enlace a Apariencia); con
       sesión sí muestra los tres enlaces.
-- [ ] Sin sesión la app usa el **tema del SO** aunque haya un modo guardado, y `setMode` no cambia
+- [x] Sin sesión la app usa el **tema del SO** aunque haya un modo guardado, y `setMode` no cambia
       nada; al iniciar sesión vuelve a aplicar el modo guardado y al cambiarlo persiste.
-- [ ] La pantalla Apariencia, sin sesión, muestra "Sistema" seleccionado, el control inactivo y el
+- [x] La pantalla Apariencia, sin sesión, muestra "Sistema" seleccionado, el control inactivo y el
       aviso "Inicia sesión para elegir el tema…".
-- [ ] **Sin sesión no se ven los tabs**: arranque en frío abre la bienvenida; un deep link a
+- [x] **Sin sesión no se ven los tabs**: arranque en frío abre la bienvenida; un deep link a
       `/search`, `/track` o `/profile` redirige a `/welcome`.
-- [ ] **Con sesión el arranque va directo a Buscar**, sin pasar por la bienvenida ni parpadearla
+- [x] **Con sesión el arranque va directo a Buscar**, sin pasar por la bienvenida ni parpadearla
       (la sesión se restaura de AsyncStorage antes de decidir el destino).
-- [ ] Cerrar sesión deja la app en la bienvenida **sin tabs**, igual que un arranque sin sesión (el
+- [x] Cerrar sesión deja la app en la bienvenida **sin tabs**, igual que un arranque sin sesión (el
       comportamiento del arranque y del logout coincide).
-- [ ] La sesión sobrevive cerrar y reabrir la app; tras cerrar sesión no vuelve a aparecer.
-- [ ] En AsyncStorage solo se guarda correo, proveedor y nombre mostrado — ninguna contraseña.
-- [ ] Abrir la bienvenida con la app en oscuro **no** produce destello claro (fallback `isHydrated`),
+- [x] La sesión sobrevive cerrar y reabrir la app; tras cerrar sesión no vuelve a aparecer.
+- [x] En AsyncStorage solo se guarda correo, proveedor y nombre mostrado — ninguna contraseña.
+- [x] Abrir la bienvenida con la app en oscuro **no** produce destello claro (fallback `isHydrated`),
       y las 3 pantallas se ven correctas en claro y oscuro, iOS y Android.
-- [ ] Con el teclado abierto, el CTA y el mensaje de error siguen alcanzables por scroll en ambas
+- [x] Con el teclado abierto, el CTA y el mensaje de error siguen alcanzables por scroll en ambas
       plataformas.
-- [ ] El pie de Términos/Privacidad respeta el safe area inferior (no queda bajo la barra de gestos) y
+- [x] El pie de Términos/Privacidad respeta el safe area inferior (no queda bajo la barra de gestos) y
       muestra `Toast` "Próximamente"; igual "¿Olvidaste tu contraseña?".
-- [ ] Ninguna pantalla importa `fakeAuthDataSource`: el stub entra por el parámetro `repo` de
+- [x] Ninguna pantalla importa `fakeAuthDataSource`: el stub entra por el parámetro `repo` de
       `useAuthForm`, que por defecto lo inyecta detrás del puerto `AuthRepository` (mismo patrón que
       `useProductSearch(repo = fakeProductRepository)`). El puerto es la frontera para el futuro
       spec de Clerk.
-- [ ] Ninguna pantalla nueva importa `glass/` ni `md3/` directo (solo `adaptive/`).
-- [ ] Todos los botones tienen `accessibilityRole`/`accessibilityLabel`, estado deshabilitado
+- [x] Ninguna pantalla nueva importa `glass/` ni `md3/` directo (solo `adaptive/`).
+- [x] Todos los botones tienen `accessibilityRole`/`accessibilityLabel`, estado deshabilitado
       accesible y objetivo ≥ 44 pt; los errores son `selectable`.
-- [ ] Los tres tabs y las rutas `/profile/account|payment|appearance` siguen funcionando igual.
-- [ ] `package.json` y `pnpm-lock.yaml` **sin cambios** (cero dependencias nuevas).
-- [ ] `npx tsc --noEmit` pasa sin errores nuevos.
-- [ ] `docs/ux_spec.md` (sección Auth Flow) y `CLAUDE.md` quedan consistentes con lo implementado.
+- [x] Los tres tabs y las rutas `/profile/account|payment|appearance` siguen funcionando igual.
+- [x] `package.json` y `pnpm-lock.yaml` **sin cambios** (cero dependencias nuevas).
+- [x] `npx tsc --noEmit` pasa sin errores nuevos.
+- [x] `docs/ux_spec.md` (sección Auth Flow) y `CLAUDE.md` quedan consistentes con lo implementado.
 
 ## Decisiones tomadas y descartadas
 
