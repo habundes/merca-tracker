@@ -19,7 +19,7 @@ export default function WelcomeScreen() {
   const router = useRouter();
   const styles = useThemedStyles(themedStyles);
   // La bienvenida solo usa los sociales del hook; el formulario vive en /signup.
-  const { error, isSubmitting, submitWithProvider } = useAuthForm('signup');
+  const { error, isSubmitting, pendingProvider, submitWithProvider } = useAuthForm('signup');
   const [toast, setToast] = useState<string | null>(null);
 
   return (
@@ -44,6 +44,7 @@ export default function WelcomeScreen() {
               variant="social"
               tone="apple"
               icon="logo-apple"
+              loading={pendingProvider === 'apple'}
               disabled={isSubmitting}
               onPress={() => void submitWithProvider('apple')}
             />
@@ -52,6 +53,7 @@ export default function WelcomeScreen() {
             label="Continuar con Google"
             variant="social"
             icon="logo-google"
+            loading={pendingProvider === 'google'}
             disabled={isSubmitting}
             onPress={() => void submitWithProvider('google')}
           />

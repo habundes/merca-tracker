@@ -25,6 +25,8 @@ export interface UseAuthForm {
   toggleShowPassword: () => void;
   error: string | null;
   isSubmitting: boolean;
+  // Proveedor social en curso, para que solo su botón muestre el spinner.
+  pendingProvider: Exclude<AuthProvider, 'email'> | null;
   submit: () => Promise<void>;
   submitWithProvider: (provider: Exclude<AuthProvider, 'email'>) => Promise<void>;
 }
@@ -45,6 +47,9 @@ export function useAuthForm(
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingProvider, setPendingProvider] = useState<
+    Exclude<AuthProvider, 'email'> | null
+  >(null);
 
   // El error se borra al primer cambio de cualquier campo (como en Buscar).
   const setEmail = useCallback((value: string) => {
@@ -114,7 +119,12 @@ export function useAuthForm(
   const submitWithProvider = useCallback(
     async (provider: Exclude<AuthProvider, 'email'>) => {
       if (isSubmitting) return;
-      await runProviderCall(() => repo.signInWithProvider(provider));
+      setPendingProvider(provider);
+      try {
+        await runProviderCall(() => repo.signInWithProvider(provider));
+      } finally {
+        setPendingProvider(null);
+      }
     },
     [isSubmitting, repo, runProviderCall],
   );
@@ -130,6 +140,7 @@ export function useAuthForm(
     toggleShowPassword,
     error,
     isSubmitting,
+    pendingProvider,
     submit,
     submitWithProvider,
   };
