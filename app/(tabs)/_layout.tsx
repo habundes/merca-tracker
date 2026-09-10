@@ -1,9 +1,11 @@
+import { Redirect } from 'expo-router';
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { Platform, DynamicColorIOS } from 'react-native';
+import { useAuth } from '@/shared/context/AuthContext';
 import { useTheme, lightColors, darkColors } from '@/shared/context/ThemeContext';
 
-// Ruta ancla del navegador de tabs. El landing real lo maneja app/index.tsx
-// con un <Redirect href="/search" />.
+// Ruta ancla del navegador de tabs. El landing real lo maneja app/index.tsx,
+// que redirige a /search o a /welcome según haya sesión.
 export const unstable_settings = {
   anchor: 'search',
 };
@@ -13,6 +15,13 @@ const isAndroid = Platform.OS === 'android';
 
 export default function TabsLayout() {
   const { colors, isHydrated } = useTheme();
+  const { isAuthenticated, isHydrated: isSessionHydrated } = useAuth();
+
+  // Gate de sesión (add-on del spec 20): sin sesión los tabs no se montan — ni al
+  // arrancar, ni por deep link, ni al cerrar sesión desde Perfil.
+  if (isSessionHydrated && !isAuthenticated) {
+    return <Redirect href="/welcome" />;
+  }
 
   // NativeTabs renderiza la barra nativa: Material 3 en Android (con su pill
   // indicator nativo) y Liquid Glass en iOS 26+.

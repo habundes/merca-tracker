@@ -109,7 +109,7 @@ app/
         ├── _layout.tsx         ← <Stack> con headers temáticos
         ├── index.tsx           ← "Perfil"
         ├── account.tsx         ← "Ajustes de cuenta"
-        ├── payment.tsx         ← "Ajustes de pago"
+        ├── payment.tsx         ← "Ajustes de pago" — suscripción + historial de compras por-artículo + "Restaurar compras"
         └── appearance.tsx      ← "Apariencia" (theme mode: light/dark/system)
 ```
 
@@ -368,6 +368,9 @@ Free tier, no products:
 Free tier, slots used:
 │ 📋 Rastreando 5/5 · 2/2 🔄 (lleno)   │
 
+Free tier + per-item unlocks (los ⭐ NO cuentan en 5/5 ni 2/2):
+│ 📋 Rastreando 5/5 · 2/2 🔄 · 3 ⭐    │  ← 3 productos desbloqueados aparte
+
 Premium tier:
 │ ⭐ Rastreando 8/20 · 3/20 🔄          │
 
@@ -406,6 +409,8 @@ Price change indicator variants:
   $899  ⏸ pausado  (wish price triggered — yellow)
   $899  ⚠️ no disp. (unavailable — gray strikethrough)
   $899  ⏳ manual   (manual mode — no next check shown)
+  $749  📉 -$150 ⭐ (per-item unlocked — ⭐ badge, comportamiento premium)
+  $899  ⏸ inactivo ⭐ (per-item unlock pausado por inactividad — abre la app)
 ```
 
 ---
@@ -589,6 +594,9 @@ When auto slots are full (2/2):
 │                              │
 │ Desactiva otro producto para │
 │ activar la verificación aquí │
+│                              │
+│ ── o ──                      │
+│ [Desbloquear este producto ⭐]│  ← pago único $59 MXN, no usa slots
 
 When interval is active:
 │ ● Intervalo [activo]         │
@@ -603,6 +611,73 @@ When wish price triggered:
 │                              │
 │   [Nuevo precio deseado]     │
 │   [Eliminar producto]        │
+
+Per-Item Unlock CTA (usuario free, dentro de VERIFICACIÓN AUTOMÁTICA):
+│ ⭐ Desbloquea este producto  │
+│ Verificación automática      │
+│ (6/12/24 h) solo para este   │
+│ producto — pago único $59 MXN│
+│ No cuenta para tu límite de  │
+│ 5 ni tus 2 espacios.         │
+│ [Desbloquear ⭐]             │
+│ El desbloqueo es único y no  │  ← aviso de riesgo obligatorio (D7)
+│ se reembolsa si el producto  │
+│ se finaliza o elimina de ML. │
+
+When product is per-item unlocked:
+│ ⭐ Premium — desbloqueado    │  ← badge, sin contador de slots
+│ ● Intervalo [activo]         │
+│   Verificando cada 12 hrs    │  ← 6 h ya disponible
+│   [6h] [12h] [24h]           │
+│   [Cambiar] [Desactivar]     │
+
+When per-item unlock paused (inactividad):
+│ ⭐ Premium — desbloqueado    │
+│ ⏸ Rastreo pausado           │
+│ Reactiva abriendo la app.    │
+│ [Reactivar]                  │
+```
+
+---
+
+## Per-Item Unlock (Paywall Sheet)
+
+Compra única para desbloquear comportamiento premium en un solo producto (ver
+`pricing_models.md → Option D`). Entradas: el CTA "Desbloquear este producto ⭐"
+en Configurar (sobre todo con slots 2/2 llenos) y el modal de límite diario. La
+compra corre por la tienda del SO (StoreKit / Play Billing), **no** Stripe.
+
+```
+iOS (bottom sheet) / Android (BottomSheet MD3):
+┌──────────────────────────────────┐
+│ ⭐ Desbloquear este producto      │
+│ iPhone 15 Pro                    │
+│                                  │
+│ Con este producto obtienes:      │
+│  ✓ Verificación automática       │
+│    (cada 6, 12 o 24 h)           │
+│  ✓ Checks manuales ilimitados    │
+│  ✓ Historial completo            │
+│  ✓ No usa tu límite de 5 ni tus  │
+│    2 espacios                    │
+│                                  │
+│  Pago único                $59 MXN│
+│  ╔════════════════════════════╗  │
+│  ║        Comprar             ║  │  ← hoja StoreKit / Play
+│  ╚════════════════════════════╝  │
+│  [Restaurar compras]             │
+│                                  │
+│ El desbloqueo es único y no se   │  ← aviso de riesgo (D7)
+│ reembolsa si el producto se      │
+│ finaliza o elimina de Mercado    │
+│ Libre.                           │
+└──────────────────────────────────┘
+
+Estados:
+  Comprando…      → botón con spinner, sheet no descartable
+  Éxito           → "✅ ¡Producto desbloqueado!" → cierra → card muestra ⭐
+  Pendiente       → "Compra en revisión (Ask to Buy). Se activará al aprobarse."
+  Error/cancelado → "No se completó la compra." (sin cargo)
 ```
 
 ---
@@ -991,6 +1066,9 @@ URL input: highlighted/pulsing to draw attention
 └──────────────────────────────┘
 ```
 
+Nota: los productos con desbloqueo por-artículo (⭐) NUNCA se ocultan ni se
+pausan por downgrade — siguen rastreando con su compra única.
+
 ---
 
 ## Error States
@@ -1037,6 +1115,7 @@ In expanded card:
 │  Resetea a medianoche            │
 │                                  │
 │  [Ver ad → +1 check hoy]         │  ← reward ad option
+│  [Desbloquear este producto ⭐]  │  ← $59 MXN: checks ilimitados aquí
 │  [Actualizar a Premium ⭐]       │  ← upsell
 └──────────────────────────────────┘
 ```
@@ -1149,68 +1228,52 @@ Resets at midnight UTC
 
 ### First Launch — Welcome Screen
 
-Shown only when no active session exists (new install or logged out).
+Shown when no active session exists (new install, logged out, or entering from the Profile tab).
+Social buttons live **here**, not repeated inside the forms (see `specs/20-ui-bienvenida-login-registro.md`).
 
 ```
 iOS (Liquid Glass):
 ┌──────────────────────────────────┐
 │                                  │
-│                                  │
-│         🏷️                       │  ← App icon large
-│   ML Price Tracker               │  ← App name
+│           🏷️                     │  ← App icon large
+│      Merca Tracker               │  ← App name
 │   Rastrea precios en             │
 │   Mercadolibre                   │  ← Tagline
 │                                  │
-│                                  │
 │  ╔════════════════════════════╗  │
-│  ║    Crear cuenta            ║  │  ← Primary CTA (glass button)
+│  ║  Continuar con Apple   🍎  ║  │  ← iOS only
+│  ╚════════════════════════════╝  │
+│  ╔════════════════════════════╗  │
+│  ║  Continuar con Google  G   ║  │
+│  ╚════════════════════════════╝  │
+│  ╔════════════════════════════╗  │
+│  ║  Continuar con correo      ║  │  ← → Sign Up screen
 │  ╚════════════════════════════╝  │
 │                                  │
-│  ╔════════════════════════════╗  │
-│  ║    Iniciar sesión          ║  │  ← Secondary CTA (glass outline)
-│  ╚════════════════════════════╝  │
-│                                  │
-│  Al continuar aceptas los        │
-│  [Términos de uso] y la          │
-│  [Política de privacidad]        │  ← Clerk-managed links
-│                                  │
-└──────────────────────────────────┘
-
-Android (Material 3):
-┌──────────────────────────────────┐
-│                                  │
-│                                  │
-│         🏷️                       │
-│   ML Price Tracker               │
-│   Rastrea precios en             │
-│   Mercadolibre                   │
-│                                  │
-│                                  │
-│  ┌────────────────────────────┐  │
-│  │      Crear cuenta          │  │  ← FilledButton (MD3)
-│  └────────────────────────────┘  │
-│                                  │
-│  ┌────────────────────────────┐  │
-│  │      Iniciar sesión        │  │  ← OutlinedButton (MD3)
-│  └────────────────────────────┘  │
+│       Ya tengo cuenta  →         │  ← → Sign In screen
 │                                  │
 │  Al continuar aceptas los        │
 │  [Términos de uso] y la          │
 │  [Política de privacidad]        │
 │                                  │
 └──────────────────────────────────┘
+
+Android (Material 3):
+  Same structure — FilledButton (correo), OutlinedButton (Google), text link.
+  No Apple Sign-In option on Android.
 ```
 
 ### Auth Navigation Flow
 
 ```
-First install / no session:
-  Launch → Welcome screen
+No session (new install, logged out, or Profile tab CTA):
+  Profile tab → "Iniciar sesión o crear cuenta" → Welcome screen
       ↓
-  "Crear cuenta"    → Sign Up screen
-  "Iniciar sesión"  → Sign In screen
+  "Continuar con correo"  → Sign Up screen
+  "Ya tengo cuenta"       → Sign In screen
+  "Continuar con Google / Apple" → provider flow (no intermediate screen)
       ↓
-  Auth success (Clerk handles all logic)
+  Auth success
       ↓
   → Search tab (first app screen)
 
@@ -1218,7 +1281,7 @@ Returning user (session exists):
   Launch → Search tab directly (Welcome screen skipped)
 
 Sign out (from Profile tab):
-  Session cleared by Clerk → Welcome screen
+  Confirmation → session cleared → Welcome screen
 ```
 
 ### Auth Error States
@@ -1236,13 +1299,22 @@ Email already registered:
 Google / Apple auth failed:
   ⚠️ No se pudo conectar. Inténtalo de nuevo.
 
-Note: All password reset and email verification flows
-are fully managed by Clerk (no custom screens needed).
+Local validation (before hitting the provider):
+  ⚠️ Completa todos los campos.
+  ⚠️ Ingresa un correo electrónico válido.
+  ⚠️ La contraseña debe tener al menos 8 caracteres.
+  ⚠️ Las contraseñas no coinciden.
+
+Note: password reset and email verification flows are
+delegated to the auth provider (no custom screens).
 ```
 
 ---
 
 ### Sign Up Screen
+
+Reached from the Welcome screen's "Continuar con correo". Email + password only — the social
+buttons are not repeated here.
 
 ```
 iOS (Liquid Glass):
@@ -1251,25 +1323,21 @@ iOS (Liquid Glass):
 ├──────────────────────────────────┤
 │                                  │
 │  ╔════════════════════════════╗  │
-│  ║  Continuar con Google  G   ║  │  ← Glass button + Google icon
-│  ╚════════════════════════════╝  │
-│                                  │
-│  ╔════════════════════════════╗  │
-│  ║  Continuar con Apple   🍎  ║  │  ← iOS only
-│  ╚════════════════════════════╝  │
-│                                  │
-│  ─────────── o ────────────      │  ← divider
-│                                  │
-│  ╔════════════════════════════╗  │
 │  ║  Correo electrónico        ║  │  ← Glass input
 │  ╚════════════════════════════╝  │
 │                                  │
 │  ╔════════════════════════════╗  │
-│  ║  Contraseña                ║  │  ← Glass input
+│  ║  Contraseña            👁  ║  │  ← Glass input + eye toggle
 │  ╚════════════════════════════╝  │
 │                                  │
 │  ╔════════════════════════════╗  │
-│  ║       Crear cuenta         ║  │  ← Primary CTA
+│  ║  Confirmar contraseña  👁  ║  │
+│  ╚════════════════════════════╝  │
+│                                  │
+│  ⚠️ <error inline>               │
+│                                  │
+│  ╔════════════════════════════╗  │
+│  ║       Crear cuenta         ║  │  ← Primary CTA (busy state)
 │  ╚════════════════════════════╝  │
 │                                  │
 │  ¿Ya tienes cuenta?              │
@@ -1278,13 +1346,16 @@ iOS (Liquid Glass):
 └──────────────────────────────────┘
 
 Android (Material 3):
-  Same structure — OutlinedTextField, FilledButton, OutlinedButton
-  No Apple Sign-In option on Android
+  Same structure — OutlinedTextField, FilledButton, text link.
+
+No "Nombre completo" field: the display name is derived from the email.
 ```
 
 ---
 
 ### Sign In Screen
+
+Reached from the Welcome screen's "Ya tengo cuenta" or from the Sign Up footer.
 
 ```
 iOS (Liquid Glass):
@@ -1293,25 +1364,17 @@ iOS (Liquid Glass):
 ├──────────────────────────────────┤
 │                                  │
 │  ╔════════════════════════════╗  │
-│  ║  Continuar con Google  G   ║  │
-│  ╚════════════════════════════╝  │
-│                                  │
-│  ╔════════════════════════════╗  │
-│  ║  Continuar con Apple   🍎  ║  │  ← iOS only
-│  ╚════════════════════════════╝  │
-│                                  │
-│  ─────────── o ────────────      │
-│                                  │
-│  ╔════════════════════════════╗  │
 │  ║  Correo electrónico        ║  │
 │  ╚════════════════════════════╝  │
 │                                  │
 │  ╔════════════════════════════╗  │
-│  ║  Contraseña                ║  │
+│  ║  Contraseña            👁  ║  │
 │  ╚════════════════════════════╝  │
 │                                  │
 │           [¿Olvidaste tu         │
-│            contraseña?]          │  ← Clerk handles reset flow
+│            contraseña?]          │  ← provider handles reset flow
+│                                  │
+│  ⚠️ <error inline>               │
 │                                  │
 │  ╔════════════════════════════╗  │
 │  ║       Iniciar sesión       ║  │
@@ -1323,8 +1386,7 @@ iOS (Liquid Glass):
 └──────────────────────────────────┘
 
 Android (Material 3):
-  Same structure — OutlinedTextField, FilledButton, OutlinedButton
-  No Apple Sign-In option on Android
+  Same structure — OutlinedTextField, FilledButton, text link.
 ```
 
 ---
@@ -1334,27 +1396,34 @@ Android (Material 3):
 ```
 App Launch
     ↓
-Check Clerk session (automatic)
+Check session
     ├─ Session active → Search tab (skip auth entirely)
-    └─ No session →
+    └─ No session → Search tab; auth is entered from the Profile tab
            ↓
        Welcome Screen
-       ├─ "Crear cuenta"   → Sign Up Screen
-       └─ "Iniciar sesión" → Sign In Screen
+       ├─ "Continuar con Apple"  (iOS) ─┐
+       ├─ "Continuar con Google"       ─┤→ provider flow
+       ├─ "Continuar con correo" → Sign Up Screen
+       └─ "Ya tengo cuenta"      → Sign In Screen
               ↓
-       User fills form / taps social login
+       Local validation → provider call (loading state)
               ↓
-       Clerk handles:
+       Provider handles:
          - Email/password auth
          - Google OAuth
          - Apple Sign-In (iOS)
          - Password reset (email)
-         - Session persistence ✅
+         - Session persistence
               ↓
        Auth success → Search tab (first screen)
               ↓
-       Session persists across app closes (Clerk)
+       Session persists across app closes
        User never sees Welcome Screen again until logout
+
+Implementation status: `specs/20-ui-bienvenida-login-registro.md` builds these three screens
+UI-only, against a fake auth data source behind an `AuthRepository` port, with an in-memory
+session (no persistence, no route gating, no provider SDK). Swapping the data source for the
+real provider (Clerk, per the technical docs) is a separate spec.
 ```
 
 ---

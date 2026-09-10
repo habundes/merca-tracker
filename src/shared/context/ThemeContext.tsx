@@ -1,6 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import * as SystemUI from 'expo-system-ui';
 import { Appearance, Platform } from 'react-native';
+import { useAuth } from './AuthContext';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 export type ColorScheme = 'light' | 'dark';
@@ -34,6 +36,8 @@ export type ThemeContextValue = {
   colors: ThemeColors;
   setMode: (mode: ThemeMode) => void;
   isHydrated: boolean;
+  // Sin sesión el tema no se puede elegir ni guardar: manda el sistema (spec 20).
+  canChangeTheme: boolean;
 };
 
 export const lightColors: ThemeColors = {
@@ -81,16 +85,26 @@ export const ON_ACCENT = '#ffffff';
 const STORAGE_KEY = '@merca-tracker/theme-preference';
 const VALID_MODES: ThemeMode[] = ['light', 'dark', 'system'];
 
+// Esquema real del SO leído al cargar el módulo, es decir ANTES de que el provider
+// llame a `Appearance.setColorScheme` para forzar un modo. Una vez forzado, la API
+// de `Appearance` devuelve el valor forzado y el del sistema ya no es legible; este
+// valor inicial es el fallback para volver al tema del sistema (p. ej. al cerrar
+// sesión) sin reiniciar la app.
+const initialSystemScheme: ColorScheme = (Appearance.getColorScheme() as ColorScheme) ?? 'light';
+
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>('system');
   const [isHydrated, setIsHydrated] = useState(false);
-  const [systemScheme, setSystemScheme] = useState<ColorScheme>(
-    (Appearance.getColorScheme() as ColorScheme) ?? 'light'
-  );
+  const [systemScheme, setSystemScheme] = useState<ColorScheme>(initialSystemScheme);
+  // El tema es parte de la cuenta (spec 20): sin sesión no se puede elegir ni
+  // guardar, así que manda el sistema; el modo guardado vuelve a aplicar al entrar.
+  const { isAuthenticated } = useAuth();
 
-  const effectiveScheme: ColorScheme = mode === 'system' ? systemScheme : mode;
+  const canChangeTheme = isAuthenticated;
+  const followsSystem = !canChangeTheme || mode === 'system';
+  const effectiveScheme: ColorScheme = followsSystem ? systemScheme : mode;
   const colors = effectiveScheme === 'dark' ? darkColors : lightColors;
 
   useEffect(() => {
@@ -108,13 +122,20 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setIsHydrated(true));
   }, []);
 
+  // Solo se escucha (y se re-lee) el esquema del SO mientras NO estamos forzando
+  // la apariencia: con un modo forzado, `Appearance` reporta el valor forzado y
+  // contaminaría `systemScheme`.
+  // No se re-lee `getColorScheme()` al volver al modo sistema: en ese instante la
+  // apariencia forzada todavía está aplicada y devolvería ese valor. Se parte del
+  // último valor conocido (o `initialSystemScheme`) y el listener corrige en cuanto
+  // el SO reporta el cambio real.
   useEffect(() => {
-    if (mode !== 'system') return;
+    if (!followsSystem) return;
     const subscription = Appearance.addChangeListener(({ colorScheme }) => {
       setSystemScheme((colorScheme as ColorScheme) ?? 'light');
     });
     return () => subscription.remove();
-  }, [mode]);
+  }, [followsSystem]);
 
   // Fuerza la apariencia nativa al esquema elegido en la app.
   // - iOS: sin esto, la barra de NativeTabs y los colores DynamicColorIOS
@@ -125,27 +146,38 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   //   diálogos nativos AppCompat (`Alert.alert`) al tema de la app. Se pasa
   //   siempre el `effectiveScheme` concreto ('light'/'dark'): en Android `null`
   //   revienta, y usar el esquema efectivo hace que 'system' siga al SO.
+  // Fondo de la ventana nativa. Sin esto, cualquier hueco durante una transición
+  // (p. ej. al cambiar del grupo `(auth)` a los tabs) muestra el blanco por
+  // defecto de Android aunque la app esté en oscuro.
+  useEffect(() => {
+    SystemUI.setBackgroundColorAsync(colors.bg).catch(() => {});
+  }, [colors.bg]);
+
   useEffect(() => {
     if (Platform.OS === 'ios') {
       // `null` resetea al esquema del sistema; el tipo de RN 0.86 no lo incluye
       // pese a soportarlo en runtime (iOS), de ahí el cast al tipo del parámetro.
-      const scheme = (mode === 'system' ? null : mode) as Parameters<
+      const scheme = (followsSystem ? null : mode) as Parameters<
         typeof Appearance.setColorScheme
       >[0];
       Appearance.setColorScheme(scheme);
     } else if (Platform.OS === 'android') {
       Appearance.setColorScheme(effectiveScheme);
     }
-  }, [mode, effectiveScheme]);
+  }, [followsSystem, mode, effectiveScheme]);
 
   const setMode = (newMode: ThemeMode) => {
+    // Sin sesión no se guarda ni se aplica: el tema lo decide el sistema.
+    if (!canChangeTheme) return;
     setModeState(newMode);
     AsyncStorage.setItem(STORAGE_KEY, newMode).catch(() => {});
   };
 
   const value = useMemo<ThemeContextValue>(
-    () => ({ mode, effectiveScheme, colors, setMode, isHydrated }),
-    [mode, effectiveScheme, colors, isHydrated]
+    () => ({ mode, effectiveScheme, colors, setMode, isHydrated, canChangeTheme }),
+    // `setMode` se recrea en cada render pero solo cierra sobre `canChangeTheme`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mode, effectiveScheme, colors, isHydrated, canChangeTheme]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

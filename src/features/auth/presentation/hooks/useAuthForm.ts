@@ -1,0 +1,141 @@
+import { useCallback, useState } from 'react';
+import { useAuth } from '@/shared/context/AuthContext';
+import {
+  AUTH_ERROR_MESSAGES,
+  isAuthError,
+  validateEmail,
+  validatePassword,
+  type AuthProvider,
+  type AuthRepository,
+  type AuthSession,
+} from '@/features/auth/domain';
+import { fakeAuthDataSource } from '@/features/auth/data/fakeAuthDataSource';
+
+export type AuthMode = 'signin' | 'signup';
+
+export interface UseAuthForm {
+  email: string;
+  setEmail: (value: string) => void;
+  password: string;
+  setPassword: (value: string) => void;
+  confirm: string;
+  setConfirm: (value: string) => void;
+  showPassword: boolean;
+  toggleShowPassword: () => void;
+  error: string | null;
+  isSubmitting: boolean;
+  // Proveedor social en curso, para que solo su botón muestre el spinner.
+  pendingProvider: Exclude<AuthProvider, 'email'> | null;
+  submit: () => Promise<void>;
+  submitWithProvider: (provider: Exclude<AuthProvider, 'email'>) => Promise<void>;
+}
+
+// Orquesta los formularios de auth: valida en local (sin tocar el repositorio),
+// llama al puerto `AuthRepository`, guarda la sesión y sale del grupo `(auth)`.
+// `repo` es inyectable para tests; las pantallas no conocen la implementación.
+export function useAuthForm(
+  mode: AuthMode,
+  repo: AuthRepository = fakeAuthDataSource,
+): UseAuthForm {
+  const { signIn } = useAuth();
+
+  const [email, setEmailState] = useState('');
+  const [password, setPasswordState] = useState('');
+  const [confirm, setConfirmState] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingProvider, setPendingProvider] = useState<
+    Exclude<AuthProvider, 'email'> | null
+  >(null);
+
+  // El error se borra al primer cambio de cualquier campo (como en Buscar).
+  const setEmail = useCallback((value: string) => {
+    setEmailState(value);
+    setError(null);
+  }, []);
+
+  const setPassword = useCallback((value: string) => {
+    setPasswordState(value);
+    setError(null);
+  }, []);
+
+  const setConfirm = useCallback((value: string) => {
+    setConfirmState(value);
+    setError(null);
+  }, []);
+
+  const toggleShowPassword = useCallback(() => setShowPassword(prev => !prev), []);
+
+  // Sin navegación imperativa tras el login: al haber sesión, el gate de
+  // `app/(auth)/_layout.tsx` cambia el grupo entero por los tabs. Evita el frame
+  // intermedio de `app/index.tsx` (parpadeo blanco en Android) y deja el
+  // historial limpio sin `dismissAll()`.
+  const runProviderCall = useCallback(
+    async (call: () => Promise<AuthSession>) => {
+      setError(null);
+      setIsSubmitting(true);
+      try {
+        const session = await call();
+        signIn(session);
+      } catch (thrown) {
+        setError(
+          isAuthError(thrown) ? thrown.message : AUTH_ERROR_MESSAGES['provider-failed'],
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [signIn],
+  );
+
+  const submit = useCallback(async () => {
+    if (isSubmitting) return;
+
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setError(AUTH_ERROR_MESSAGES[emailError]);
+      return;
+    }
+
+    const passwordError = validatePassword(password, mode === 'signup' ? confirm : undefined);
+    if (passwordError) {
+      setError(AUTH_ERROR_MESSAGES[passwordError]);
+      return;
+    }
+
+    const credentials = { email: email.trim(), password };
+    await runProviderCall(() =>
+      mode === 'signup' ? repo.signUp(credentials) : repo.signIn(credentials),
+    );
+  }, [isSubmitting, email, password, confirm, mode, repo, runProviderCall]);
+
+  const submitWithProvider = useCallback(
+    async (provider: Exclude<AuthProvider, 'email'>) => {
+      if (isSubmitting) return;
+      setPendingProvider(provider);
+      try {
+        await runProviderCall(() => repo.signInWithProvider(provider));
+      } finally {
+        setPendingProvider(null);
+      }
+    },
+    [isSubmitting, repo, runProviderCall],
+  );
+
+  return {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    confirm,
+    setConfirm,
+    showPassword,
+    toggleShowPassword,
+    error,
+    isSubmitting,
+    pendingProvider,
+    submit,
+    submitWithProvider,
+  };
+}
